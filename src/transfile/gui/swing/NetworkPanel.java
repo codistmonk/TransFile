@@ -539,6 +539,10 @@ public class NetworkPanel extends TopLevelPanel {
 		stopButton.setVisible(true);
 	}
 	
+	/*
+	 * INTERNAL EVENT HANDLERS
+	 */
+	
 	/**
 	 * Invoked when a connection has been established successfully
 	 * 
