@@ -106,21 +106,14 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	 * {@inheritDoc}
 	 */
 	public void start() {
-		setNativeLookAndFeel();
-		
-		addWindowListener(new MainWindowListener());
-		
-		setBounds(300, 100, width, height);
-		
-		setup();
-		
-		showConnectScreen();
-		
-		setVisible(true);
-		
-		// tell all active panels to initialise
-		for(TopLevelPanel panel: panels)
-			panel.onInit();
+		SwingUtilities.invokeLater(new Runnable() {
+
+			@Override
+			public void run() {
+				_start();
+			}
+			
+		});
 	}
 	
 	/**
@@ -153,6 +146,28 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 
 		// tell the Backend to quit
 		backend.quit();
+	}
+	
+	/**
+	 * Sets up and starts the Swing GUI. Should be invoked from the Swing event dispatch thread
+	 * 
+	 */
+	private void _start() {
+		setNativeLookAndFeel();
+		
+		addWindowListener(new MainWindowListener());
+		
+		setBounds(300, 100, width, height);
+		
+		setup();
+		
+		showConnectScreen();
+		
+		setVisible(true);
+		
+		// tell all active panels to initialise
+		for(TopLevelPanel panel: panels)
+			panel.onInit();
 	}
 	
 	/**
