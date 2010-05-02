@@ -36,6 +36,12 @@ public class TransFile implements Runnable {
 	 */
 	private GUI gui;
 	
+	/**
+	 * Creates a TransFile application object. Constructor is private
+	 * because only the static main() method in this class should ever
+	 * call it.
+	 * 
+	 */
 	private TransFile() {}
 	
 	/**
@@ -55,6 +61,9 @@ public class TransFile implements Runnable {
 		return app;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void run() {
 		gui.start();

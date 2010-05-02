@@ -54,6 +54,11 @@ public class Backend implements ControllableBackend {
 	 */
 	private Link connection = null;
 	
+	/**
+	 * Constructs a Backend object
+	 * 
+	 * @param ui a reference to the GUI in use, used to inform the UI about asynchronous events
+	 */
 	public Backend(final BackendEventHandler ui) {
 		this.ui = ui;
 	}
