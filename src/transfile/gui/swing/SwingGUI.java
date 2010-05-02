@@ -32,6 +32,9 @@ import java.util.List;
 
 import javax.swing.*;
 
+import com.apple.eawt.Application;
+
+import transfile.TransFile;
 import transfile.backend.BackendEventHandler;
 import transfile.backend.ControllableBackend;
 import transfile.gui.GUI;
@@ -77,9 +80,19 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	 */
 	private List<TopLevelPanel> activePanels = new LinkedList<TopLevelPanel>();
 	
+	/*
+	 * True if running on Mac OS X
+	 */
+	private final boolean onMacOSX;
 	
+	
+	/**
+	 * Constructs a SwingGUI instance
+	 * 
+	 */
 	public SwingGUI() {
 		super(title);
+		onMacOSX = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
 	}
 	
 	/**
@@ -110,6 +123,10 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 			panel.onInit();
 	}
 	
+	/**
+	 * Invoked when a connection to a peer has been established
+	 * 
+	 */
 	void onConnectSuccessful() {
 		setStatus("Connected");
 		
@@ -123,6 +140,19 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	 */
 	void setStatus(final String status) {
 		statusPanel.setStatus(status);
+	}
+	
+	/**
+	 * Quits the application
+	 * 
+	 */
+	void quit() {
+		// inform all TopLevelPanels about the impending shutdown
+		for(TopLevelPanel panel: panels)
+			panel.onQuit();
+
+		// tell the Backend to quit
+		backend.quit();
 	}
 	
 	/**
@@ -176,7 +206,7 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 		
 		// add the "Exit" item to the "File" menu, unless running on Mac OS (X) in which
 		// case there is already a "Quit" item in the application menu
-		if(!System.getProperty("os.name").toLowerCase().startsWith("mac os")) {
+		if(!onMacOSX) {
 			final JMenuItem exitItem = new JMenuItem("Exit");
 			exitItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
@@ -212,22 +242,22 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 			e.printStackTrace();
 		}
 		
-		// use system menu bar on Mac OS X
-		//TODO fine on windows/linux or surround with if System.getProperty("os.name")...?
-		System.setProperty("apple.laf.useScreenMenuBar", "true");
-	}
-	
-	/**
-	 * Quits the application
-	 * 
-	 */
-	private void quit() {
-		// inform all TopLevelPanels about the impending shutdown
-		for(TopLevelPanel panel: panels)
-			panel.onQuit();
+		if(onMacOSX) {
+			// use system menu bar on Mac OS X
+			System.setProperty("apple.laf.useScreenMenuBar", "true");
 
-		// tell the Backend to quit
-		backend.quit();
+			// since the application's title to be used in the mac os x application menu bar and for the 
+			// "About" menu item has to be set early, so this is done in SwingGUI's static initializer
+			
+			Application macApplication = Application.getApplication();
+			macApplication.addApplicationListener(new MacOSXApplicationAdapter(this));
+			
+			//TODO change to true when the About dialog is implemented
+			macApplication.setEnabledAboutMenu(true);
+			
+			//TODO change to true when the Preferences window is implemented
+			macApplication.setEnabledPreferencesMenu(false);
+		}
 	}
 	
 	/**

@@ -32,9 +32,24 @@ import transfile.gui.swing.SwingGUI;
 public class TransFile implements Runnable {
 	
 	/*
+	 * The application title to be used throughout the program
+	 */
+	public static final String applicationTitle = "TransFile";
+	
+	/*
 	 * Reference to the GUI used to asynchronously inform the GUI about state changes
 	 */
 	private GUI gui;
+	
+	/*
+	 * Sets the application's title to be used in the automatically generated Mac OS X application menu
+	 * and "About" menu item
+	 * 
+	 * It has to be done early, hence this static initializer
+	 */
+	static {
+		System.setProperty("com.apple.mrj.application.apple.menu.about.name", TransFile.applicationTitle);
+	}
 	
 	/**
 	 * Creates a TransFile application object. Constructor is private
