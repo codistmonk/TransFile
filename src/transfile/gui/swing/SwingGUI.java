@@ -253,7 +253,7 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 			macApplication.addApplicationListener(new MacOSXApplicationAdapter(this));
 			
 			//TODO change to true when the About dialog is implemented
-			macApplication.setEnabledAboutMenu(true);
+			macApplication.setEnabledAboutMenu(false);
 			
 			//TODO change to true when the Preferences window is implemented
 			macApplication.setEnabledPreferencesMenu(false);
