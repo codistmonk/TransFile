@@ -30,22 +30,19 @@ public class ConnectIOException extends ConnectException {
 	private static final long serialVersionUID = -2078647737319645109L;
 
 	public ConnectIOException() {
-		// TODO Auto-generated constructor stub
+
 	}
 
 	public ConnectIOException(String arg0) {
 		super(arg0);
-		// TODO Auto-generated constructor stub
 	}
 
 	public ConnectIOException(Throwable arg0) {
 		super(arg0);
-		// TODO Auto-generated constructor stub
 	}
 
 	public ConnectIOException(String arg0, Throwable arg1) {
 		super(arg0, arg1);
-		// TODO Auto-generated constructor stub
 	}
 
 }

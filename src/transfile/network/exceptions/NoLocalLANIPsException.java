@@ -17,35 +17,32 @@
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package transfile.backend.exceptions;
+package transfile.network.exceptions;
 
 /**
- * 
+ * Thrown when no suitable local LAN IP address could be found
  * 
  * @author Martin Riedel
  *
  */
-public class NoLocalIPsException extends Exception {
+public class NoLocalLANIPsException extends Exception {
 
 	private static final long serialVersionUID = 7065637047940088958L;
 
-	public NoLocalIPsException() {
-		// TODO Auto-generated constructor stub
+	public NoLocalLANIPsException() {
+
 	}
 
-	public NoLocalIPsException(String message) {
+	public NoLocalLANIPsException(String message) {
 		super(message);
-		// TODO Auto-generated constructor stub
 	}
 
-	public NoLocalIPsException(Throwable cause) {
+	public NoLocalLANIPsException(Throwable cause) {
 		super(cause);
-		// TODO Auto-generated constructor stub
 	}
 
-	public NoLocalIPsException(String message, Throwable cause) {
+	public NoLocalLANIPsException(String message, Throwable cause) {
 		super(message, cause);
-		// TODO Auto-generated constructor stub
 	}
 
 }

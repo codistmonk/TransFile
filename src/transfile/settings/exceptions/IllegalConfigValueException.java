@@ -17,38 +17,32 @@
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package transfile.backend.exceptions;
+package transfile.settings.exceptions;
 
 /**
- * 
+ * Thrown when a configuration setting is invalid in the per-use configuration file is invalid
  * 
  * @author Martin Riedel
  *
  */
 public class IllegalConfigValueException extends RuntimeException {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 451538573200525501L;
 
 	public IllegalConfigValueException() {
-		// TODO Auto-generated constructor stub
+
 	}
 
 	public IllegalConfigValueException(String arg0) {
 		super(arg0);
-		// TODO Auto-generated constructor stub
 	}
 
 	public IllegalConfigValueException(Throwable arg0) {
 		super(arg0);
-		// TODO Auto-generated constructor stub
 	}
 
 	public IllegalConfigValueException(String arg0, Throwable arg1) {
 		super(arg0, arg1);
-		// TODO Auto-generated constructor stub
 	}
 
 }
