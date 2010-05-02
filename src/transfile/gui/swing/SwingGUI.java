@@ -130,21 +130,7 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	 * 
 	 */
 	private void setup() {
-		// set up menu bar
-		
-		final JMenuBar menuBar = new JMenuBar();
-		setJMenuBar(menuBar);
-		
-		final JMenu fileMenu = new JMenu("File");
-		menuBar.add(fileMenu);
-		
-		final JMenuItem exitItem = new JMenuItem("Exit");
-		exitItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				quit();
-			}
-		});
-		fileMenu.add(exitItem);
+		setupMenuBar();
 		
 		// set up content pane
 		
@@ -177,6 +163,35 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 		pane.add(statusPanel, c);
 		activePanels.add(statusPanel);
 	}
+	
+	/**
+	 * Creates the menu bar
+	 * 
+	 */
+	private void setupMenuBar() {
+		final JMenuBar menuBar = new JMenuBar();
+		setJMenuBar(menuBar);
+		
+		final JMenu fileMenu = new JMenu("File");
+		
+		// add the "Exit" item to the "File" menu, unless running on Mac OS (X) in which
+		// case there is already a "Quit" item in the application menu
+		if(!System.getProperty("os.name").toLowerCase().startsWith("mac os")) {
+			final JMenuItem exitItem = new JMenuItem("Exit");
+			exitItem.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					quit();
+				}
+			});
+			fileMenu.add(exitItem);
+		}
+		
+		// show the "File" menu if it has at least one element
+		if(fileMenu.getSubElements() != null)
+			if(fileMenu.getSubElements().length > 0)
+				menuBar.add(fileMenu);
+	}
+	
 	/**
 	 * 	Makes this Swing GUI look like a native application on the respective OS it's running on
 	 * 
