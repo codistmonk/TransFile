@@ -40,7 +40,8 @@ import transfile.backend.ControllableBackend;
 import transfile.gui.GUI;
 
 /**
- * 
+ * Main class of the Swing GUI for TransFile. Handles global events, aggregates GUI windows
+ * and components and incorporates the application's main window.
  * 
  * @author Martin Riedel
  *
