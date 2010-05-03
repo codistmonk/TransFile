@@ -27,7 +27,10 @@ import java.io.IOException;
 import java.util.Properties;
 
 /**
- * TODO
+ * Provides simple key-value pair persistence. Default values are in transfile.settings.defaults.properties,
+ * per-user configuration files are saved to USER_HOME/.transfile/settings.properties.
+ * 
+ * Singelton class.
  * 
  * @author Martin Riedel
  *
@@ -41,7 +44,7 @@ public class Settings extends Properties {
 	 * Deliberately NOT using the Initialization on Demand Holder idiom to avoid 
 	 * concurrency issues and because it wouldn't produce any advantage for this class.
 	 */
-	private static final Settings INSTANCE = makeInstance();
+	private static final Settings _instance = makeInstance();
 	
 	/*
 	 * Configuration file directory
@@ -65,20 +68,20 @@ public class Settings extends Properties {
 	 * @return the Singleton instance of Settings
 	 */
 	public static Settings getInstance() {
-		return INSTANCE;
+		return _instance;
 	}
 	
 	/**
-	 * TODO
+	 * Returns the user-specific configuration directory (i.e. USER_HOME/.transfile/)
 	 * 
-	 * @return
+	 * @return the user-specific configuration directory
 	 */
 	public File getCfgDir() {
 		return cfgDir;
 	}
 	
 	/**
-	 * TODO
+	 * Saves the current key-value pairs to disk
 	 * 
 	 */
 	public void save() {
@@ -141,6 +144,7 @@ public class Settings extends Properties {
 	}
 	
 	/**
+	 * Loads settings from disk
 	 * 
 	 */
 	private void load() {
