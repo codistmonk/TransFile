@@ -32,9 +32,6 @@ import javax.swing.JButton;
  */
 class ReceivePanel extends TopLevelPanel {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -3454758528985441231L;
 
 	public ReceivePanel() {
@@ -45,7 +42,7 @@ class ReceivePanel extends TopLevelPanel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	void onQuit() {
+	protected void onQuit() {
 		// do nothing
 	}
 	
@@ -53,7 +50,7 @@ class ReceivePanel extends TopLevelPanel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	void onInit() {
+	protected void onInit() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -62,7 +59,7 @@ class ReceivePanel extends TopLevelPanel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	void onHide() {
+	protected void onHide() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -71,7 +68,7 @@ class ReceivePanel extends TopLevelPanel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	void onShow() {
+	protected void onShow() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -88,5 +85,23 @@ class ReceivePanel extends TopLevelPanel {
 		receiveButtonConstraints.gridx = 0;
 		receiveButtonConstraints.gridy = 0;
 		add(receiveButton, receiveButtonConstraints);
+	}
+
+	/** 
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void loadState() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/** 
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void saveState() {
+		// TODO Auto-generated method stub
+		
 	}	
 }

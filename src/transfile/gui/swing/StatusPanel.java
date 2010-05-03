@@ -61,14 +61,6 @@ public class StatusPanel extends TopLevelPanel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	void onQuit() {
-		// do nothing
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
 	protected void setup() {
 		setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
@@ -88,7 +80,7 @@ public class StatusPanel extends TopLevelPanel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	void onInit() {
+	protected void onInit() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -97,7 +89,7 @@ public class StatusPanel extends TopLevelPanel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	void onHide() {
+	protected void onHide() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -106,7 +98,33 @@ public class StatusPanel extends TopLevelPanel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	void onShow() {
+	protected void onShow() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void onQuit() {
+		// do nothing
+	}
+	
+	/** 
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void loadState() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/** 
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void saveState() {
 		// TODO Auto-generated method stub
 		
 	}

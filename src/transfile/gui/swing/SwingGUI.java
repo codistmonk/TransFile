@@ -26,7 +26,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -34,7 +33,6 @@ import javax.swing.*;
 
 import com.apple.eawt.Application;
 
-import transfile.TransFile;
 import transfile.backend.BackendEventHandler;
 import transfile.backend.ControllableBackend;
 import transfile.gui.GUI;
@@ -66,20 +64,16 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	private final static int width = 340;
 	private final static int height = 340;
 	
+	/*
+	 * References to the TopLevelPanels
+	 */
 	private NetworkPanel networkPanel;
 	private StatusPanel statusPanel;
-	
+
 	/*
-	 * All TopLevelPanels aggregated by SwingGUI must be added to this list.
-	 * It's used to call some of he panels' event handlers, i.e. onInit() and onQuit();
+	 * List containing all TopLevelPanels
 	 */
-	private final List<TopLevelPanel> panels = new ArrayList<TopLevelPanel>(2);
-	
-	/*
-	 * All TopLevelPanels aggregated and currently visible must be present in this list.
-	 * It is used to call some of the panels' event handlers, i.e. onShow() and onHide()
-	 */
-	private List<TopLevelPanel> activePanels = new LinkedList<TopLevelPanel>();
+	private List<TopLevelPanel> panels = new LinkedList<TopLevelPanel>();
 	
 	/*
 	 * True if running on Mac OS X
@@ -93,9 +87,11 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	 */
 	public SwingGUI() {
 		super(title);
+		
+		// check whether the application is running on Mac OS X and store the result
 		onMacOSX = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -143,7 +139,7 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	void quit() {
 		// inform all TopLevelPanels about the impending shutdown
 		for(TopLevelPanel panel: panels)
-			panel.onQuit();
+			panel.informQuit();
 
 		// tell the Backend to quit
 		backend.quit();
@@ -165,10 +161,6 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 		showConnectScreen();
 		
 		setVisible(true);
-		
-		// tell all active panels to initialise
-		for(TopLevelPanel panel: panels)
-			panel.onInit();
 	}
 	
 	/**
@@ -195,7 +187,6 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 		c.weightx = 1;
 		c.weighty = 1;
 		pane.add(networkPanel, c);
-		activePanels.add(networkPanel);
 		
 		// "Status" panel
 		
@@ -207,7 +198,6 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 		c.weightx = 1;
 		c.weighty = 0;
 		pane.add(statusPanel, c);
-		activePanels.add(statusPanel);
 	}
 	
 	/**
@@ -282,26 +272,28 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	 * 
 	 */
 	private void showConnectScreen() {
-		//TODO encapsulate the showing and hiding part of this code to a new class that
-		// manages the TopLevelPanels (or somehow encapsulate it inside of SwingGUI, but encapsulate it)
-		for(TopLevelPanel activePanel: activePanels) {
-			if(activePanel != networkPanel && activePanel != statusPanel) {
-				activePanel.onHide();
-				activePanel.setVisible(false);
-			}
-		}
+		hideAllPanels();
 		
-		activePanels.clear();
-		
-		//TODO only invoke onShow if the respective panel wasn't being shown at the time this method was invoked
-		
-		activePanels.add(networkPanel);
-		networkPanel.onShow();
-		
-		activePanels.add(statusPanel);
-		statusPanel.onShow();
+		networkPanel.showPanel();
+		statusPanel.showPanel();
 	}
 	
+	/**
+	 * Hides all TopLevelPanels
+	 * 
+	 */
+	private void hideAllPanels() {
+		for(TopLevelPanel panel: panels) {
+			panel.hidePanel();
+		}
+	}
+	
+	/**
+	 * Listens for when the user closes the window
+	 * 
+	 * @author Martin Riedel
+	 *
+	 */
 	private class MainWindowListener extends WindowAdapter {
 		public void windowClosing(WindowEvent e) {
 			quit();

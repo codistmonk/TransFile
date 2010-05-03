@@ -22,6 +22,9 @@ package transfile.gui.swing;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
+import transfile.gui.swing.exceptions.DoubleInitializationException;
+import transfile.gui.swing.exceptions.DoubleShowException;
+
 /**
  * TopLevelPanels are the highest level components inside SwingGUI. SwingGUI only aggregates
  * TopLevelPanels, and there is bilateral communication between SwingGUI and the individual
@@ -29,6 +32,9 @@ import javax.swing.JPanel;
  * 
  * TopLevelPanels typically encapsulate a particular feature of the application, i.e. the area
  * where the user configures and initiates a connection.
+ * 
+ * TopLevelPanels should NOT perform any expensive operations in their constructors 
+ * and should instead use their onInit() methods for that.
  * 
  * @author Martin Riedel
  *
@@ -41,6 +47,16 @@ abstract class TopLevelPanel extends JPanel {
 	 * The panel's title
 	 */
 	private final String title;
+	
+	/*
+	 * True if this panel has been initialized
+	 */
+	private boolean isInit = false;
+	
+	/*
+	 * True when the panel is currently being shown to the user
+	 */
+	private boolean isShown = false;
 
 	
 	/**
@@ -56,34 +72,114 @@ abstract class TopLevelPanel extends JPanel {
 	}
 	
 	/**
-	 * Invoked just _after_ the GUI starts (after SwingGUI's call of setVisible)
 	 * 
+	 * @return true if the panel has been initialized
 	 */
-	abstract void onInit();
+	public final boolean isInitialized() {
+		return isInit;
+	}
 	
 	/**
-	 * Invoked just before the GUI exits. Should be used to store settings etc.
 	 * 
+	 * @return true if the panel is currently being shown
 	 */
-	abstract void onQuit();
+	public final boolean isShown() {
+		return isShown;
+	}
 	
 	/**
-	 * Invoked when this panel goes from being hidden from the user by the GUI to being shown
+	 * Tells the panel to initialize and perform all expensive initialization operations
 	 * 
 	 */
-	abstract void onShow();
+	final void initPanel() {
+		if(isInit)
+			throw new DoubleInitializationException("TopLevelPanel was asked to initialize a second time: " + title);
+		
+		onInit();
+	}
+	
+	/**
+	 * Shows this panel, initializing it if it hasn't been initialized. Should be invoked as late as
+	 * possible.
+	 * 
+	 */
+	final void showPanel() {
+		if(isShown)
+			throw new DoubleShowException("TopLevelPanel was asked to show while already being shown: " + title);
+		
+		if(!isInit)
+			initPanel();
+		
+		loadState();
+		onShow();
+		setVisible(true);
+	}
+	
+	/**
+	 * Hides this panel
+	 * 
+	 */
+	final void hidePanel() {
+		if(!isShown)
+			return;
+		
+		setVisible(false);
+		onHide();
+	}
+	
+	/**
+	 * Informs the panel that the application is quitting
+	 * 
+	 */
+	final void informQuit() {
+		saveState();
+		onQuit();
+	}
+	
+	/**
+	 * Invoked just before the GUI exits. State should not be saved here but in
+	 * {@link #saveState()}.
+	 * 
+	 */
+	protected abstract void onQuit();
+	
+	/**
+	 * Invoked when the panel is asked to initialize. Any expensive initialization operations
+	 * should be performed here. State should not be loaded here but in {@link #loadState()}.
+	 * 
+	 */
+	protected abstract void onInit();
+	
+	/**
+	 * Invoked when this panel goes from being hidden from the user by the GUI to being shown.
+	 * State will be loaded via {@link #loadState()} BEFORE this method is invoked.
+	 * 
+	 */
+	protected abstract void onShow();
 	
 	/**
 	 * Invoked when this panel goes from being shown to the user by the GUI to being hidden
 	 * 
 	 */
-	abstract void onHide();
+	protected abstract void onHide();
 	
 	/**
 	 * Creates the panel's GUI elements
 	 * 
 	 */
 	protected abstract void setup();
+	
+	/**
+	 * Loads state/settings
+	 * 
+	 */
+	protected abstract void loadState();
+	
+	/**
+	 * Saves state/settings
+	 * 
+	 */
+	protected abstract void saveState();
 	
 	/**
 	 * Creates a titled border around the panel using the panel title

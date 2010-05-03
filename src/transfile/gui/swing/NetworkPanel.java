@@ -151,35 +151,30 @@ public class NetworkPanel extends TopLevelPanel {
 	/**
 	 * {@inheritDoc}
 	 */
-	void onShow() {
-		
+	protected void onShow() {
+		// do nothing
 	}
 	
-	void onHide() {
-		
+	/**
+	 * {@inheritDoc}
+	 */	
+	protected void onHide() {
+		// do nothing
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
-	void onInit() {
+	protected void onInit() {
 		retrieveLocalInternetIPAddress();
-		retrieveLocalLANAddresses();
-		loadSettings();		
+		retrieveLocalLANAddresses();	
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
-	void onQuit() {
-		try {
-			PeerURLBar.getInstance().saveModel();
-		} catch (SerializationException e) {
-			//TODO LOG
-			e.printStackTrace(); //TODO remove
-		}
-		
-		saveSettings();
+	protected void onQuit() {
+		// do nothing
 	}
 
 	/**
@@ -235,6 +230,44 @@ public class NetworkPanel extends TopLevelPanel {
 			}
 		});
 		add(stopButton, c);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	protected void loadState() {
+		// load last entered local port
+		try {
+			localPort = Integer.parseInt(Settings.getInstance().getProperty("local_port")); // always exists because there is a default
+			localPortField.setText(localPort.toString());
+		} catch(NumberFormatException e) {
+			localPort = null;
+			localPortField.setText("N/A");
+		}
+		
+		// selected local IP address is loaded in onLANAddressesDiscovered() (if applicable)
+	}
+	
+	/**
+	 * {@inheritDoc} 
+	 */
+	protected void saveState() {
+		// save PeerURLBar state
+		try {
+			PeerURLBar.getInstance().saveModel();
+		} catch (SerializationException e) {
+			//TODO LOG
+			e.printStackTrace(); //TODO remove
+		}
+		
+		// save local port
+		String localPort = localPortField.getText();
+		if(localPort != null && !("".equals(localPort)))
+			Settings.getInstance().setProperty("local_port", localPortField.getText());
+		
+		// save selected local IP address
+		if(selectedLocalAddress != null && !("".equals(selectedLocalAddress)))
+			Settings.getInstance().setProperty("selected_local_ip", selectedLocalAddress);
 	}
 	
 	/**
@@ -457,37 +490,6 @@ public class NetworkPanel extends TopLevelPanel {
 			}
 			
 		}.execute();	
-	}
-	
-	/**
-	 * Loads saved settings/state
-	 * 
-	 */
-	private void loadSettings() {
-		// load last entered local port
-		try {
-			localPort = Integer.parseInt(Settings.getInstance().getProperty("local_port")); // always exists because there is a default
-			localPortField.setText(localPort.toString());
-		} catch(NumberFormatException e) {
-			localPort = null;
-			localPortField.setText("N/A");
-		}
-		
-		// selected local IP address is loaded in onLANAddressesDiscovered() (if applicable)
-	}
-	
-	/**
-	 * Saves current settings/state
-	 * 
-	 */
-	private void saveSettings() {
-		String localPort = localPortField.getText();
-		if(localPort != null && !("".equals(localPort)))
-			Settings.getInstance().setProperty("local_port", localPortField.getText());
-		
-		// save the selected local IP address
-		if(selectedLocalAddress != null && !("".equals(selectedLocalAddress)))
-			Settings.getInstance().setProperty("selected_local_ip", selectedLocalAddress);
 	}
 	
 	/**

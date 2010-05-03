@@ -39,9 +39,6 @@ import javax.swing.JTextField;
  */
 public class SendPanel extends TopLevelPanel {
 	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -3849684830598909661L;
 	
 	final JTextField fileText = new JTextField();
@@ -54,7 +51,7 @@ public class SendPanel extends TopLevelPanel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	void onQuit() {
+	protected void onQuit() {
 		// do nothing
 	}
 
@@ -62,7 +59,7 @@ public class SendPanel extends TopLevelPanel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	void onInit() {
+	protected void onInit() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -71,7 +68,7 @@ public class SendPanel extends TopLevelPanel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	void onHide() {
+	protected void onHide() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -80,7 +77,7 @@ public class SendPanel extends TopLevelPanel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	void onShow() {
+	protected void onShow() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -128,6 +125,24 @@ public class SendPanel extends TopLevelPanel {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void loadState() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void saveState() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
