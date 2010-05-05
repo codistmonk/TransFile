@@ -35,13 +35,14 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 import net.sourceforge.transfile.backend.BackendEventHandler;
 import net.sourceforge.transfile.backend.ControllableBackend;
 import net.sourceforge.transfile.gui.GUI;
+import net.sourceforge.transfile.gui.swing.exceptions.NativeLookAndFeelException;
 
 
 /**
@@ -165,7 +166,11 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	 * 
 	 */
 	private void _start() {
-		setNativeLookAndFeel();
+		try {
+			setNativeLookAndFeel();
+		} catch(NativeLookAndFeelException e) {
+			showErrorDialog(e);
+		}
 		
 		addWindowListener(new MainWindowListener());
 		
@@ -237,20 +242,11 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	 * 	Makes this Swing GUI look like a native application on the respective OS it's running on
 	 * 
 	 */
-	private void setNativeLookAndFeel() {
+	private void setNativeLookAndFeel() throws NativeLookAndFeelException {
 		try {
 		    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch (UnsupportedLookAndFeelException ex) {
-		  System.out.println("Unable to load native look and feel");
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch(Exception e) {
+			throw new NativeLookAndFeelException(e);
 		}
 		
 		// Mac-specific adaptation
@@ -285,6 +281,24 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 		
 		// resize the main window to fit the currently active panels
 		pack();
+	}
+	
+	/**
+	 * Shows a (more or less) human-readable, localized error dialog for the provided Throwable
+	 * 
+	 * @param t the Throwable to visualise as an error dialog
+	 */
+	private void showErrorDialog(final Throwable t) {	
+		showErrorDialog(t.toString());
+	}
+	
+	/**
+	 * Shows an error dialog displaying the provided message 
+	 * 
+	 * @param errorMessage the error message to show
+	 */
+	private void showErrorDialog(final String errorMessage) {
+		JOptionPane.showMessageDialog(this, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
 	}
 	
 	/**
