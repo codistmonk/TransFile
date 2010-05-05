@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010 Martin Riedel
+ * Copyright ï¿½ 2010 Martin Riedel
  * 
  * This file is part of TransFile.
  *
@@ -29,9 +29,13 @@ import java.awt.event.WindowEvent;
 import java.util.LinkedList;
 import java.util.List;
 
-import javax.swing.*;
-
-import com.apple.eawt.Application;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import transfile.backend.BackendEventHandler;
 import transfile.backend.ControllableBackend;
@@ -130,6 +134,20 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	 */
 	void setStatus(final String status) {
 		statusPanel.setStatus(status);
+	}
+	
+	/**
+	 * Shows the "About" dialog
+	 */
+	void showAboutDialog() {
+		//TODO implement
+	}
+	
+	/**
+	 * Shows the preferences window
+	 */
+	void showPreferences() {
+		//TODO implement
 	}
 	
 	/**
@@ -248,22 +266,9 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 			e.printStackTrace();
 		}
 		
-		if(onMacOSX) {
-			// use system menu bar on Mac OS X
-			System.setProperty("apple.laf.useScreenMenuBar", "true");
-
-			// since the application's title to be used in the mac os x application menu bar and for the 
-			// "About" menu item has to be set early, so this is done in SwingGUI's static initializer
-			
-			Application macApplication = Application.getApplication();
-			macApplication.addApplicationListener(new MacOSXApplicationAdapter(this));
-			
-			//TODO change to true when the About dialog is implemented
-			macApplication.setEnabledAboutMenu(false);
-			
-			//TODO change to true when the Preferences window is implemented
-			macApplication.setEnabledPreferencesMenu(false);
-		}
+		// Mac-specific adaptation
+		if(onMacOSX)
+			new MacOSXAdapter(this);
 	}
 	
 	/**
