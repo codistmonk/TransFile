@@ -134,7 +134,7 @@ public class Settings extends Properties {
 		Properties defaults = new Properties();
 		
 		try {
-			defaults.load(Settings.class.getClass().getResourceAsStream("/transfile/settings/defaults.properties"));
+			defaults.load(Settings.class.getResourceAsStream("defaults.properties"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
