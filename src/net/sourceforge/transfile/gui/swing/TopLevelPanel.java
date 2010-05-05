@@ -23,7 +23,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 import net.sourceforge.transfile.gui.swing.exceptions.DoubleInitializationException;
-import net.sourceforge.transfile.gui.swing.exceptions.DoubleShowException;
 
 
 /**
@@ -101,12 +100,12 @@ abstract class TopLevelPanel extends JPanel {
 	
 	/**
 	 * Shows this panel, initializing it if it hasn't been initialized. Should be invoked as late as
-	 * possible.
+	 * possible. Does nothing if the panel is already visible.
 	 * 
 	 */
 	final void showPanel() {
 		if(isShown)
-			throw new DoubleShowException("TopLevelPanel was asked to show while already being shown: " + title);
+			return;
 		
 		if(!isInit)
 			initPanel();
@@ -117,7 +116,7 @@ abstract class TopLevelPanel extends JPanel {
 	}
 	
 	/**
-	 * Hides this panel
+	 * Hides this panel. Does nothing if the panel is already hidden.
 	 * 
 	 */
 	final void hidePanel() {

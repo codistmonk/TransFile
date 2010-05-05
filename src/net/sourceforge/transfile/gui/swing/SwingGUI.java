@@ -25,8 +25,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
@@ -172,7 +174,6 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 		showConnectScreen();
 		
 		setBounds(300, 200, 0, 0);
-		pack();
 		setVisible(true);
 	}
 	
@@ -263,20 +264,27 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	 * 
 	 */
 	private void showConnectScreen() {
-		hideAllPanels();
-		
-		networkPanel.showPanel();
-		statusPanel.showPanel();
+		Set<TopLevelPanel> visiblePanels = new HashSet<TopLevelPanel>(2);
+		visiblePanels.add(networkPanel);
+		visiblePanels.add(statusPanel);
+		setVisiblePanels(visiblePanels);
 	}
 	
 	/**
-	 * Hides all TopLevelPanels
+	 * Shows the panels contained in the provided set, hides all others
 	 * 
+	 * @param visiblePanels the panels to show
 	 */
-	private void hideAllPanels() {
+	private void setVisiblePanels(Set<TopLevelPanel> visiblePanels) {
 		for(TopLevelPanel panel: panels) {
-			panel.hidePanel();
+			if(visiblePanels.contains(panel))
+				panel.showPanel();
+			else
+				panel.hidePanel();
 		}
+		
+		// resize the main window to fit the currently active panels
+		pack();
 	}
 	
 	/**
