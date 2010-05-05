@@ -216,7 +216,7 @@ public class NetworkPanel extends TopLevelPanel {
 		});
 		c.gridx = 0;
 		c.gridy = 2;
-		c.insets = new Insets(15, 5, 15, 5);
+		c.insets = new Insets(5, 5, 15, 5);
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
 		add(connectButton, c);

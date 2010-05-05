@@ -20,8 +20,7 @@
 package net.sourceforge.transfile.gui.swing;
 
 import java.awt.Container;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -29,6 +28,7 @@ import java.awt.event.WindowEvent;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -62,12 +62,6 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	 * Main window title
 	 */
 	private final static String title = "TransFile";
-	
-	/*
-	 * Startup main window dimensions
-	 */
-	private final static int width = 340;
-	private final static int height = 340;
 	
 	/*
 	 * References to the TopLevelPanels
@@ -173,12 +167,12 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 		
 		addWindowListener(new MainWindowListener());
 		
-		setBounds(300, 100, width, height);
-		
 		setup();
 		
 		showConnectScreen();
 		
+		setBounds(300, 200, 0, 0);
+		pack();
 		setVisible(true);
 	}
 	
@@ -193,30 +187,21 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 		
 		final Container pane = getContentPane();
 		
-		pane.setLayout(new GridBagLayout());
-		final GridBagConstraints c = new GridBagConstraints();
+		pane.setLayout(new BoxLayout(pane, BoxLayout.PAGE_AXIS));
 		
 		// "Network" panel
 		
 		networkPanel = new NetworkPanel(this, backend);
+		networkPanel.setPreferredSize(new Dimension(340, 300));
 		panels.add(networkPanel);
-		c.gridx = 0;
-		c.gridy = 0;
-		c.fill = GridBagConstraints.BOTH;
-		c.weightx = 1;
-		c.weighty = 1;
-		pane.add(networkPanel, c);
+		pane.add(networkPanel);
 		
 		// "Status" panel
 		
 		statusPanel = new StatusPanel();
+		statusPanel.setPreferredSize(new Dimension(360, 20));
 		panels.add(statusPanel);
-		c.gridx = 0;
-		c.gridy = 1;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 1;
-		c.weighty = 0;
-		pane.add(statusPanel, c);
+		pane.add(statusPanel);
 	}
 	
 	/**
