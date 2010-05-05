@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010 Martin Riedel
+ * Copyright Â© 2010 Martin Riedel
  * 
  * This file is part of TransFile.
  *

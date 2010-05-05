@@ -1,5 +1,5 @@
 /*
- * Copyright © 2010 Martin Riedel
+ * Copyright Â© 2010 Martin Riedel
  * 
  * This file is part of TransFile.
  *
@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package transfile.network.exceptions;
 
 /**
