@@ -21,7 +21,8 @@ package net.sourceforge.transfile.exceptions;
 
 /**
  * This Error represents a logical programming error. It may, for instance, be thrown when a backend method receives
- * obviously invalid parameters from the GUI which should have performed a validity check on that data.
+ * obviously invalid parameters from the GUI which should have performed a validity check on that data. Wherever
+ * it is possible to recover from the logical error, {@link LogicException} should be favoured over LogicError.
  * 
  * @author Martin Riedel
  *
