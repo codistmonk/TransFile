@@ -69,6 +69,9 @@ abstract class TopLevelPanel extends JPanel {
 		
 		// create GUI elements
 		setup();
+		
+		// by default, TopLevelPanels are hidden
+		setVisible(false);
 	}
 	
 	/**

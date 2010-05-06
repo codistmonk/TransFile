@@ -89,7 +89,7 @@ public class SendPanel extends TopLevelPanel {
 	protected void setup() {
 		setLayout(new GridBagLayout());	
 		
-		final JFileChooser fileChooser = new JFileChooser();
+		/*final JFileChooser fileChooser = new JFileChooser();
 		
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx = 0;
@@ -115,7 +115,7 @@ public class SendPanel extends TopLevelPanel {
 		c.weightx = 0;
 		c.weighty = 0;
 		c.insets = new Insets(5, 5, 5, 5);
-		add(fileButton, c);
+		add(fileButton, c); */
 	}
 	
 	private void setFile(final File file) {
