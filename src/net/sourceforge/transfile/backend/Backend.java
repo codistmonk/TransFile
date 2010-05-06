@@ -22,11 +22,12 @@ package net.sourceforge.transfile.backend;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Set;
 
 import net.sourceforge.transfile.network.Link;
 import net.sourceforge.transfile.network.PeerURL;
-import net.sourceforge.transfile.network.exceptions.ConnectTimeoutException;
+import net.sourceforge.transfile.network.exceptions.LinkFailedException;
 import net.sourceforge.transfile.network.exceptions.PeerURLFormatException;
 import net.sourceforge.transfile.settings.Settings;
 
@@ -112,14 +113,14 @@ public class Backend implements ControllableBackend {
 	 */
 	@Override
 	public void connect(final String remoteURL, final int localPort) 
-			throws PeerURLFormatException, IOException, ConnectTimeoutException, InterruptedException {
+			throws PeerURLFormatException, UnknownHostException, InterruptedException, LinkFailedException {
 		if(connection != null)
 			throw new IllegalStateException("already connected to a peer");
 		
 		try {
 			connection = new Link(remoteURL, localPort);
-		} catch(InterruptedException e) {
-			// reset connection to null if the connection attempt was interrupted by the user
+		} finally {
+			// if something went wrong reset connection to null
 			connection = null;
 		}
 	}

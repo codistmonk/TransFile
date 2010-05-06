@@ -28,25 +28,23 @@ import java.net.MalformedURLException;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.sourceforge.transfile.network.exceptions.ConnectFailedToSetTimeoutException;
-import net.sourceforge.transfile.network.exceptions.ConnectIOException;
-import net.sourceforge.transfile.network.exceptions.ConnectSecurityException;
-import net.sourceforge.transfile.network.exceptions.ConnectSocketFailedToCloseException;
-import net.sourceforge.transfile.network.exceptions.ConnectTimeoutException;
+import net.sourceforge.transfile.network.exceptions.LinkFailedException;
 import net.sourceforge.transfile.network.exceptions.PeerURLFormatException;
-import net.sourceforge.transfile.network.exceptions.ServerFailedToBindException;
-import net.sourceforge.transfile.network.exceptions.ServerFailedToCloseException;
 import net.sourceforge.transfile.settings.Settings;
 
 
 /**
- * 
+ * A Link is a monolateral or bilateral connection between two peers. An attempt to both
+ * establish a connection from the local host to the remote host and to accept an incoming connection 
+ * from the remote host. If at least one of those attempts succeeds, the Link is established.
  * 
  * @author Martin Riedel
  *
@@ -74,13 +72,13 @@ public class Link {
 	 * TODO doc
 	 */
 	public Link(final String peerURL, final int localPort) 
-			throws PeerURLFormatException, IOException, InterruptedException, ConnectTimeoutException {
+			throws PeerURLFormatException, UnknownHostException, InterruptedException, LinkFailedException {
 		peer = new PeerURL(peerURL);
 		
 		connectionToPeer = new ConnectionToPeer(peer);
 		connectionFromPeer = new ConnectionFromPeer(peer, localPort);
 		
-		establishConnection();
+		establishLink();
 	}
 	
 	/**
@@ -135,60 +133,41 @@ public class Link {
 	}
 	
 	/**
-	 * 
 	 * TODO doc
+	 * 
+	 * @throws LinkFailedException if the link could not be established
 	 */
-	private void establishConnection() throws InterruptedException  {		
+	private void establishLink() throws InterruptedException, LinkFailedException  {		
 		connectionFromPeer.establishInBackground();
+		
+		// make these members and define getters as well as other Link state
+		Exception connectionToPeerError = null;
+		Exception connectionFromPeerError = null;
 		
 		try {
 			connectionToPeer.establish();
-		} catch (ConnectIOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InterruptedException e) {
+		} catch(InterruptedException e) {
 			// if establishing a Link to the peer has been interrupted, make sure to interrupt
 			// both connection attempts (both outgoing and incoming) by interrupting connectionFromPeer
 			connectionFromPeer.interruptBackgroundTask();
 			throw e;
-		} catch (ConnectTimeoutException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ConnectSocketFailedToCloseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ConnectFailedToSetTimeoutException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch(Exception e) {
+			connectionToPeerError = e;
 		}
 		
 		try {
 			connectionFromPeer.establish();
-		} catch (ConnectTimeoutException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ConnectSocketFailedToCloseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ConnectIOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ServerFailedToCloseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ServerFailedToBindException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ConnectSecurityException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ConnectFailedToSetTimeoutException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch(CancellationException e) {
+			throw new InterruptedException();
+		} catch(Exception e) {
+			connectionFromPeerError = e;
 		}
 
 		System.out.println("Connection to peer: " + (connectionToPeer.isConnected() == true ? "established" : "failed"));
 		System.out.println("Connection from peer: " + (connectionFromPeer.isConnected() == true ? "established" : "failed"));
+		
+		if(!(connectionToPeer.isConnected() || connectionFromPeer.isConnected()))
+			throw new LinkFailedException(connectionToPeerError, connectionFromPeerError);
 		
 	}
 	

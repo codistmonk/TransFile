@@ -47,6 +47,7 @@ import javax.swing.SwingWorker;
 
 import net.sourceforge.transfile.backend.ControllableBackend;
 import net.sourceforge.transfile.exceptions.SerializationException;
+import net.sourceforge.transfile.network.exceptions.LinkFailedException;
 import net.sourceforge.transfile.network.exceptions.PeerURLFormatException;
 import net.sourceforge.transfile.settings.Settings;
 
@@ -673,10 +674,13 @@ public class NetworkPanel extends TopLevelPanel {
 						gui.setStatus(connectFail + "invalid Peer URL");
 					} else if(cause instanceof UnknownHostException) {
 						gui.setStatus(connectFail + "unknown host");
-					} else if(cause instanceof IOException) {
-						gui.setStatus(connectFail + "I/O error");
 					} else if(cause instanceof IllegalStateException) {
 						gui.setStatus(connectFail + cause.getMessage());
+					} else if(cause instanceof LinkFailedException) {
+						// TODO...
+						gui.setStatus(connectFail + "both connections to/from the remote host have failed");
+					} else if(cause instanceof InterruptedException) {
+						// ignore, situation handled by CancellationException
 					} else {
 						gui.setStatus(connectFail + "unknown error");
 						cause.printStackTrace();

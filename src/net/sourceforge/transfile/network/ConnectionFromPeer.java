@@ -26,7 +26,6 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.nio.channels.IllegalBlockingModeException;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
@@ -108,11 +107,9 @@ class ConnectionFromPeer extends Connection {
 				throw (ConnectSocketFailedToCloseException) cause;
 			} else if(cause instanceof ConnectFailedToSetTimeoutException) {
 				throw (ConnectFailedToSetTimeoutException) cause;
-			}
-		
-		} catch(CancellationException e) {
-			// Nothing major to do here. If ServerTask was cancelled, then so was this thread,
-			// causing peerConnectionAcceptor.get() to throw an InterruptedException
+			} //TODO else (except InterruptedException)
+		} finally {
+			// if something went wrong we're not connected
 			setConnected(false);
 		}
 	}
