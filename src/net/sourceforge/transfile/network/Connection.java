@@ -70,14 +70,26 @@ abstract class Connection {
 	protected Socket socket = null;
 
 	
+	/**
+	 * 
+	 * TODO doc
+	 */
 	public Connection(final PeerURL peer) {
 		this.peer = peer;
 	}
 	
+	/**
+	 * 
+	 * TODO doc
+	 */
 	public final PeerURL getPeerURL() {
 		return peer;
 	}
 	
+	/**
+	 * 
+	 * TODO doc
+	 */
 	public final boolean isConnected() {
 		return connected;
 	}
@@ -94,10 +106,18 @@ abstract class Connection {
 			ConnectTimeoutException, InterruptedException, ConnectSocketFailedToCloseException,
 			ServerFailedToCloseException, ServerFailedToBindException, ConnectFailedToSetTimeoutException;
 	
+	/**
+	 * 
+	 * TODO doc
+	 */
 	public final void authenticate() {
 		//TODO ...
 	}
 	
+	/**
+	 * 
+	 * TODO doc
+	 */
 	protected final void setConnected(final boolean connected) {
 		this.connected = connected;
 	}

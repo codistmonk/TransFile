@@ -40,10 +40,17 @@ import net.sourceforge.transfile.network.exceptions.ConnectTimeoutException;
  */
 class ConnectionToPeer extends Connection {
 
+	/**
+	 * 
+	 * TODO doc
+	 */
 	public ConnectionToPeer(final PeerURL peer) {
 		super(peer);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void establish() throws ConnectIOException, InterruptedException, ConnectTimeoutException, 
 			ConnectSocketFailedToCloseException, ConnectFailedToSetTimeoutException {	

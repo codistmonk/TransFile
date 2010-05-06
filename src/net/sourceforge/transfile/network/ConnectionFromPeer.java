@@ -48,8 +48,15 @@ import net.sourceforge.transfile.network.exceptions.ServerFailedToCloseException
  */
 class ConnectionFromPeer extends Connection {
 	
+	/*
+	 * TODO doc
+	 */
 	private final FutureTask<Socket> peerConnectionAcceptor;
 
+	/**
+	 * 
+	 * TODO doc
+	 */
 	public ConnectionFromPeer(final PeerURL peer, final int localPort) {
 		super(peer);
 		
@@ -59,10 +66,18 @@ class ConnectionFromPeer extends Connection {
 		peerConnectionAcceptor = new FutureTask<Socket>(new ServerTask(localPort, peer));
 	}
 
+	/**
+	 * 
+	 * TODO doc
+	 */
 	public void establishInBackground() {
 		(new Thread(peerConnectionAcceptor)).start();	
 	}
 
+	/**
+	 * 
+	 * TODO doc
+	 */
 	public void interruptBackgroundTask() {
 		peerConnectionAcceptor.cancel(true);
 	}

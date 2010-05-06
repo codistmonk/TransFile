@@ -68,6 +68,11 @@ public class Link {
 	 */
 	private ConnectionFromPeer connectionFromPeer;
 
+	
+	/**
+	 * 
+	 * TODO doc
+	 */
 	public Link(final String peerURL, final int localPort) 
 			throws PeerURLFormatException, IOException, InterruptedException, ConnectTimeoutException {
 		peer = new PeerURL(peerURL);
@@ -75,9 +80,13 @@ public class Link {
 		connectionToPeer = new ConnectionToPeer(peer);
 		connectionFromPeer = new ConnectionFromPeer(peer, localPort);
 		
-		establishBilateralConnection();
+		establishConnection();
 	}
 	
+	/**
+	 * 
+	 * TODO doc
+	 */
 	public static String findExternalAddress() throws MalformedURLException, IOException {
 		URL siteURL = new URL(Settings.getInstance().getProperty("external_ip_site"));  
 		   
@@ -87,6 +96,10 @@ public class Link {
 		return bufferedSiteReader.readLine();  		
 	}
 	
+	/**
+	 * 
+	 * TODO doc
+	 */
 	public static Set<String> findLocalAddresses(final boolean ipv4Only) throws SocketException {
 		Set<String> localAddresses = new HashSet<String>();
 		
@@ -121,7 +134,11 @@ public class Link {
 		return localAddresses;	
 	}
 	
-	private void establishBilateralConnection() throws InterruptedException  {
+	/**
+	 * 
+	 * TODO doc
+	 */
+	private void establishConnection() throws InterruptedException  {		
 		connectionFromPeer.establishInBackground();
 		
 		try {

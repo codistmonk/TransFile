@@ -30,21 +30,41 @@ import net.sourceforge.transfile.network.exceptions.PeerURLFormatException;
 
 
 /**
- * 
+ * TODO doc
  * 
  * @author Martin Riedel
  *
  */
 public interface ControllableBackend {
 	
+	/**
+	 * 
+	 * TODO doc
+	 */
 	public void quit();
-	
+
+	/**
+	 * 
+	 * TODO doc
+	 */
 	public String findExternalAddress() throws MalformedURLException, IOException;
 	
+	/**
+	 * 
+	 * TODO doc
+	 */
 	public Set<String> findLocalAddresses() throws SocketException;
 	
+	/**
+	 * 
+	 * TODO doc
+	 */
 	public Set<String> findLocalAddresses(final boolean ipv4Only) throws SocketException;
 	
+	/**
+	 * 
+	 * TODO doc
+	 */
 	public String makePeerURLString(final String address, final int port);
 	
 	/**
