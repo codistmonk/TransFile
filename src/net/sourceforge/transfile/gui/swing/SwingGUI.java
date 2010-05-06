@@ -71,6 +71,8 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	 */
 	private NetworkPanel networkPanel;
 	private StatusPanel statusPanel;
+	private SendPanel sendPanel;
+	private ReceivePanel receivePanel;
 
 	/*
 	 * List containing all TopLevelPanels
@@ -122,7 +124,7 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	void onConnectSuccessful() {
 		setStatus("Connected");
 		
-		// TODO ...
+		showTransferScreen();
 	}
 	
 	/**
@@ -202,6 +204,20 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 		panels.add(networkPanel);
 		pane.add(networkPanel);
 		
+		// "Send Files" panel
+		
+		sendPanel = new SendPanel();
+		sendPanel.setPreferredSize(new Dimension(340, 150));
+		panels.add(sendPanel);
+		pane.add(sendPanel);
+		
+		// "Receive Files" panel
+		
+		receivePanel = new ReceivePanel();
+		receivePanel.setPreferredSize(new Dimension(340, 150));
+		panels.add(receivePanel);
+		pane.add(receivePanel);
+		
 		// "Status" panel
 		
 		statusPanel = new StatusPanel();
@@ -249,7 +265,7 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 			throw new NativeLookAndFeelException(e);
 		}
 		
-		// Mac-specific adaptation
+		// Mac-specific adaptations
 		if(onMacOSX)
 			new MacOSXAdapter(this);
 	}
@@ -261,8 +277,25 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	 */
 	private void showConnectScreen() {
 		Set<TopLevelPanel> visiblePanels = new HashSet<TopLevelPanel>(2);
+		
 		visiblePanels.add(networkPanel);
 		visiblePanels.add(statusPanel);
+		
+		setVisiblePanels(visiblePanels);
+	}
+	
+	/**
+	 * Changes the main window so that it represents the screen where the user
+	 * sends and receives files through the previously established connection
+	 * 
+	 */
+	private void showTransferScreen() {
+		Set<TopLevelPanel> visiblePanels = new HashSet<TopLevelPanel>(3);
+		
+		visiblePanels.add(sendPanel);
+		visiblePanels.add(receivePanel);
+		visiblePanels.add(statusPanel);
+		
 		setVisiblePanels(visiblePanels);
 	}
 	

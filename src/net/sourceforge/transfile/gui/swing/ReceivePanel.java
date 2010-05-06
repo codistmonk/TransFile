@@ -35,7 +35,7 @@ class ReceivePanel extends TopLevelPanel {
 	private static final long serialVersionUID = -3454758528985441231L;
 
 	public ReceivePanel() {
-		super("Receive");	
+		super("Receive Files");	
 	}
 	
 	/**
