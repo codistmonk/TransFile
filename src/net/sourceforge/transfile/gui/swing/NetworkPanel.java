@@ -24,10 +24,6 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
@@ -40,10 +36,13 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import net.sourceforge.transfile.backend.ControllableBackend;
 import net.sourceforge.transfile.exceptions.SerializationException;
@@ -95,11 +94,6 @@ public class NetworkPanel extends TopLevelPanel {
 	private String localInternetIPAddress = null;
 	
 	/*
-	 * Represents the local Port selected by the user, or null if the port entered by the user is invalid
-	 */
-	private Integer localPort = null;
-	
-	/*
 	 * The SwingWorker used to initiate a connection. Null whenever a connection attempt is not
 	 * currently running.
 	 */
@@ -124,18 +118,26 @@ public class NetworkPanel extends TopLevelPanel {
 	private JPanel localURLPanel;
 	
 	/*
+	 * TODO doc
+	 */
+	private PeerURLBar remoteURLBar;
+	
+	/*
+	 * TODO doc
+	 */
+	private PortSpinner localPort;
+	
+	/*
 	 * Dynamic GUI elements
 	 */
 	private JLabel localLANAddrLabel;
 	private JLabel localInternetAddrLabel;
-	private PeerURLBar remoteURLBar;
 	private JComboBox localIPAddrBox;
 	private JTextField localInternetAddrField;
-	private JTextField localPortField;
 	private JTextField localURLField;
 	private JButton connectButton;
 	private JButton stopButton;
-	
+
 	
 	/**
 	 * Creates a NetworkPanel
@@ -238,14 +240,8 @@ public class NetworkPanel extends TopLevelPanel {
 	 * {@inheritDoc}
 	 */
 	protected void loadState() {
-		// load last entered local port
-		try {
-			localPort = Integer.parseInt(Settings.getInstance().getProperty("local_port")); // always exists because there is a default
-			localPortField.setText(localPort.toString());
-		} catch(NumberFormatException e) {
-			localPort = null;
-			localPortField.setText("N/A");
-		}
+		// load last entered local port (property always exists because there is a default)
+		localPort.setValue(Settings.getInstance().getInt("local_port"));
 		
 		// selected local IP address is loaded in onLANAddressesDiscovered() (if applicable)
 	}
@@ -263,9 +259,7 @@ public class NetworkPanel extends TopLevelPanel {
 		}
 		
 		// save local port
-		String localPort = localPortField.getText();
-		if(localPort != null && !("".equals(localPort)))
-			Settings.getInstance().setProperty("local_port", localPortField.getText());
+		Settings.getInstance().setProperty("local_port", localPort.getValue().toString());
 		
 		// save selected local IP address
 		if(selectedLocalAddress != null && !("".equals(selectedLocalAddress)))
@@ -367,49 +361,20 @@ public class NetworkPanel extends TopLevelPanel {
 		
 		localInternetAddrField = new JTextField();
 		localInternetAddrField.setEditable(false);
+		
 		c.gridy = 2;
 		localURLPanel.add(localInternetAddrField, c);
 		
-		localPortField = new JTextField();
-		localPortField.setEditable(true);
-		localPortField.addFocusListener(new FocusListener() {
+		localPort = new PortSpinner();
+		localPort.addChangeListener(new ChangeListener() {
 			
 			@Override
-			public void focusLost(FocusEvent e) {
-				JTextField source = (JTextField) e.getSource();
-				// if the port field loses focus while it's empty...
-				if(source.getText() == null || "".equals(source.getText()))
-					// set it to the last port the user entered if available/vald
-					if(localPort != null)
-						source.setText(localPort.toString());
-					// or if not, set it to the port currently stored in Settings
-					else
-						source.setText(Settings.getInstance().getProperty("local_port"));
-			}
-			
-			@Override
-			public void focusGained(FocusEvent arg0) {
-				// do nothing
-			}
-		});
-		localPortField.addKeyListener(new KeyListener() {
-			
-			@Override
-			public void keyTyped(KeyEvent arg0) {
-				// do nothing
-			}
-			
-			@Override
-			public void keyReleased(KeyEvent arg0) {
+			public void stateChanged(ChangeEvent e) {
 				onUserActionChangeLocalPort();
-			}
-			@Override
-			public void keyPressed(KeyEvent arg0) {
-				// do nothing
 			}
 		});
 		c.gridy = 3;
-		localURLPanel.add(localPortField, c);
+		localURLPanel.add(localPort, c);
 	}
 	
 	/**
@@ -517,12 +482,12 @@ public class NetworkPanel extends TopLevelPanel {
 	 * 
 	 */
 	private void updateLocalURL() {
-		if(localPort == null || selectedLocalAddress == null || "".equals(selectedLocalAddress)) {
+		if(selectedLocalAddress == null || "".equals(selectedLocalAddress)) {
 			localURLField.setText("N/A");
 			return;
 		}
 		
-		localURLField.setText(backend.makePeerURLString(selectedLocalAddress, localPort));
+		localURLField.setText(backend.makePeerURLString(selectedLocalAddress, ((Number) localPort.getValue()).intValue()));
 	}
 	
 	/**
@@ -614,14 +579,7 @@ public class NetworkPanel extends TopLevelPanel {
 	 * Invoked when the user changes the local port
 	 * 
 	 */
-	private void onUserActionChangeLocalPort() {
-		try {
-			localPort = Integer.parseInt((String) localPortField.getText());
-		} catch(NumberFormatException e) {
-			// set local port to null to indicate an error in the port number entered by the user
-			localPort = null;
-		}
-		
+	private void onUserActionChangeLocalPort() {	
 		updateLocalURL();
 	}
 	
@@ -637,11 +595,6 @@ public class NetworkPanel extends TopLevelPanel {
 			return;
 		}
 		
-		if(localPort == null) {
-			gui.setStatus("Invalid local port");
-			return;
-		}
-		
 		showStopButton();
 		
 		gui.setStatus("Connecting...");
@@ -650,7 +603,7 @@ public class NetworkPanel extends TopLevelPanel {
 
 			@Override
 			protected Void doInBackground() throws Exception {
-				backend.connect(remoteURL, localPort);
+				backend.connect(remoteURL, ((Number) localPort.getValue()).intValue());
 				return null;
 			}
 			

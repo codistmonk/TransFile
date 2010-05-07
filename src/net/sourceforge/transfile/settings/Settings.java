@@ -26,6 +26,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 
+import net.sourceforge.transfile.settings.exceptions.IllegalConfigValueException;
+
 /**
  * Provides simple key-value pair persistence. Default values are in transfile.settings.defaults.properties,
  * per-user configuration files are saved to USER_HOME/.transfile/settings.properties.
@@ -98,6 +100,46 @@ public class Settings extends Properties {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	/**
+	 * Returns the value for the specified property key as an integer
+	 * 
+	 * @param key the property key to look up
+	 * @return the value for the specified property key as an integer, or null if the key could not be found
+	 * @throws IllegalConfigValueException if the value is not an integer
+	 */
+	public int getInt(final String key) {
+		try {
+			return Integer.parseInt(getProperty(key));
+		} catch(NumberFormatException e) {
+			throw new IllegalConfigValueException(e);
+		}
+	}
+	
+	/**
+	 * Returns the default setting for the provided property key.
+	 * 
+	 * @param key the property key to look up
+	 * @return the default for the specified property key, or null if the key could no be found
+	 */
+	public String getDefault(final String key) {
+		return defaults.getProperty(key);
+	}
+
+	/**
+	 * Returns the default setting for the specified property key as an integer
+	 * 
+	 * @param key the property key to look up
+	 * @return the default for the specified property key as an integer, or null if the key could not be found
+	 * @throws IllegalConfigValueException if the value is not an integer
+	 */
+	public int getDefaultInt(final String key) {
+		try {
+			return Integer.parseInt(defaults.getProperty(key));
+		} catch(NumberFormatException e) {
+			throw new IllegalConfigValueException(e);
+		}
 	}
 	
 	/**

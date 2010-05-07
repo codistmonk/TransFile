@@ -20,7 +20,7 @@
 package net.sourceforge.transfile.settings.exceptions;
 
 /**
- * Thrown when a configuration setting is invalid in the per-use configuration file is invalid
+ * Thrown when an invalid configuration settings is encountered
  * 
  * @author Martin Riedel
  *
