@@ -39,8 +39,9 @@ import net.sourceforge.transfile.network.exceptions.PeerURLFormatException;
 public interface ControllableBackend {
 	
 	/**
-	 * 
 	 * TODO doc
+	 * 
+	 * Responsible for persistence. Should be the last method called in the UI's quit method
 	 */
 	public void quit();
 
