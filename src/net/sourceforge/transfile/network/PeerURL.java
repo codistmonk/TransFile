@@ -68,7 +68,10 @@ public class PeerURL {
 	 * @throws UnknownHostException if the host referenced by the provided PeerURL string representation cannot be resolved
 	 */
 	public PeerURL(final String peerURLString) throws PeerURLFormatException, UnknownHostException {
-		if(!isPeerURLString(peerURLString))
+		Pattern p = Pattern.compile("^" + protocolPrefix + "(.+):([0-9]+)$");
+		Matcher m = p.matcher(peerURLString);
+		
+		if(!m.find())
 			throw new PeerURLFormatException("Malformatted PeerURL: " + peerURLString);
 		
 		try {
@@ -130,19 +133,6 @@ public class PeerURL {
 	 */
 	public static String makePeerURLString(final String address, final int port) {
 		return protocolPrefix + address + ":" + port;	
-	}
-	
-	/**
-	 * Determines whether the provided string is a valid PeerURL string representation
-	 * 
-	 * @param string the string for which it is to be determined whether it is a PeerURL
-	 * @return true if the provided string is a valid PeerURL string representation
-	 */
-	public static boolean isPeerURLString(final String string) {
-		Pattern p = Pattern.compile("^" + protocolPrefix + "(.+):([0-9]+)$");
-		Matcher m = p.matcher(string);
-		
-		return m.find();
 	}
 
 }
