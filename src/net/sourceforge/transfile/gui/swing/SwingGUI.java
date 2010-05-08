@@ -28,6 +28,7 @@ import java.awt.event.WindowEvent;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import javax.swing.BoxLayout;
@@ -43,6 +44,8 @@ import net.sourceforge.transfile.backend.BackendEventHandler;
 import net.sourceforge.transfile.backend.ControllableBackend;
 import net.sourceforge.transfile.gui.GUI;
 import net.sourceforge.transfile.gui.swing.exceptions.NativeLookAndFeelException;
+import net.sourceforge.transfile.settings.Settings;
+import net.sourceforge.transfile.settings.exceptions.IllegalConfigValueException;
 
 
 /**
@@ -94,6 +97,12 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 		
 		// check whether the application is running on Mac OS X and store the result
 		onMacOSX = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
+		
+		try {
+			loadLocale();
+		} catch(IllegalConfigValueException e) {
+			//TODO log the error, but do nothing else (gracefully revert to the host's default locale)
+		}
 	}
 
 	/**
@@ -182,6 +191,30 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 		
 		setBounds(300, 200, 0, 0);
 		setVisible(true);
+	}
+	
+	/**
+	 * Loads the user's selected locale from the user-specific config file
+	 * 
+	 * @throws IllegalConfigValueException if the "locale" setting is present but invalid
+	 */
+	private void loadLocale() {
+		String userLocaleSetting = Settings.getInstance().getProperty("locale");
+
+		if(userLocaleSetting == null || "".equals(userLocaleSetting))
+			return;
+
+		String[] userLocale = userLocaleSetting.split("_");
+
+		if(userLocale.length < 1 || userLocale.length > 2)
+			throw new IllegalConfigValueException();
+
+		if(userLocale.length == 1)
+			setLocale(new Locale(userLocale[0]));
+		else if(userLocale.length == 2)
+			setLocale(new Locale(userLocale[0], userLocale[1]));
+		else
+			throw new IllegalConfigValueException();
 	}
 	
 	/**
