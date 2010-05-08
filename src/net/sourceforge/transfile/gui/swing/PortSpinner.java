@@ -147,8 +147,6 @@ class PortSpinner extends JSpinner {
 			
 			document = (AbstractDocument) textField.getDocument();
 			
-			textField.setDocument(document);
-			
 			// limit the text editor to a maximum of 5 columns
 			//textField.setColumns(maxDigits);
 											
