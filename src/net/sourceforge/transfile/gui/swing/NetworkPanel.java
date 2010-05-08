@@ -63,11 +63,6 @@ public class NetworkPanel extends TopLevelPanel {
 	private static final long serialVersionUID = -6730149437479457030L;
 	
 	/*
-	 * Back-reference to the main GUI class used to delegate events
-	 */
-	private final SwingGUI gui;
-	
-	/*
 	 * Reference to the application backend 
 	 */
 	private final ControllableBackend backend;
@@ -145,10 +140,9 @@ public class NetworkPanel extends TopLevelPanel {
 	 * @param gui the main GUI class aggregating this NetworkPanel
 	 * @param backend the backend to use
 	 */
-	public NetworkPanel(final SwingGUI gui, final ControllableBackend backend) {
-		super("Network");
+	public NetworkPanel(final SwingGUI window, final ControllableBackend backend) {
+		super(window, "Network");
 		
-		this.gui = gui;
 		this.backend = backend;
 	}
 	
@@ -403,9 +397,9 @@ public class NetworkPanel extends TopLevelPanel {
 				} catch(ExecutionException e) {
 					Throwable cause = e.getCause();
 					if(cause instanceof SocketException) {
-						gui.setStatus("failed to discover local LAN addresses: socket error");
+						getWindow().setStatus("failed to discover local LAN addresses: socket error");
 					} else {
-						gui.setStatus("failed to discover local LAN addresses: unknown error");
+						getWindow().setStatus("failed to discover local LAN addresses: unknown error");
 					}
 				}
 			}
@@ -440,16 +434,16 @@ public class NetworkPanel extends TopLevelPanel {
 				} catch(ExecutionException e) {
 					Throwable cause = e.getCause();
 					if(cause instanceof UnknownHostException) {
-						gui.setStatus("failed to discover external IP address: unknown host \"" + cause.getMessage() + "\"");
+						getWindow().setStatus("failed to discover external IP address: unknown host \"" + cause.getMessage() + "\"");
 						localInternetAddrField.setText("N/A");
 					} else if(cause instanceof MalformedURLException) {
-						gui.setStatus("failed to discover external IP address: malformed URL: \"" + cause.getMessage() + "\"");
+						getWindow().setStatus("failed to discover external IP address: malformed URL: \"" + cause.getMessage() + "\"");
 						localInternetAddrField.setText("N/A");
 					} else if(cause instanceof IOException) {
-						gui.setStatus("failed to discover external IP address: I/O error");
+						getWindow().setStatus("failed to discover external IP address: I/O error");
 						localInternetAddrField.setText("N/A");
 					} else {
-						gui.setStatus("failed to discover external IP address: unexpected error");
+						getWindow().setStatus("failed to discover external IP address: unexpected error");
 						localInternetAddrField.setText("N/A");
 						e.printStackTrace();
 					}
@@ -521,7 +515,7 @@ public class NetworkPanel extends TopLevelPanel {
 		// if they're still running
 		
 		// inform the main GUI class
-		gui.onConnectSuccessful();
+		getWindow().onConnectSuccessful();
 	}
 	
 	/**
@@ -591,13 +585,13 @@ public class NetworkPanel extends TopLevelPanel {
 		final String remoteURL = (String) remoteURLBar.getSelectedItem();
 		
 		if(remoteURL == null || "".equals(remoteURL)) {
-			gui.setStatus("Invalid PeerURL");
+			getWindow().setStatus("Invalid PeerURL");
 			return;
 		}
 		
 		showStopButton();
 		
-		gui.setStatus("Connecting...");
+		getWindow().setStatus("Connecting...");
 		
 		connectWorker = new SwingWorker<Void, Void>() {
 
@@ -614,7 +608,7 @@ public class NetworkPanel extends TopLevelPanel {
 					// if the flow reaches this / no exceptions are thrown, the connection has been established.
 					onConnectSuccessful();
 				} catch(CancellationException e) {
-					gui.setStatus("Connection attempt interrupted by user");
+					getWindow().setStatus("Connection attempt interrupted by user");
 				} catch(InterruptedException e) {
 					//TODO when exactly does this happen. should be while the third thread
 					// involved with this SwingWorker gets interrupted while waiting for get to
@@ -624,18 +618,18 @@ public class NetworkPanel extends TopLevelPanel {
 					String connectFail = "Failed to connect: ";
 					
 					if(cause instanceof PeerURLFormatException) {
-						gui.setStatus(connectFail + "invalid Peer URL");
+						getWindow().setStatus(connectFail + "invalid Peer URL");
 					} else if(cause instanceof UnknownHostException) {
-						gui.setStatus(connectFail + "unknown host");
+						getWindow().setStatus(connectFail + "unknown host");
 					} else if(cause instanceof IllegalStateException) {
-						gui.setStatus(connectFail + cause.getMessage());
+						getWindow().setStatus(connectFail + cause.getMessage());
 					} else if(cause instanceof LinkFailedException) {
 						// TODO...
-						gui.setStatus(connectFail + "both connections to/from the remote host have failed");
+						getWindow().setStatus(connectFail + "both connections to/from the remote host have failed");
 					} else if(cause instanceof InterruptedException) {
 						// ignore, situation handled by CancellationException
 					} else {
-						gui.setStatus(connectFail + "unknown error");
+						getWindow().setStatus(connectFail + "unknown error");
 						cause.printStackTrace();
 					}
 				} finally {

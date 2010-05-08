@@ -44,6 +44,11 @@ abstract class TopLevelPanel extends JPanel {
 	private static final long serialVersionUID = -1438024844244777250L;
 	
 	/*
+	 * Back-reference to the SwingGUI instance aggregating this TopLevelPanel
+	 */
+	private final SwingGUI window;
+	
+	/*
 	 * The panel's title
 	 */
 	private final String title;
@@ -64,7 +69,8 @@ abstract class TopLevelPanel extends JPanel {
 	 * 
 	 * @param title the title to be used for this TopLevelPanel
 	 */
-	public TopLevelPanel(final String title) {
+	public TopLevelPanel(final SwingGUI window, final String title) {
+		this.window = window;
 		this.title = title;
 		
 		// create GUI elements
@@ -137,6 +143,15 @@ abstract class TopLevelPanel extends JPanel {
 	final void informQuit() {
 		saveState();
 		onQuit();
+	}
+	
+	/**
+	 * Returns a reference to the SwingGUI instance aggregating this TopLevelPanel
+	 * 
+	 * @return a reference to the Swing window this TopLevelPanel belongs to
+	 */
+	final protected SwingGUI getWindow() {
+		return window;
 	}
 	
 	/**

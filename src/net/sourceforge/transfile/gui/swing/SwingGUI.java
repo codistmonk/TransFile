@@ -206,21 +206,21 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 		
 		// "Send Files" panel
 		
-		sendPanel = new SendPanel();
+		sendPanel = new SendPanel(this);
 		sendPanel.setPreferredSize(new Dimension(340, 150));
 		panels.add(sendPanel);
 		pane.add(sendPanel);
 		
 		// "Receive Files" panel
 		
-		receivePanel = new ReceivePanel();
+		receivePanel = new ReceivePanel(this);
 		receivePanel.setPreferredSize(new Dimension(340, 150));
 		panels.add(receivePanel);
 		pane.add(receivePanel);
 		
 		// "Status" panel
 		
-		statusPanel = new StatusPanel();
+		statusPanel = new StatusPanel(this);
 		statusPanel.setPreferredSize(new Dimension(360, 20));
 		panels.add(statusPanel);
 		pane.add(statusPanel);

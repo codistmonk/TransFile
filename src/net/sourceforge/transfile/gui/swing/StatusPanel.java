@@ -44,8 +44,8 @@ public class StatusPanel extends TopLevelPanel {
 	 * Creates a StatusPanel
 	 * 
 	 */
-	public StatusPanel() {
-		super("Status");	
+	public StatusPanel(final SwingGUI window) {
+		super(window, "Status");	
 	}
 	
 	/**
