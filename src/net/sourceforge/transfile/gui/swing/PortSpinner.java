@@ -26,6 +26,7 @@ import java.text.ParseException;
 
 import javax.swing.JFormattedTextField;
 import javax.swing.JSpinner;
+import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
@@ -146,6 +147,8 @@ class PortSpinner extends JSpinner {
 				throw new LogicError("PortSpinner JFormattedTextField Document is not an AbstractDocument");
 			
 			document = (AbstractDocument) textField.getDocument();
+			
+			textField.setHorizontalAlignment(JTextField.LEFT);
 			
 			// limit the text editor to a maximum of 5 columns
 			//textField.setColumns(maxDigits);
