@@ -156,7 +156,7 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	 * Shows the preferences window
 	 */
 	void showPreferences() {
-		//TODO implement
+		new PreferencesFrame(this).setVisible(true);
 	}
 	
 	/**

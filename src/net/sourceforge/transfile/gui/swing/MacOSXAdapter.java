@@ -101,8 +101,7 @@ class MacOSXAdapter {
 			application_setEnabledAboutMenu.invoke(applicationInstance, new Object[] { false });
 			
 			// invoke com.apple.eawt.Application.setEnabledPreferencesMenu(boolean)
-			//TODO change to argument true when the Preferences window is implemented
-			application_setEnabledPreferencesMenu.invoke(applicationInstance, new Object[] { false });
+			application_setEnabledPreferencesMenu.invoke(applicationInstance, new Object[] { true });
 			
 			// create a proxy instance of a proxy class implementing com.apple.eawt.ApplicationListener
 			// see http://java.sun.com/javase/6/docs/api/java/lang/reflect/Proxy.html
