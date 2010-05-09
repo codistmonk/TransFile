@@ -263,28 +263,52 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	 * Creates the menu bar
 	 * 
 	 */
-	private void setupMenuBar() {
+	private final void setupMenuBar() {
 		final JMenuBar menuBar = new JMenuBar();
-		setJMenuBar(menuBar);
+		this.setJMenuBar(menuBar);
 		
 		final JMenu fileMenu = new JMenu("File");
 		
 		// add the "Exit" item to the "File" menu, unless running on Mac OS (X) in which
 		// case there is already a "Quit" item in the application menu
-		if(!onMacOSX) {
+		if(!this.onMacOSX) {
 			final JMenuItem exitItem = new JMenuItem("Exit");
+			
 			exitItem.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					quit();
+				
+				@Override
+				public final void actionPerformed(final ActionEvent event) {
+					SwingGUI.this.quit();
 				}
+				
 			});
+			
 			fileMenu.add(exitItem);
 		}
 		
+		final JMenu settingsMenu = new JMenu("Settings");
+		
+		// add the "Preferences..." item to the "Settings" menu, unless running on Mac OS (X) in which
+		// case there is already a "Preferences..." item in the application menu
+		if(!this.onMacOSX) {
+			final JMenuItem preferencesItem = new JMenuItem("Preferences...");
+			
+			preferencesItem.addActionListener(new ActionListener() {
+				
+				@Override
+				public final void actionPerformed(final ActionEvent event) {
+					SwingGUI.this.showPreferences();
+				}
+				
+			});
+			
+			settingsMenu.add(preferencesItem);
+		}
+		
 		// show the "File" menu if it has at least one element
-		if(fileMenu.getSubElements() != null)
-			if(fileMenu.getSubElements().length > 0)
-				menuBar.add(fileMenu);
+		addMenuIfNotEmpty(menuBar, fileMenu);
+		// show the "Settings" menu if it has at least one element
+		addMenuIfNotEmpty(menuBar, settingsMenu);
 	}
 	
 	/**
@@ -378,5 +402,19 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 			quit();
 		}
 	}
-
+	
+	/**
+	 * Adds {@code menu} to {@code menuBar} if {@code menu} contains at least one sub element.
+	 * @param menuBar
+	 * <br>Should not be null
+	 * @param menu
+	 * <br>Should not be null
+	 * <br>Reference parameter
+	 */
+	private static final void addMenuIfNotEmpty(final JMenuBar menuBar, final JMenu menu) {
+		if (menu.getSubElements() != null && menu.getSubElements().length > 0) {
+			menuBar.add(menu);
+		}
+	}
+	
 }
