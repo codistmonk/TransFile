@@ -19,7 +19,8 @@
 
 package net.sourceforge.transfile.gui.swing;
 
-import javax.swing.BorderFactory;
+import java.util.ResourceBundle;
+
 import javax.swing.JPanel;
 
 import net.sourceforge.transfile.gui.swing.exceptions.DoubleInitializationException;
@@ -49,11 +50,6 @@ abstract class TopLevelPanel extends JPanel {
 	private final SwingGUI window;
 	
 	/*
-	 * The panel's title
-	 */
-	private final String title;
-	
-	/*
 	 * True if this panel has been initialized
 	 */
 	private boolean isInit = false;
@@ -62,6 +58,11 @@ abstract class TopLevelPanel extends JPanel {
 	 * True when the panel is currently being shown to the user
 	 */
 	private boolean isShown = false;
+	
+	/*
+	 * The ResourceBundle for the respective TopLevelPanel and the current locale 
+	 */
+	private final ResourceBundle strings;
 
 	
 	/**
@@ -69,12 +70,14 @@ abstract class TopLevelPanel extends JPanel {
 	 * 
 	 * @param title the title to be used for this TopLevelPanel
 	 */
-	public TopLevelPanel(final SwingGUI window, final String title) {
+	public TopLevelPanel(final SwingGUI window) {
 		this.window = window;
-		this.title = title;
 		
 		// inherit the main window's locale
 		setLocale(window.getLocale());
+		
+		// load the localized bundle of strings for this panel for the selected locale
+		strings = ResourceBundle.getBundle(getClass().getSimpleName(), getLocale());
 		
 		// create GUI elements
 		setup();
@@ -105,7 +108,7 @@ abstract class TopLevelPanel extends JPanel {
 	 */
 	final void initPanel() {
 		if(isInit)
-			throw new DoubleInitializationException("TopLevelPanel was asked to initialize a second time: " + title);
+			throw new DoubleInitializationException("TopLevelPanel was asked to initialize a second time: " + getClass().getSimpleName());
 		
 		onInit();
 	}
@@ -158,6 +161,15 @@ abstract class TopLevelPanel extends JPanel {
 	}
 	
 	/**
+	 * Returns the bundle of localized strings for this TopLevelPanel
+	 * 
+	 * @return the localized bundle of strings for this TopLevelPanel
+	 */
+	final protected ResourceBundle getStrings() {
+		return strings;
+	}
+	
+	/**
 	 * Invoked just before the GUI exits. State should not be saved here but in
 	 * {@link #saveState()}.
 	 * 
@@ -201,14 +213,5 @@ abstract class TopLevelPanel extends JPanel {
 	 * 
 	 */
 	protected abstract void saveState();
-	
-	/**
-	 * Creates a titled border around the panel using the panel title
-	 * 
-	 */
-	protected void titledBorder() {
-		// use look and feel default border, adding the title
-		setBorder(BorderFactory.createTitledBorder(title));		
-	}
 
 }

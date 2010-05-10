@@ -45,7 +45,7 @@ public class StatusPanel extends TopLevelPanel {
 	 * 
 	 */
 	public StatusPanel(final SwingGUI window) {
-		super(window, "Status");	
+		super(window);	
 	}
 	
 	/**
@@ -65,7 +65,7 @@ public class StatusPanel extends TopLevelPanel {
 		setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		
-		statusLabel = new JLabel("Ready");
+		statusLabel = new JLabel(getStrings().getString("status_ready"));
 		c.gridx = 0;
 		c.gridy = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;

@@ -35,7 +35,7 @@ class ReceivePanel extends TopLevelPanel {
 	private static final long serialVersionUID = -3454758528985441231L;
 
 	public ReceivePanel(final SwingGUI window) {
-		super(window, "Receive Files");	
+		super(window);	
 	}
 	
 	/**
@@ -80,7 +80,7 @@ class ReceivePanel extends TopLevelPanel {
 	protected void setup() {
 		setLayout(new GridBagLayout());
 		
-		final JButton receiveButton = new JButton("Receive");
+		final JButton receiveButton = new JButton(getStrings().getString("button_receive_file"));
 		final GridBagConstraints receiveButtonConstraints = new GridBagConstraints();
 		receiveButtonConstraints.gridx = 0;
 		receiveButtonConstraints.gridy = 0;

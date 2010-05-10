@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
@@ -141,7 +142,7 @@ public class NetworkPanel extends TopLevelPanel {
 	 * @param backend the backend to use
 	 */
 	public NetworkPanel(final SwingGUI window, final ControllableBackend backend) {
-		super(window, "Network");
+		super(window);
 		
 		this.backend = backend;
 	}
@@ -184,7 +185,7 @@ public class NetworkPanel extends TopLevelPanel {
 		GridBagConstraints c = new GridBagConstraints();
 		
 		remoteURLPanel = new JPanel();
-		remoteURLPanel.setBorder(BorderFactory.createTitledBorder("Remote PeerURL"));
+		remoteURLPanel.setBorder(BorderFactory.createTitledBorder(getStrings().getString("section_remote_peerurl")));
 		c.gridx = 0;
 		c.gridy = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
@@ -194,7 +195,7 @@ public class NetworkPanel extends TopLevelPanel {
 		setupRemoteURLPanel();
 		
 		localURLPanel = new JPanel();
-		localURLPanel.setBorder(BorderFactory.createTitledBorder("Local PeerURL"));
+		localURLPanel.setBorder(BorderFactory.createTitledBorder(getStrings().getString("section_local_peerurl")));
 		c.gridx = 0;
 		c.gridy = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
@@ -203,7 +204,7 @@ public class NetworkPanel extends TopLevelPanel {
 		add(localURLPanel, c);
 		setupLocalURLPanel();
 		
-		connectButton = new JButton("Connect");
+		connectButton = new JButton(getStrings().getString("button_connect"));
 		connectButton.addActionListener(new ActionListener() {
 			
 			@Override
@@ -218,7 +219,7 @@ public class NetworkPanel extends TopLevelPanel {
 		c.weightx = 1;
 		add(connectButton, c);
 		
-		stopButton = new JButton("Stop");
+		stopButton = new JButton(getStrings().getString("button_interrupt_connect"));
 		stopButton.setVisible(false);
 		stopButton.addActionListener(new ActionListener() {
 			
@@ -315,15 +316,15 @@ public class NetworkPanel extends TopLevelPanel {
 		c.weightx = 0;
 		c.anchor = GridBagConstraints.LINE_START;
 			
-		localLANAddrLabel = new JLabel("Select local IP address: ");
+		localLANAddrLabel = new JLabel(getStrings().getString("label_local_lan_addresses"));
 		c.gridy = 1;
 		localURLPanel.add(localLANAddrLabel, c);
 		
-		localInternetAddrLabel = new JLabel("Your internet IP address: ");
+		localInternetAddrLabel = new JLabel(getStrings().getString("label_local_internet_address"));
 		c.gridy = 2;
 		localURLPanel.add(localInternetAddrLabel, c);
 		
-		JLabel localPortLabel = new JLabel("Local Port: ");
+		JLabel localPortLabel = new JLabel(getStrings().getString("label_local_port"));
 		c.gridy = 3;
 		localURLPanel.add(localPortLabel, c);
 		
@@ -397,9 +398,11 @@ public class NetworkPanel extends TopLevelPanel {
 				} catch(ExecutionException e) {
 					Throwable cause = e.getCause();
 					if(cause instanceof SocketException) {
-						getWindow().setStatus("failed to discover local LAN addresses: socket error");
+						//TODO log
+						getWindow().setStatus(getStrings().getString("error_discover_lan_sockets"));
 					} else {
-						getWindow().setStatus("failed to discover local LAN addresses: unknown error");
+						//TODO log
+						getWindow().setStatus(getStrings().getString("error_discover_lan_unknown"));
 					}
 				}
 			}
@@ -434,16 +437,16 @@ public class NetworkPanel extends TopLevelPanel {
 				} catch(ExecutionException e) {
 					Throwable cause = e.getCause();
 					if(cause instanceof UnknownHostException) {
-						getWindow().setStatus("failed to discover external IP address: unknown host \"" + cause.getMessage() + "\"");
-						localInternetAddrField.setText("N/A");
+						getWindow().setStatus((new MessageFormat(getStrings().getString("error_discover_internet_unknown_host"))).format(new Object[] { cause.getLocalizedMessage() }));
+						localInternetAddrField.setText(getStrings().getString("not_available"));
 					} else if(cause instanceof MalformedURLException) {
-						getWindow().setStatus("failed to discover external IP address: malformed URL: \"" + cause.getMessage() + "\"");
-						localInternetAddrField.setText("N/A");
+						getWindow().setStatus((new MessageFormat(getStrings().getString("error_discover_internet_malformed_url"))).format(new Object[] { cause.getLocalizedMessage() }));
+						localInternetAddrField.setText(getStrings().getString("not_available"));
 					} else if(cause instanceof IOException) {
-						getWindow().setStatus("failed to discover external IP address: I/O error");
-						localInternetAddrField.setText("N/A");
+						getWindow().setStatus(getStrings().getString("error_discover_internet_io_error"));
+						localInternetAddrField.setText(getStrings().getString("not_available"));
 					} else {
-						getWindow().setStatus("failed to discover external IP address: unexpected error");
+						getWindow().setStatus(getStrings().getString("error_discover_internet_unknown"));
 						localInternetAddrField.setText("N/A");
 						e.printStackTrace();
 					}
@@ -585,13 +588,13 @@ public class NetworkPanel extends TopLevelPanel {
 		final String remoteURL = (String) remoteURLBar.getSelectedItem();
 		
 		if(remoteURL == null || "".equals(remoteURL)) {
-			getWindow().setStatus("Invalid PeerURL");
+			getWindow().setStatus(getStrings().getString("error_invalid_peerurl"));
 			return;
 		}
 		
 		showStopButton();
 		
-		getWindow().setStatus("Connecting...");
+		getWindow().setStatus(getStrings().getString("status_connecting"));
 		
 		connectWorker = new SwingWorker<Void, Void>() {
 
@@ -608,28 +611,27 @@ public class NetworkPanel extends TopLevelPanel {
 					// if the flow reaches this / no exceptions are thrown, the connection has been established.
 					onConnectSuccessful();
 				} catch(CancellationException e) {
-					getWindow().setStatus("Connection attempt interrupted by user");
+					getWindow().setStatus(getStrings().getString("status_interrupted"));
 				} catch(InterruptedException e) {
 					//TODO when exactly does this happen. should be while the third thread
 					// involved with this SwingWorker gets interrupted while waiting for get to
 					// stop blocking - handle? if yes, how?
 				} catch(ExecutionException e) {
 					Throwable cause = e.getCause();
-					String connectFail = "Failed to connect: ";
 					
 					if(cause instanceof PeerURLFormatException) {
-						getWindow().setStatus(connectFail + "invalid Peer URL");
+						getWindow().setStatus(getStrings().getString("connect_fail_invalid_peerurl"));
 					} else if(cause instanceof UnknownHostException) {
-						getWindow().setStatus(connectFail + "unknown host");
+						getWindow().setStatus(getStrings().getString("connect_fail_unknown_host"));
 					} else if(cause instanceof IllegalStateException) {
-						getWindow().setStatus(connectFail + cause.getMessage());
+						getWindow().setStatus(new MessageFormat(getStrings().getString("connect_fail_illegal_state")).format(new Object[] { cause.getLocalizedMessage() }));
 					} else if(cause instanceof LinkFailedException) {
 						// TODO...
-						getWindow().setStatus(connectFail + "both connections to/from the remote host have failed");
+						getWindow().setStatus(getStrings().getString("connect_fail_no_link"));
 					} else if(cause instanceof InterruptedException) {
 						// ignore, situation handled by CancellationException
 					} else {
-						getWindow().setStatus(connectFail + "unknown error");
+						getWindow().setStatus(getStrings().getString("connect_fail_unknown"));
 						cause.printStackTrace();
 					}
 				} finally {

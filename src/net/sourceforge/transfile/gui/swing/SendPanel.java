@@ -38,7 +38,7 @@ public class SendPanel extends TopLevelPanel {
 	final JTextField fileText = new JTextField();
 
 	public SendPanel(final SwingGUI window) {
-		super(window, "Send Files");
+		super(window);
 	}
 	
 	/**
