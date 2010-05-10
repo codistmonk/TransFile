@@ -20,19 +20,18 @@
 package net.sourceforge.transfile.settings;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 
 import net.sourceforge.transfile.settings.exceptions.IllegalConfigValueException;
 
 /**
  * Provides simple key-value pair persistence. Default values are in transfile.settings.defaults.properties,
- * per-user configuration files are saved to USER_HOME/.transfile/settings.properties.
+ * per-user configuration files are saved to user preferences (Java mechanism).
  * 
- * Singelton class.
+ * <br>Singleton class.
  * 
  * @author Martin Riedel
  *
@@ -52,11 +51,6 @@ public class Settings extends Properties {
 	 * Configuration file directory
 	 */
 	private final File cfgDir;
-	
-	/*
-	 * Configuration file
-	 */
-	private final File cfgFile;
 	
 	/*
 	 * True if the user home directory couldn't be determined, making it impossible to load or save
@@ -79,27 +73,23 @@ public class Settings extends Properties {
 	 * @return the user-specific configuration directory
 	 */
 	public File getCfgDir() {
-		return cfgDir;
+		return this.cfgDir;
 	}
 	
 	/**
-	 * Saves the current key-value pairs to disk
+	 * Saves the current key-value pairs to user preferences.
 	 * 
 	 */
-	public void save() {
-		if(!persistent)
+	public final void save() {
+		if(!this.persistent) {
 			return;
-		
-		try {
-			store(new FileOutputStream(cfgFile), "TransFile per-user configuration file");
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 		
+		final Preferences userPreferences = Preferences.userNodeForPackage(Settings.class);
+		
+		for (final Object key : this.keySet()) {
+			userPreferences.put(key.toString(), this.get(key).toString());
+		}
 	}
 	
 	/**
@@ -124,7 +114,7 @@ public class Settings extends Properties {
 	 * @return the default for the specified property key, or null if the key could no be found
 	 */
 	public String getDefault(final String key) {
-		return defaults.getProperty(key);
+		return this.defaults.getProperty(key);
 	}
 
 	/**
@@ -136,7 +126,7 @@ public class Settings extends Properties {
 	 */
 	public int getDefaultInt(final String key) {
 		try {
-			return Integer.parseInt(defaults.getProperty(key));
+			return Integer.parseInt(this.defaults.getProperty(key));
 		} catch(NumberFormatException e) {
 			throw new IllegalConfigValueException(e);
 		}
@@ -150,21 +140,33 @@ public class Settings extends Properties {
 	private Settings(final Properties defaults) {
 		super(defaults);
 		
-		//TODO handle this differently?
-		if(System.getProperty("user.home") == null) {
-			persistent = false;
-			throw new IllegalStateException("user.home == null");
-		} else {
-			persistent = true;
+		this.persistent = getPreferences() != null;
+		
+		this.cfgDir = new File(System.getProperty("user.home"), ".transfile");
+		
+		if(!this.cfgDir.isDirectory()) {
+			this.cfgDir.mkdir();
 		}
 		
-		cfgDir = new File(System.getProperty("user.home"), ".transfile");
-		cfgFile = new File(cfgDir, "settings.properties");
-		
-		if(!cfgDir.isDirectory())
-			cfgDir.mkdir();
-		
 		load();
+	}
+	
+	/**
+	 * Returns the user preferences for this package.
+	 * 
+	 * @return {@code null} if the user preferences for this package could not be created or retrieved
+	 * <br>A possibly null value
+	 * <br>A possibly new value
+	 * @see Preferences#userNodeForPackage(Class)
+	 */
+	private static final Preferences getPreferences() {
+		try {
+			return Preferences.userNodeForPackage(Settings.class);
+		} catch (final Exception exception) {
+			exception.printStackTrace();
+			
+			return null;
+		}
 	}
 	
 	/**
@@ -177,33 +179,31 @@ public class Settings extends Properties {
 		
 		try {
 			defaults.load(Settings.class.getResourceAsStream("defaults.properties"));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (final IOException exception) {
+			exception.printStackTrace();
 		}
 		
 		return new Settings(defaults);
 	}
 	
 	/**
-	 * Loads settings from disk
+	 * Loads settings from user preferences
 	 * 
 	 */
-	private void load() {
-		if(!persistent)
+	private final void load() {
+		if (!this.persistent) {
 			return;
+		}
 		
-		if(cfgDir.isDirectory() && cfgFile.isFile()) {
-			try {
-				super.load(new FileInputStream(cfgFile));
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		final Preferences userPreferences = Preferences.userNodeForPackage(Settings.class);
+
+		try {
+			for (final String key : userPreferences.keys()) {
+				this.put(key, userPreferences.get(key, this.getDefault(key)));
 			}
-		}		
+		} catch (final BackingStoreException exception) {
+			throw new RuntimeException(exception);
+		}
 	}
 
 }
