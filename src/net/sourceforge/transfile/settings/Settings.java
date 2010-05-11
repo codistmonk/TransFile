@@ -58,6 +58,7 @@ public class Settings extends Properties {
 	 */
 	private final boolean persistent; 
 
+	
 	/**
 	 * Returns the Singleton instance. 
 	 * 

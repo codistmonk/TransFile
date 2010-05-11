@@ -17,33 +17,31 @@
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.transfile.gui.swing.exceptions;
-
-import net.sourceforge.transfile.exceptions.LogicException;
+package net.sourceforge.transfile.ui.swing.exceptions;
 
 /**
- * Thrown when a TopLevelPanel has been asked to initialize more than once
- * 
+ * Thrown when an error occurs while trying to adapt the application's behaviour to Mac OS X
+ *
  * @author Martin Riedel
  *
  */
-public class DoubleInitializationException extends LogicException {
+public class MacOSXAdaptationException extends RuntimeException {
 
-	private static final long serialVersionUID = -4743626600273550138L;
+	private static final long serialVersionUID = -8183084416601255968L;
 
-	public DoubleInitializationException() {
-		
+	public MacOSXAdaptationException() {
+
 	}
 
-	public DoubleInitializationException(String message) {
+	public MacOSXAdaptationException(String message) {
 		super(message);
 	}
 
-	public DoubleInitializationException(Throwable cause) {
+	public MacOSXAdaptationException(Throwable cause) {
 		super(cause);
 	}
 
-	public DoubleInitializationException(String message, Throwable cause) {
+	public MacOSXAdaptationException(String message, Throwable cause) {
 		super(message, cause);
 	}
 

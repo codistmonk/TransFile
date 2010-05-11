@@ -17,11 +17,11 @@
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.transfile.gui.swing;
+package net.sourceforge.transfile.ui.swing;
 
-import static net.sourceforge.transfile.gui.swing.SwingTranslator.createLocale;
-import static net.sourceforge.transfile.gui.swing.SwingTranslator.getDefaultTranslator;
-import static net.sourceforge.transfile.gui.swing.SwingTranslator.Helpers.translate;
+import static net.sourceforge.transfile.ui.swing.SwingTranslator.createLocale;
+import static net.sourceforge.transfile.ui.swing.SwingTranslator.getDefaultTranslator;
+import static net.sourceforge.transfile.ui.swing.SwingTranslator.Helpers.translate;
 
 import java.awt.Container;
 import java.awt.Dimension;
@@ -46,10 +46,10 @@ import javax.swing.UIManager;
 
 import net.sourceforge.transfile.backend.BackendEventHandler;
 import net.sourceforge.transfile.backend.ControllableBackend;
-import net.sourceforge.transfile.gui.GUI;
-import net.sourceforge.transfile.gui.swing.exceptions.NativeLookAndFeelException;
 import net.sourceforge.transfile.settings.Settings;
 import net.sourceforge.transfile.settings.exceptions.IllegalConfigValueException;
+import net.sourceforge.transfile.ui.UserInterface;
+import net.sourceforge.transfile.ui.swing.exceptions.NativeLookAndFeelException;
 
 
 /**
@@ -59,7 +59,7 @@ import net.sourceforge.transfile.settings.exceptions.IllegalConfigValueException
  * @author Martin Riedel
  *
  */
-public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
+public class SwingGUI extends JFrame implements UserInterface, BackendEventHandler {
 	
 	private static final long serialVersionUID = 3087671371254147452L;
 
@@ -127,6 +127,18 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	}
 	
 	/**
+	 * <p>Tells the main window to display the provided status (or error) message</p>
+	 * 
+	 * <p>Public only so that reflective access is possible. <b>Do not use from outside 
+	 * the net.sourceforge.transfile.ui package!</b></p>
+	 * 
+	 * @param status the message to display
+	 */
+	public void setStatus(final String status) {
+		statusPanel.setStatus(status);
+	}
+	
+	/**
 	 * Invoked when a connection to a peer has been established
 	 * 
 	 */
@@ -134,15 +146,6 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 		setStatus("Connected");
 		
 		showTransferScreen();
-	}
-	
-	/**
-	 * Tells the main window to display the provided status (or error) message
-	 * 
-	 * @param status the message to display
-	 */
-	public void setStatus(final String status) {
-		statusPanel.setStatus(status);
 	}
 	
 	/**
@@ -349,7 +352,7 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 		
 		// Mac-specific adaptations
 		if(onMacOSX)
-			new MacOSXAdapter(this);
+			MacOSXAdapter.adapt(this);
 	}
 	
 	/**

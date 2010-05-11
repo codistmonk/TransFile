@@ -17,20 +17,20 @@
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.transfile.gui;
+package net.sourceforge.transfile.ui;
 
 import net.sourceforge.transfile.backend.ControllableBackend;
 
 /**
- * TODO ...
+ * <p>A UserInterface is the application's frontend and performes all communication with the user.</p>
  * 
- * All implementing classes are expected to not initialize any GUI components or depend on any backend functionality before
- * GUI.start() is called.
+ * <p>All implementing classes are expected to not initialize any (G)UI components or depend on any backend functionality 
+ * before UserInterface.start() is called.</p>
  * 
  * @author Martin Riedel
  *
  */
-public interface GUI {
+public interface UserInterface {
 	
 	public void setBackend(final ControllableBackend backend);
 	

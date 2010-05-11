@@ -17,13 +17,13 @@
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.transfile.gui.swing;
+package net.sourceforge.transfile.ui.swing;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-import net.sourceforge.transfile.gui.swing.exceptions.MacOSXAdaptationException;
+import net.sourceforge.transfile.ui.swing.exceptions.MacOSXAdaptationException;
 
 
 //TODO catch MacOSXAdaptationExceptions somewhere and handle them gracefully (log but don't exit)
@@ -39,6 +39,11 @@ import net.sourceforge.transfile.gui.swing.exceptions.MacOSXAdaptationException;
  *
  */
 class MacOSXAdapter {
+	
+	/*
+	 * Static instance holder
+	 */
+	private static MacOSXAdapter _instance = null;
 	
 	/*
 	 * Back-reference to the SwingGUI instance
@@ -57,20 +62,32 @@ class MacOSXAdapter {
 	
 	
 	/**
-	 * Constructs a MacOSXApplicationAdapter instance
+	 * Performs Mac OS X specific adaptations to the running application
 	 * 
 	 * @param gui back-reference to the SwingGUI instance creating this object
 	 */
-	public MacOSXAdapter(final SwingGUI gui) {
-		this.gui = gui;
+	public static void adapt(final SwingGUI gui) {
+		if(_instance != null)
+			throw new IllegalStateException("adaptation already performed");
 		
 		// since the application title to be used in the mac os x application menu bar and for the 
 		// "About" menu item has to be set early, so this is done in SwingGUI's static initializer
 		
+		_instance = new MacOSXAdapter(gui);
+		
 		// use system menu bar on Mac OS X
 		System.setProperty("apple.laf.useScreenMenuBar", "true");
 		
-		makeApplicationListener();
+		_instance.makeApplicationListener();
+	}
+	
+	/**
+	 * Constructs a new MacOSXAdapter 
+	 * 
+	 * @param gui back-reference to the SwingGUI instance creating this object
+	 */
+	private MacOSXAdapter(final SwingGUI gui) {
+		this.gui = gui;
 	}
 	
 	/**

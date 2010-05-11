@@ -17,9 +17,9 @@
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.transfile.gui.swing;
+package net.sourceforge.transfile.ui.swing;
 
-import static net.sourceforge.transfile.gui.swing.SwingTranslator.Helpers.translate;
+import static net.sourceforge.transfile.ui.swing.SwingTranslator.Helpers.translate;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;

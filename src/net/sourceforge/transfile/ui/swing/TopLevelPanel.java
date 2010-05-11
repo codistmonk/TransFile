@@ -17,11 +17,11 @@
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.transfile.gui.swing;
+package net.sourceforge.transfile.ui.swing;
 
 import javax.swing.JPanel;
 
-import net.sourceforge.transfile.gui.swing.exceptions.DoubleInitializationException;
+import net.sourceforge.transfile.ui.swing.exceptions.DoubleInitializationException;
 
 
 /**
@@ -64,9 +64,6 @@ abstract class TopLevelPanel extends JPanel {
 	 */
 	public TopLevelPanel(final SwingGUI window) {
 		this.window = window;
-		
-		// inherit the main window's locale
-		setLocale(window.getLocale());
 		
 		// create GUI elements
 		setup();

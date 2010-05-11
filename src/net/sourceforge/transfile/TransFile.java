@@ -20,8 +20,8 @@
 package net.sourceforge.transfile;
 
 import net.sourceforge.transfile.backend.Backend;
-import net.sourceforge.transfile.gui.GUI;
-import net.sourceforge.transfile.gui.swing.SwingGUI;
+import net.sourceforge.transfile.ui.UserInterface;
+import net.sourceforge.transfile.ui.swing.SwingGUI;
 
 /**
  * 
@@ -37,9 +37,9 @@ public class TransFile implements Runnable {
 	public static final String applicationTitle = "TransFile";
 	
 	/*
-	 * Reference to the GUI used to asynchronously inform the GUI about state changes
+	 * Reference to the UserInterface used to asynchronously inform the user / user interface about state changes in the backend
 	 */
-	private GUI gui;
+	private UserInterface ui;
 	
 	/*
 	 * Sets the application's title to be used in the automatically generated Mac OS X application menu
@@ -71,7 +71,7 @@ public class TransFile implements Runnable {
 		Backend backend = new Backend(gui);
 		gui.setBackend(backend);
 		
-		app.gui = gui;
+		app.ui = gui;
 		
 		return app;
 	}
@@ -81,7 +81,7 @@ public class TransFile implements Runnable {
 	 */
 	@Override
 	public void run() {
-		gui.start();
+		ui.start();
 	}
 	
 	/**
