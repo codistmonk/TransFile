@@ -19,6 +19,8 @@
 
 package net.sourceforge.transfile.settings.exceptions;
 
+//TODO override getMessage(), getLocalizedMessage() and toString()(?)
+
 /**
  * Thrown when an invalid configuration settings is encountered
  * 
@@ -28,21 +30,51 @@ package net.sourceforge.transfile.settings.exceptions;
 public class IllegalConfigValueException extends RuntimeException {
 
 	private static final long serialVersionUID = 451538573200525501L;
+	
+	private final String key;
+	
+	private final String value;
+	
 
-	public IllegalConfigValueException() {
-
+	/**
+	 * Constructs a new IllegalConfigValueException
+	 * 
+	 * @param key the configuration key for which an illegal value was encountered
+	 * @param value the value which was deemed illegal
+	 */
+	public IllegalConfigValueException(final String key, final String value) {
+		this.key = key;
+		this.value = value;
 	}
-
-	public IllegalConfigValueException(String arg0) {
-		super(arg0);
+	
+	/**
+	 * Constructs a new IllegalConfigValueException
+	 * 
+	 * @param key the configuration key for which an illegal value was encountered
+	 * @param value the value which was deemed illegal
+	 * @param cause the {@code Throwable} causing/describing the invalidity of {@code value}
+	 */
+	public IllegalConfigValueException(final String key, final String value, final Throwable cause) {
+		super(cause);
+		
+		this.key = key;
+		this.value = value;
 	}
-
-	public IllegalConfigValueException(Throwable arg0) {
-		super(arg0);
+	
+	/**
+	 * 
+	 * @return the configuration key whose value was deemed illegal
+	 */
+	public String getKey() {
+		return key;
 	}
-
-	public IllegalConfigValueException(String arg0, Throwable arg1) {
-		super(arg0, arg1);
+	
+	/**
+	 * 
+	 * @return the configuration value that was deemed illegal
+	 */
+	public String getValue() {
+		return value;
 	}
 
 }

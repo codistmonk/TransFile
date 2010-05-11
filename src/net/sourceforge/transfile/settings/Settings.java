@@ -100,10 +100,11 @@ public class Settings extends Properties {
 	 * @throws IllegalConfigValueException if the value is not an integer
 	 */
 	public int getInt(final String key) {
+		String value = getProperty(key);
 		try {
 			return Integer.parseInt(getProperty(key));
 		} catch(NumberFormatException e) {
-			throw new IllegalConfigValueException(e);
+			throw new IllegalConfigValueException(key, value, e);
 		}
 	}
 	
@@ -125,10 +126,11 @@ public class Settings extends Properties {
 	 * @throws IllegalConfigValueException if the value is not an integer
 	 */
 	public int getDefaultInt(final String key) {
+		String value = this.defaults.getProperty(key);
 		try {
-			return Integer.parseInt(this.defaults.getProperty(key));
+			return Integer.parseInt(value);
 		} catch(NumberFormatException e) {
-			throw new IllegalConfigValueException(e);
+			throw new IllegalConfigValueException(key, value, e);
 		}
 	}
 	

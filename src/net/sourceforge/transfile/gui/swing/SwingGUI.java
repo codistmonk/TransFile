@@ -20,7 +20,6 @@
 package net.sourceforge.transfile.gui.swing;
 
 import static net.sourceforge.transfile.gui.swing.SwingTranslator.createLocale;
-import static net.sourceforge.transfile.gui.swing.SwingTranslator.emptyIfNull;
 import static net.sourceforge.transfile.gui.swing.SwingTranslator.getDefaultTranslator;
 import static net.sourceforge.transfile.gui.swing.SwingTranslator.Helpers.translate;
 
@@ -103,11 +102,7 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 		// check whether the application is running on Mac OS X and store the result
 		onMacOSX = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
 		
-		try {
-			loadLocale();
-		} catch(IllegalConfigValueException e) {
-			//TODO log the error, but do nothing else (gracefully revert to the host's default locale)
-		}
+		setStartupLocale();
 	}
 
 	/**
@@ -201,27 +196,41 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	}
 	
 	/**
+	 *	Sets the initial locale during startup
+	 * 
+	 */
+	private void setStartupLocale() {
+		Locale locale;
+		
+		try {
+			// load locale from user settings file
+			locale = loadLocale();
+			// if not present, use the host's default locale (and implicitly fall back to en_US if the host's
+			// default locale is unsupported
+			if(locale == null)
+				locale = getLocale();
+		} catch(final IllegalConfigValueException e) {
+			// user set an invalid locale, fall back to host's default locale
+			locale = getLocale();
+			//TODO log: value e.getValue() illegal for key e.getKey()
+			//TODO inform the user (i.e. dialog)
+		}
+		
+		getDefaultTranslator().setLocale(locale);
+	}
+	
+	/**
 	 * Loads the user's selected locale from the user-specific config file
 	 * 
 	 * @throws IllegalConfigValueException if the "locale" setting is present but invalid
 	 */
-	private void loadLocale() {
+	private static Locale loadLocale() {
 		String userLocaleSetting = Settings.getInstance().getProperty("locale");
 
 		if(userLocaleSetting == null || "".equals(userLocaleSetting))
-			return;
+			return null;
 
-		String[] userLocale = userLocaleSetting.split("_");
-
-		if(userLocale.length < 1 || userLocale.length > 2)
-			throw new IllegalConfigValueException();
-
-		if(userLocale.length == 1)
-			setLocale(new Locale(userLocale[0]));
-		else if(userLocale.length == 2)
-			setLocale(new Locale(userLocale[0], userLocale[1]));
-		else
-			throw new IllegalConfigValueException();
+		return createLocale(userLocaleSetting);	
 	}
 	
 	/**
@@ -229,7 +238,6 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	 * 
 	 */
 	private void setup() {
-		getDefaultTranslator().setLocale(createLocale(emptyIfNull((String) Settings.getInstance().get("locale"))));
 		getDefaultTranslator().addTranslatorListener(new SwingTranslator.Listener() {
 			
 			@Override

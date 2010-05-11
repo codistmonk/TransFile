@@ -54,8 +54,6 @@ public class SwingTranslator {
 		this.listeners = new ArrayList<Listener>();
 		this.autotranslators = new HashSet<Autotranslator>();
 		this.availableLocales = new HashSet<Locale>();
-		
-		this.availableLocales.add(new Locale(""));
 	}
 	
 	/**
