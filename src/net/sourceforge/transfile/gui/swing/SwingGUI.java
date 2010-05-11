@@ -349,7 +349,7 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 		
 		// Mac-specific adaptations
 		if(onMacOSX)
-			new MacOSXAdapter(this);
+			MacOSXAdapter.adapt(this);
 	}
 	
 	/**
