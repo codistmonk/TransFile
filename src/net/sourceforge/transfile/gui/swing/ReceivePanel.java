@@ -80,11 +80,14 @@ class ReceivePanel extends TopLevelPanel {
 	protected void setup() {
 		setLayout(new GridBagLayout());
 		
-		final JButton receiveButton = new JButton(getStrings().getString("button_receive_file"));
+//		final JButton receiveButton = new JButton(getStrings().getString("button_receive_file"));
+		final JButton receiveButton = new JButton("button_receive_file");
 		final GridBagConstraints receiveButtonConstraints = new GridBagConstraints();
 		receiveButtonConstraints.gridx = 0;
 		receiveButtonConstraints.gridy = 0;
 		add(receiveButton, receiveButtonConstraints);
+		
+		SwingTranslator.getDefaultTranslator().autotranslate(this);
 	}
 
 	/** 

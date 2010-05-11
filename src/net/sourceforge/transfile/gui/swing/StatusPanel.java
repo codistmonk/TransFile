@@ -75,6 +75,8 @@ public class StatusPanel extends TopLevelPanel {
 		c.anchor = GridBagConstraints.LINE_START;
 		c.insets = new Insets(2, 5, 2, 5);
 		add(statusLabel, c);
+		
+		SwingTranslator.getDefaultTranslator().autotranslate(this);
 	}
 
 	/**

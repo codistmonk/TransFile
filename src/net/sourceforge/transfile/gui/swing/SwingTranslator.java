@@ -1,7 +1,5 @@
 package net.sourceforge.transfile.gui.swing;
 
-import static net.sourceforge.transfile.gui.swing.PreferencesFrame.debugPrint;
-
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Frame;
@@ -13,7 +11,6 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -46,11 +43,13 @@ import net.sourceforge.transfile.settings.Settings;
  */
 public final class SwingTranslator implements Serializable {
 	
-	private final Collection<ITranslatorListener> listeners;
+	private final Collection<Listener> listeners;
 	
-	private final MultiMap<Object, Pair<Method, String>> translationMethods;
+	private final MultiMap<Object, AutotranslationMethod> translationMethods;
 	
 	private final Map<String, Void> untranslated;
+	
+	private final Set<Locale> availableLocales;
 	
 	private String messagesBase;
 	
@@ -60,13 +59,16 @@ public final class SwingTranslator implements Serializable {
 	 * 
 	 */
 	public SwingTranslator() {
-		this.listeners = new ArrayList<ITranslatorListener>();
-		this.translationMethods = new MultiMap<Object, Pair<Method, String>>(IdentityHashMap.class, HashSet.class);
+		this.listeners = new ArrayList<Listener>();
+		this.translationMethods = new MultiMap<Object, AutotranslationMethod>(IdentityHashMap.class, HashSet.class);
 		this.untranslated = new IdentityHashMap<String, Void>();
+		this.availableLocales = new HashSet<Locale>();
 		this.messagesBase = "";
 		this.locale = Locale.getDefault();
 		
-		this.addTranslatorListener(new ITranslatorListener() {
+		this.availableLocales.add(new Locale(""));
+		
+		this.addTranslatorListener(new Listener() {
 			
 			@Override
 			public final void messagesBaseChanged(final String oldMessagesBase, final String newMessagesBase) {
@@ -85,10 +87,10 @@ public final class SwingTranslator implements Serializable {
 	 * 
 	 */
 	public final void updateAutotranslated() {
-		for (final Map.Entry<Object, Collection<Pair<Method, String>>> entry : this.translationMethods.entrySet()) {
-			for (final Pair<Method, String> pair : entry.getValue()) {
+		for (final Map.Entry<Object, Collection<AutotranslationMethod>> entry : this.translationMethods.entrySet()) {
+			for (final AutotranslationMethod autotranslationMethod : entry.getValue()) {
 				try {
-					this.translate(entry.getKey(), pair.getFirst(), pair.getSecond());
+					this.translate(entry.getKey(), autotranslationMethod.getMethod(), autotranslationMethod.getTranslationKey(), autotranslationMethod.getMessagesBase());
 				} catch (final Exception exception) {
 					getLoggerForThisMethod().log(Level.WARNING, "", exception);
 				}
@@ -133,7 +135,7 @@ public final class SwingTranslator implements Serializable {
 	 *  <li>NOT_NULL</li>
 	 * </ul>
 	 */
-	public final void addTranslatorListener(final ITranslatorListener listener) {
+	public final void addTranslatorListener(final Listener listener) {
 		this.listeners.add(listener);
 	}
 	
@@ -145,7 +147,7 @@ public final class SwingTranslator implements Serializable {
 	 *  <li>NOT_NULL</li>
 	 * </ul>
 	 */
-	public final void removeTranslatorListener(final ITranslatorListener listener) {
+	public final void removeTranslatorListener(final Listener listener) {
 		this.listeners.remove(listener);
 	}
 	
@@ -157,8 +159,8 @@ public final class SwingTranslator implements Serializable {
 	 *  <li>NOT_NULL</li>
 	 * </ul>
 	 */
-	public final ITranslatorListener[] getTranslatorListeners() {
-		return this.listeners.toArray(new ITranslatorListener[this.listeners.size()]);
+	public final Listener[] getTranslatorListeners() {
+		return this.listeners.toArray(new Listener[this.listeners.size()]);
 	}
 	
 	/**
@@ -187,7 +189,9 @@ public final class SwingTranslator implements Serializable {
 		this.messagesBase = messagesBase;
 		
 		if (this.getMessagesBase() != oldMessagesBase) {
-			for (final ITranslatorListener listener : this.getTranslatorListeners()) {
+			this.collectAvailableLocales(this.getMessagesBase());
+			
+			for (final Listener listener : this.getTranslatorListeners()) {
 				listener.messagesBaseChanged(oldMessagesBase, this.getMessagesBase());
 			}
 		}
@@ -219,7 +223,7 @@ public final class SwingTranslator implements Serializable {
 		this.locale = locale;
 		
 		if (this.getLocale() != oldLocale) {
-			for (final ITranslatorListener listener : this.getTranslatorListeners()) {
+			for (final Listener listener : this.getTranslatorListeners()) {
 				listener.localeChanged(oldLocale, this.getLocale());
 			}
 		}
@@ -277,35 +281,27 @@ public final class SwingTranslator implements Serializable {
 	 * 
 	 * @param <T>
 	 * @param object
-	 * <ul>
-	 *  <li>REF</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
+	 * <br>Shared parameter
+	 * <br>Should not be null
 	 * @param getterName
-	 * <ul>
-	 *  <li>IN</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
+	 * <br>Should not be null
 	 * @param setterName
-	 * <ul>
-	 *  <li>IN</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
-	 * @return <tt>object</tt>
-	 * <ul>
-	 *  <li>NOT_NEW</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
+	 * <br>Should not be null
+	 * @param messagesBase
+	 * <br>Can be null
+	 * <br>Shared parameter
 	 */
-	public final <T> T autotranslate(final T object, final String getterName, final String setterName) {
+	public final <T> T autotranslate(final T object, final String getterName, final String setterName, final String messagesBase) {
+		this.collectAvailableLocales(messagesBase);
+		
 		try {
 			final Method textGetter = object.getClass().getMethod(getterName);
 			final Method textSetter = object.getClass().getMethod(setterName, String.class);
 			final String translationKey = cast(String.class, textGetter.invoke(object));
 			
 			if (translationKey != null && translationKey.trim().length() > 0 && !this.untranslated.containsKey(translationKey)) {
-				this.translate(object, textSetter, translationKey);
-				this.translationMethods.put(object, new Pair<Method, String>(textSetter, translationKey));
+				this.translate(object, textSetter, translationKey, messagesBase);
+				this.translationMethods.put(object, new AutotranslationMethod(textSetter, translationKey, messagesBase));
 			}
 		} catch (final Exception exception) {
 			// Do nothing
@@ -326,8 +322,14 @@ public final class SwingTranslator implements Serializable {
 	 * @throws IllegalAccessException
 	 * @throws InvocationTargetException
 	 */
-	private final void translate(final Object object, final Method textSetter, final String translationKey) throws IllegalAccessException, InvocationTargetException {
-		this.translate(object, textSetter, translationKey, object);
+	private final void translate(final Object object, final Method textSetter, final String translationKey, final String messagesBase) throws IllegalAccessException, InvocationTargetException {
+		try {
+			final ResourceBundle messages = this.getMessages(messagesBase);
+			
+			textSetter.invoke(object, this.reEncode(messages.getString(translationKey)));
+		} catch (final Exception exception) {
+			this.translate(object, textSetter, translationKey, object);
+		}
 	}
 	
 	/**
@@ -344,9 +346,9 @@ public final class SwingTranslator implements Serializable {
 	 */
 	private final void translate(final Object object, final Method textSetter, final String translationKey, final Object objectThatMightProvideAResourceBundle) throws IllegalAccessException, InvocationTargetException {
 		try {
-			final ResourceBundle resourceBundle = ResourceBundle.getBundle(objectThatMightProvideAResourceBundle.getClass().getSimpleName(), this.getLocale());
+			final ResourceBundle messages = ResourceBundle.getBundle(objectThatMightProvideAResourceBundle.getClass().getSimpleName(), this.getLocale());
 			
-			textSetter.invoke(object, this.reEncode(resourceBundle.getString(translationKey)));
+			textSetter.invoke(object, this.reEncode(messages.getString(translationKey)));
 		} catch (final Exception exception) {
 			if (objectThatMightProvideAResourceBundle instanceof Component) {
 				this.translate(object, textSetter, translationKey, ((Component) objectThatMightProvideAResourceBundle).getParent());
@@ -391,7 +393,7 @@ public final class SwingTranslator implements Serializable {
 			final String translationKey = cast(String.class, textGetter.invoke(object));
 			
 			if (translationKey != null && translationKey.trim().length() > 0 && !this.untranslated.containsKey(translationKey)) {
-				this.translate(object, textSetter, translationKey);
+				this.translate(object, textSetter, translationKey, this.getMessagesBase());
 			}
 		} catch (final Exception exception) {
 			// Nothing
@@ -415,13 +417,13 @@ public final class SwingTranslator implements Serializable {
 	 * </ul>
 	 */
 	public final <T> T stopAutotranslate(final T autotranslated) {
-		final Collection<Pair<Method, String>> translationMethods = this.translationMethods.remove(autotranslated);
+		final Collection<AutotranslationMethod> translationMethods = this.translationMethods.remove(autotranslated);
 		
 		if (translationMethods != null) {
-			for (final Pair<Method, String> pair : translationMethods) {
+			for (final AutotranslationMethod autotranslationMethod : translationMethods) {
 				try {
 					// Change the object text back to the translation key
-					pair.getFirst().invoke(autotranslated, pair.getSecond());
+					autotranslationMethod.getMethod().invoke(autotranslated, autotranslationMethod.getTranslationKey());
 				} catch (final Exception exception) {
 					getLoggerForThisMethod().log(Level.WARNING, "", exception);
 				}
@@ -455,21 +457,25 @@ public final class SwingTranslator implements Serializable {
 	 * <br>A non-null value
 	 */
 	public final Locale[] getAvailableLocales() {
-		final Set<Locale> result = new HashSet<Locale>();
-		
-		result.add(new Locale(""));
-		
+		return this.availableLocales.toArray(new Locale[this.availableLocales.size()]);
+	}
+	
+	/**
+	 * 
+	 * TODO doc
+	 * @param messagesBase
+	 * <br>Should not be null
+	 */
+	private final void collectAvailableLocales(final String messagesBase) {
 		for (final Locale locale : Locale.getAvailableLocales()) {
 			try {
-				if (locale.equals(ResourceBundle.getBundle(this.getMessagesBase(), locale).getLocale())) {
-					result.add(locale);
+				if (locale.equals(ResourceBundle.getBundle(messagesBase, locale).getLocale())) {
+					this.availableLocales.add(locale);
 				}
 			} catch (final Exception exception) {
 				// Do nothing
 			}
 		}
-		
-		return result.toArray(new Locale[result.size()]);
 	}
 	
 	/**
@@ -493,16 +499,28 @@ public final class SwingTranslator implements Serializable {
 	 * </ul>
 	 */
 	public final synchronized ResourceBundle getMessages() {
+		return this.getMessages(this.getMessagesBase());
+	}
+	
+	/**
+	 * 
+	 * @return
+	 * <ul>
+	 *  <li>MAYBE_NEW</li>
+	 *  <li>NOT_NULL</li>
+	 * </ul>
+	 */
+	private final synchronized ResourceBundle getMessages(final String messagesBase) {
 		// XXX using the default locale feels awkward
 		// but ResourceBundle.getBundle doesn't seem
 		// to care about its locale argument :(
-		final Locale globalLocale = Locale.getDefault();
+//		final Locale globalLocale = Locale.getDefault();
+//		
+//		Locale.setDefault(this.getLocale());
 		
-		Locale.setDefault(this.getLocale());
+		final ResourceBundle messages = ResourceBundle.getBundle(messagesBase, this.getLocale(), this.getClass().getClassLoader());
 		
-		final ResourceBundle messages = ResourceBundle.getBundle(this.getMessagesBase(), this.getLocale(), this.getClass().getClassLoader());
-		
-		Locale.setDefault(globalLocale);
+//		Locale.setDefault(globalLocale);
 		
 		return messages;
 	}
@@ -567,19 +585,21 @@ public final class SwingTranslator implements Serializable {
 	 * </ul>
 	 */
 	public final <T> T autotranslate(final T component) {
+		final String messagesBase = getCallerClass().getSimpleName();
+		
 		for (final Object c : new ComponentIterable(component)) {
-			this.autotranslate(c, "getTitle", "setTitle");
-			this.autotranslate(c, "getToolTipText", "setToolTipText");
+			this.autotranslate(c, "getTitle", "setTitle", messagesBase);
+			this.autotranslate(c, "getToolTipText", "setToolTipText", messagesBase);
 			
 			if (!(c instanceof TextComponent) && !(c instanceof JTextComponent)) {
-				this.autotranslate(c, "getText", "setText");
+				this.autotranslate(c, "getText", "setText", messagesBase);
 			}
 			
 			if (c instanceof JTabbedPane) {
 				final JTabbedPane tabbedPane = (JTabbedPane) c;
 				
 				for (Integer index = 0; index < tabbedPane.getTabCount(); ++index) {
-					this.autotranslate(new TabbedPaneTitleAccessor(tabbedPane, index), "getTitle", "setTitle");
+					this.autotranslate(new TabbedPaneTitleAccessor(tabbedPane, index), "getTitle", "setTitle", messagesBase);
 				}
 			}
 			
@@ -588,7 +608,7 @@ public final class SwingTranslator implements Serializable {
 				
 				if (action != null) {
 					for (final String key : array(Action.SHORT_DESCRIPTION, Action.NAME, Action.LONG_DESCRIPTION)) {
-						this.autotranslate(new ActionStringPropertyAccessor(action, key), "getStringValue", "setStringValue");
+						this.autotranslate(new ActionStringPropertyAccessor(action, key), "getStringValue", "setStringValue", messagesBase);
 					}
 				}
 			}
@@ -633,12 +653,6 @@ public final class SwingTranslator implements Serializable {
 	public static final synchronized SwingTranslator getDefaultTranslator() {
 		if (defaultTranslator == null) {
 			defaultTranslator = new SwingTranslator();
-			
-			// TODO the following call should should be done outside this class because of the dependency on Settings
-			defaultTranslator.setLocale(createLocale(emptyIfNull((String) Settings.getInstance().get("locale"))));
-			
-			// Warning: The call to getAvailableLocales() has side-effects, don't remove it
-			debugPrint("Available locales:", Arrays.toString(defaultTranslator.getAvailableLocales()));
 		}
 		
 		return defaultTranslator;
@@ -686,7 +700,7 @@ public final class SwingTranslator implements Serializable {
 	 * @author codistmonk (creation 2009-09-28)
 	 *
 	 */
-	public static interface ITranslatorListener {
+	public static interface Listener {
 		
 		/**
 		 * 
@@ -1164,48 +1178,78 @@ public final class SwingTranslator implements Serializable {
 	 * 
 	 * @author codistmonk (creation 2009-08-04)
 	 *
-	 * @param <First>
-	 * @param <Second>
 	 */
-	public final class Pair<First, Second> implements Serializable {
+	public final class AutotranslationMethod implements Serializable {
 		
-		private final First first;
+		private final Method method;
 		
-		private final Second second;
+		private final String translationKey;
+		
+		private final String messagesBase;
 		
 		/**
 		 * 
-		 * @param first IN MAYBE_NULL
-		 * @param second IN MAYBE_NULL
+		 * @param method
+		 * <br>Should not be null
+		 * <br>Shared parameter
+		 * @param translationKey
+		 * <br>Should not be null
+		 * <br>Shared parameter
+		 * @param messagesBase
+		 * <br>Can be null
+		 * <br>Shared parameter
 		 */
-		public Pair(final First first, final Second second) {
-			this.first = first;
-			this.second = second;
+		public AutotranslationMethod(final Method method, final String translationKey, final String messagesBase) {
+			this.method = method;
+			this.translationKey = translationKey;
+			this.messagesBase = messagesBase;
 		}
 		
-		public final First getFirst() {
-			return this.first;
+		/**
+		 * 
+		 * @return
+		 * <br>A non-null value
+		 * <br>A shared value
+		 */
+		public final Method getMethod() {
+			return this.method;
 		}
 		
-		public final Second getSecond() {
-			return this.second;
+		/**
+		 * 
+		 * @return
+		 * <br>A non-null value
+		 * <br>A shared value
+		 */
+		public final String getTranslationKey() {
+			return this.translationKey;
+		}
+		
+		/**
+		 * 
+		 * @return
+		 * <br>A non-null value
+		 * <br>A shared value
+		 */
+		public final String getMessagesBase() {
+			return this.messagesBase;
 		}
 		
 		@Override
 		public final boolean equals(final Object object) {
-			final Pair<?, ?> that = cast(Pair.class, object);
+			final AutotranslationMethod that = cast(AutotranslationMethod.class, object);
 			
-			return that != null && SwingTranslator.equals(this.getFirst(), that.getFirst()) && SwingTranslator.equals(this.getSecond(), that.getSecond());
+			return that != null && SwingTranslator.equals(this.getMethod(), that.getMethod()) && SwingTranslator.equals(this.getTranslationKey(), that.getTranslationKey());
 		}
 		
 		@Override
 		public final int hashCode() {
-			return SwingTranslator.hashCode(this.getFirst()) + SwingTranslator.hashCode(this.getSecond());
+			return SwingTranslator.hashCode(this.getMethod()) + SwingTranslator.hashCode(this.getTranslationKey());
 		}
 		
 		@Override
 		public final String toString() {
-			return "(" + this.getFirst() + ", " + this.getSecond() + ")";
+			return "(" + this.getMethod() + ", " + this.getTranslationKey() + ")";
 		}
 		
 		/**

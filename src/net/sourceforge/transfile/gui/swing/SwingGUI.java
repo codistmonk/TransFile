@@ -19,6 +19,10 @@
 
 package net.sourceforge.transfile.gui.swing;
 
+import static net.sourceforge.transfile.gui.swing.SwingTranslator.createLocale;
+import static net.sourceforge.transfile.gui.swing.SwingTranslator.emptyIfNull;
+import static net.sourceforge.transfile.gui.swing.SwingTranslator.getDefaultTranslator;
+
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -260,7 +264,22 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 		panels.add(statusPanel);
 		pane.add(statusPanel);
 		
-		SwingTranslator.getDefaultTranslator().autotranslate(this);
+		getDefaultTranslator().setLocale(createLocale(emptyIfNull((String) Settings.getInstance().get("locale"))));
+		getDefaultTranslator().autotranslate(this);
+		SwingTranslator.getDefaultTranslator().addTranslatorListener(new SwingTranslator.Listener() {
+			
+			@Override
+			public final void messagesBaseChanged(final String oldMessagesBase,
+					final String newMessagesBase) {
+				// Do nothing
+			}
+			
+			@Override
+			public final void localeChanged(final Locale oldLocale, final Locale newLocale) {
+				SwingGUI.this.repaint();
+			}
+			
+		});
 	}
 	
 	/**

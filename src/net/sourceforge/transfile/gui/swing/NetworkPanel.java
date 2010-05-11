@@ -233,6 +233,8 @@ public class NetworkPanel extends TopLevelPanel {
 			}
 		});
 		add(stopButton, c);
+		
+		SwingTranslator.getDefaultTranslator().autotranslate(this);
 	}
 	
 	/**
