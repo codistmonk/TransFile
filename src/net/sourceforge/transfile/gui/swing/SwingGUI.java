@@ -146,7 +146,7 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	 * 
 	 * @param status the message to display
 	 */
-	void setStatus(final String status) {
+	public void setStatus(final String status) {
 		statusPanel.setStatus(status);
 	}
 	
