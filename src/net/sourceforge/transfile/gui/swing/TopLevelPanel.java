@@ -59,12 +59,6 @@ abstract class TopLevelPanel extends JPanel {
 	 */
 	private boolean isShown = false;
 	
-	/*
-	 * The ResourceBundle for the respective TopLevelPanel and the current locale 
-	 */
-	private final ResourceBundle strings;
-
-	
 	/**
 	 * Constructs a TopLevelPanel instance
 	 * 
@@ -75,9 +69,6 @@ abstract class TopLevelPanel extends JPanel {
 		
 		// inherit the main window's locale
 		setLocale(window.getLocale());
-		
-		// load the localized bundle of strings for this panel for the selected locale
-		strings = ResourceBundle.getBundle(getClass().getSimpleName(), getLocale());
 		
 		// create GUI elements
 		setup();
@@ -158,15 +149,6 @@ abstract class TopLevelPanel extends JPanel {
 	 */
 	final protected SwingGUI getWindow() {
 		return window;
-	}
-	
-	/**
-	 * Returns the bundle of localized strings for this TopLevelPanel
-	 * 
-	 * @return the localized bundle of strings for this TopLevelPanel
-	 */
-	final protected ResourceBundle getStrings() {
-		return strings;
 	}
 	
 	/**

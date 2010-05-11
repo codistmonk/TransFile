@@ -1,139 +1,67 @@
+/*
+ * Copyright © 2010 Martin Riedel
+ * 
+ * This file is part of TransFile.
+ *
+ * TransFile is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TransFile is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package net.sourceforge.transfile.gui.swing;
 
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Frame;
-import java.awt.Menu;
-import java.awt.MenuBar;
-import java.awt.TextComponent;
-import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.swing.AbstractButton;
-import javax.swing.Action;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JTabbedPane;
-import javax.swing.text.JTextComponent;
-
-import net.sourceforge.transfile.settings.Settings;
-
 /**
- * 
- * @author codistmonk (creation 2009-09-04)
+ * TODO doc
+ *
+ * @author codistmonk (2010-05-11)
  *
  */
-public final class SwingTranslator implements Serializable {
+public class SwingTranslator {
 	
 	private final Collection<Listener> listeners;
 	
-	private final MultiMap<Object, AutotranslationMethod> translationMethods;
-	
-	private final Map<String, Void> untranslated;
+	private final Set<Autotranslator> autotranslators;
 	
 	private final Set<Locale> availableLocales;
 	
-	private String messagesBase;
-	
 	private Locale locale;
 	
-	/**
-	 * 
-	 */
 	public SwingTranslator() {
 		this.listeners = new ArrayList<Listener>();
-		this.translationMethods = new MultiMap<Object, AutotranslationMethod>(IdentityHashMap.class, HashSet.class);
-		this.untranslated = new IdentityHashMap<String, Void>();
+		this.autotranslators = new HashSet<Autotranslator>();
 		this.availableLocales = new HashSet<Locale>();
-		this.messagesBase = "";
-		this.locale = Locale.getDefault();
 		
 		this.availableLocales.add(new Locale(""));
-		
-		this.addTranslatorListener(new Listener() {
-			
-			@Override
-			public final void messagesBaseChanged(final String oldMessagesBase, final String newMessagesBase) {
-				SwingTranslator.this.updateAutotranslated();
-			}
-			
-			@Override
-			public final void localeChanged(final Locale oldLocale, final Locale newLocale) {
-				SwingTranslator.this.updateAutotranslated();
-			}
-			
-		});
-	}
-	
-	/**
-	 * 
-	 */
-	public final void updateAutotranslated() {
-		for (final Map.Entry<Object, Collection<AutotranslationMethod>> entry : this.translationMethods.entrySet()) {
-			for (final AutotranslationMethod autotranslationMethod : entry.getValue()) {
-				try {
-					this.translate(entry.getKey(), autotranslationMethod.getMethod(), autotranslationMethod.getTranslationKey(), autotranslationMethod.getMessagesBase());
-				} catch (final Exception exception) {
-					getLoggerForThisMethod().log(Level.WARNING, "", exception);
-				}
-			}
-		}
-	}
-	
-	/**
-	 * 
-	 * @param string
-	 * <ul>
-	 *  <li>IN</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
-	 * @return
-	 * <ul>
-	 *  <li>MAYBE_NEW</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
-	 */
-	public final String untranslated(final String string) {
-		if (string == null || string.trim().length() == 0) {
-			throw new IllegalArgumentException();
-		}
-		
-		if (this.untranslated.containsKey(string)) {
-			return string;
-		}
-		
-		final String result = new String(string);
-		
-		this.untranslated.put(result, null);
-		
-		return result;
 	}
 	
 	/**
 	 * 
 	 * @param listener
-	 * <ul>
-	 *  <li>REF</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
+	 * <br>Should not be null
+	 * <br>Shared parameter
 	 */
 	public final void addTranslatorListener(final Listener listener) {
 		this.listeners.add(listener);
@@ -142,10 +70,7 @@ public final class SwingTranslator implements Serializable {
 	/**
 	 * 
 	 * @param listener
-	 * <ul>
-	 *  <li>IN</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
+	 * <br>Can be null
 	 */
 	public final void removeTranslatorListener(final Listener listener) {
 		this.listeners.remove(listener);
@@ -154,10 +79,8 @@ public final class SwingTranslator implements Serializable {
 	/**
 	 * 
 	 * @return
-	 * <ul>
-	 *  <li>NEW</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
+	 * <br>A non-null value
+	 * <br>A new value
 	 */
 	public final Listener[] getTranslatorListeners() {
 		return this.listeners.toArray(new Listener[this.listeners.size()]);
@@ -165,45 +88,71 @@ public final class SwingTranslator implements Serializable {
 	
 	/**
 	 * 
-	 * @return
-	 * <ul>
-	 *  <li>NOT_NEW</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
+	 * TODO doc
+	 * @param <T> the actual type of {@code object}
+	 * @param object
+	 * <br>Should not be null
+	 * <br>Shared parameter
+	 * @param textPropertyName
+	 * <br>Should not be null
+	 * <br>Shared parameter
+	 * @param translationKey
+	 * <br>Should not be null
+	 * <br>Shared parameter
+	 * @param messagesBase 
+	 * <br>Should not be null
+	 * <br>Shared parameter
+	 * @param parameters 
+	 * <br>Should not be null
+	 * @return {@code object}
+	 * <br>A non-null value
+	 * <br>A shared value
 	 */
-	public final String getMessagesBase() {
-		return this.messagesBase;
+	public final <T> T set(final T object, final String textPropertyName, final String translationKey, final String messagesBase, final Object... parameters) {
+		final Autotranslator autotranslator = this.new Autotranslator(object, textPropertyName, translationKey, messagesBase, parameters);
+		
+		this.collectAvailableLocales(messagesBase);
+		
+		autotranslator.translate();
+		
+		// If there is already another autotranslator with the same object and textProprtyName
+		// remove it before adding the new autotranslator
+		this.autotranslators.remove(autotranslator);
+		this.autotranslators.add(autotranslator);
+		
+		return object;
 	}
 	
 	/**
 	 * 
-	 * @param messagesBase
-	 * <ul>
-	 *  <li>REF</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
+	 * TODO doc
+	 * @param object
+	 * <br>Should not be null
+	 * <br>Shared parameter
+	 * @param textPropertyName
+	 * <br>Should not be null
+	 * <br>Shared parameter
 	 */
-	public final void setMessagesBase(final String messagesBase) {
-		final String oldMessagesBase = this.getMessagesBase();
-		
-		this.messagesBase = messagesBase;
-		
-		if (this.getMessagesBase() != oldMessagesBase) {
-			this.collectAvailableLocales(this.getMessagesBase());
+	public final void reset(final Object object, final String textPropertyName) {
+		for (final Iterator<Autotranslator> iterator = this.autotranslators.iterator(); iterator.hasNext();) {
+			final Autotranslator autotranslator = iterator.next();
 			
-			for (final Listener listener : this.getTranslatorListeners()) {
-				listener.messagesBaseChanged(oldMessagesBase, this.getMessagesBase());
+			if (autotranslator.getObject().equals(object) && autotranslator.getTextPropertyName().equals(textPropertyName)) {
+				iterator.remove();
+				
+				autotranslator.untranslate();
+				
+				return;
 			}
 		}
 	}
 	
 	/**
 	 * 
+	 * TODO doc
 	 * @return
-	 * <ul>
-	 *  <li>NOT_NEW</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
+	 * <br>A non-null value
+	 * <br>A shared value
 	 */
 	public final Locale getLocale() {
 		return this.locale;
@@ -211,243 +160,25 @@ public final class SwingTranslator implements Serializable {
 	
 	/**
 	 * 
+	 * TODO doc
 	 * @param locale
-	 * <ul>
-	 *  <li>NOT_NEW</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
+	 * <br>Should not be null
+	 * <br>Shared parameter
 	 */
 	public final void setLocale(final Locale locale) {
-		final Locale oldLocale = this.getLocale();
-		
-		this.locale = locale;
-		
-		if (this.getLocale() != oldLocale) {
+		if (this.getLocale() != locale) {
+			final Locale oldLocale = this.getLocale();
+			
+			this.locale = locale;
+			
+			for (final Autotranslator autotranslator : this.autotranslators) {
+				autotranslator.translate();
+			}
+			
 			for (final Listener listener : this.getTranslatorListeners()) {
 				listener.localeChanged(oldLocale, this.getLocale());
 			}
 		}
-	}
-	
-	/**
-	 * 
-	 * @param string
-	 * <ul>
-	 *  <li>IN</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
-	 * @return
-	 * <ul>
-	 *  <li>MAYBE_NEW</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
-	 */
-	public final String translate(final String string) {
-		if (this.untranslated.containsKey(string)) {
-			return string;
-		}
-		
-		final ResourceBundle messages = this.getMessages();
-		
-		try {
-			return this.reEncode(messages.getString(string));
-		} catch (final MissingResourceException exception) {
-			getLoggerForThisMethod().log(Level.WARNING, "Missing translation for locale (" + this.getLocale() + ") of " + exception.getKey());
-		}
-		
-		return string;
-	}
-	
-	/**
-	 * 
-	 * TODO doc
-	 * @param translatedMessage
-	 * <br>Should not be null
-	 * <br>May be a shared parameter
-	 * @return
-	 * <br>A non-null value
-	 * <br>May be a shared value
-	 */
-	private final String reEncode(final String translatedMessage) {
-		try {
-			return new String(translatedMessage.getBytes("ISO-8859-1"), "UTF-8");
-		} catch (final UnsupportedEncodingException exception) {
-			exception.printStackTrace();
-			return translatedMessage;
-		}
-	}
-	
-	/**
-	 * 
-	 * @param <T>
-	 * @param object
-	 * <br>Shared parameter
-	 * <br>Should not be null
-	 * @param getterName
-	 * <br>Should not be null
-	 * @param setterName
-	 * <br>Should not be null
-	 * @param messagesBase
-	 * <br>Can be null
-	 * <br>Shared parameter
-	 */
-	public final <T> T autotranslate(final T object, final String getterName, final String setterName, final String messagesBase) {
-		this.collectAvailableLocales(messagesBase);
-		
-		try {
-			final Method textGetter = object.getClass().getMethod(getterName);
-			final Method textSetter = object.getClass().getMethod(setterName, String.class);
-			final String translationKey = cast(String.class, textGetter.invoke(object));
-			
-			if (translationKey != null && translationKey.trim().length() > 0 && !this.untranslated.containsKey(translationKey)) {
-				this.translate(object, textSetter, translationKey, messagesBase);
-				this.translationMethods.put(object, new AutotranslationMethod(textSetter, translationKey, messagesBase));
-			}
-		} catch (final Exception exception) {
-			// Do nothing
-		}
-		
-		return object;
-	}
-	
-	/**
-	 * 
-	 * TODO doc
-	 * @param object
-	 * <br>Should not be null
-	 * @param textSetter
-	 * <br>Should not be null
-	 * @param translationKey
-	 * <br>Should not be null
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 */
-	private final void translate(final Object object, final Method textSetter, final String translationKey, final String messagesBase) throws IllegalAccessException, InvocationTargetException {
-		try {
-			final ResourceBundle messages = this.getMessages(messagesBase);
-			
-			textSetter.invoke(object, this.reEncode(messages.getString(translationKey)));
-		} catch (final Exception exception) {
-			this.translate(object, textSetter, translationKey, object);
-		}
-	}
-	
-	/**
-	 * 
-	 * TODO doc
-	 * @param object
-	 * <br>Should not be null
-	 * @param textSetter
-	 * <br>Should not be null
-	 * @param translationKey
-	 * <br>Should not be null
-	 * @throws IllegalAccessException
-	 * @throws InvocationTargetException
-	 */
-	private final void translate(final Object object, final Method textSetter, final String translationKey, final Object objectThatMightProvideAResourceBundle) throws IllegalAccessException, InvocationTargetException {
-		try {
-			final ResourceBundle messages = ResourceBundle.getBundle(objectThatMightProvideAResourceBundle.getClass().getSimpleName(), this.getLocale());
-			
-			textSetter.invoke(object, this.reEncode(messages.getString(translationKey)));
-		} catch (final Exception exception) {
-			if (objectThatMightProvideAResourceBundle instanceof Component) {
-				this.translate(object, textSetter, translationKey, ((Component) objectThatMightProvideAResourceBundle).getParent());
-			}
-			else if (objectThatMightProvideAResourceBundle instanceof Menu) {
-				this.translate(object, textSetter, translationKey, ((Menu) objectThatMightProvideAResourceBundle).getParent());
-			}
-			else {
-				textSetter.invoke(object, this.translate(translationKey));
-			}
-		}
-	}
-	
-	/**
-	 * 
-	 * @param <T>
-	 * @param object
-	 * <ul>
-	 *  <li>REF</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
-	 * @param getterName
-	 * <ul>
-	 *  <li>IN</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
-	 * @param setterName
-	 * <ul>
-	 *  <li>IN</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
-	 * @return <tt>object</tt>
-	 * <ul>
-	 *  <li>NOT_NEW</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
-	 */
-	public final <T> T translate(final T object, final String getterName, final String setterName) {
-		try {
-			final Method textGetter = object.getClass().getMethod(getterName);
-			final Method textSetter = object.getClass().getMethod(setterName, String.class);
-			final String translationKey = cast(String.class, textGetter.invoke(object));
-			
-			if (translationKey != null && translationKey.trim().length() > 0 && !this.untranslated.containsKey(translationKey)) {
-				this.translate(object, textSetter, translationKey, this.getMessagesBase());
-			}
-		} catch (final Exception exception) {
-			// Nothing
-		}
-		
-		return object;
-	}
-	
-	/**
-	 * 
-	 * @param <T>
-	 * @param autotranslated
-	 * <ul>
-	 *  <li>IN</li>
-	 *  <li>MAYBE_NULL</li>
-	 * </ul>
-	 * @return <tt>autotranslated</tt>
-	 * <ul>
-	 *  <li>NOT_NEW</li>
-	 *  <li>MAYBE_NULL</li>
-	 * </ul>
-	 */
-	public final <T> T stopAutotranslate(final T autotranslated) {
-		final Collection<AutotranslationMethod> translationMethods = this.translationMethods.remove(autotranslated);
-		
-		if (translationMethods != null) {
-			for (final AutotranslationMethod autotranslationMethod : translationMethods) {
-				try {
-					// Change the object text back to the translation key
-					autotranslationMethod.getMethod().invoke(autotranslated, autotranslationMethod.getTranslationKey());
-				} catch (final Exception exception) {
-					getLoggerForThisMethod().log(Level.WARNING, "", exception);
-				}
-			}
-		}
-		
-		return autotranslated;
-	}
-	
-	/**
-	 * 
-	 * @param object
-	 * <ul>
-	 *  <li>IN</li>
-	 *  <li>MAYBE_NULL</li>
-	 * </ul>
-	 * @return
-	 * <ul>
-	 *  <li>MAYBE_NEW</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
-	 */
-	public final Boolean isAutotranslated(final Object object) {
-		return this.translationMethods.containsKey(object);
 	}
 	
 	/**
@@ -458,6 +189,40 @@ public final class SwingTranslator implements Serializable {
 	 */
 	public final Locale[] getAvailableLocales() {
 		return this.availableLocales.toArray(new Locale[this.availableLocales.size()]);
+	}
+	
+	/**
+	 * 
+	 * TODO doc
+	 * @param translationKey
+	 * <br>Should not be null
+	 * @param messagesBase
+	 * <br>Should not be null
+	 * @param parameters 
+	 * <br>Should not be null
+	 * @return
+	 * <br>A non-null value
+	 */
+	public final String translate(final String translationKey, final String messagesBase, final Object... parameters) {
+		final ResourceBundle messages = ResourceBundle.getBundle(messagesBase, this.getLocale());
+		
+		String translatedMessage = translationKey;
+		
+		try {
+			translatedMessage = iso88591ToUTF8(messages.getString(translationKey));
+		} catch (final MissingResourceException exception) {
+			getLoggerForThisMethod().log(Level.WARNING, "Missing translation for locale (" + SwingTranslator.this.getLocale() + ") of " + exception.getKey());
+		}
+		
+		final Object[] localizedParameters = parameters.clone();
+		
+		for (int i = 0; i < localizedParameters.length; ++i) {
+			if (localizedParameters[i] instanceof Throwable) {
+				localizedParameters[i] = ((Throwable) localizedParameters[i]).getLocalizedMessage();
+			}
+		}
+		
+		return MessageFormat.format(translatedMessage, localizedParameters);
 	}
 	
 	/**
@@ -480,173 +245,118 @@ public final class SwingTranslator implements Serializable {
 	
 	/**
 	 * 
-	 * @return
-	 * <ul>
-	 *  <li>MAYBE_NEW</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
+	 * TODO doc
+	 *
+	 * @author codistmonk (creation 2010-05-11)
+	 *
 	 */
-	public final Locale getBestAvailableLocale() {
-		return this.getMessages().getLocale();
-	}
-	
-	/**
-	 * 
-	 * @return
-	 * <ul>
-	 *  <li>MAYBE_NEW</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
-	 */
-	public final synchronized ResourceBundle getMessages() {
-		return this.getMessages(this.getMessagesBase());
-	}
-	
-	/**
-	 * 
-	 * @return
-	 * <ul>
-	 *  <li>MAYBE_NEW</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
-	 */
-	private final synchronized ResourceBundle getMessages(final String messagesBase) {
-		// XXX using the default locale feels awkward
-		// but ResourceBundle.getBundle doesn't seem
-		// to care about its locale argument :(
-//		final Locale globalLocale = Locale.getDefault();
-//		
-//		Locale.setDefault(this.getLocale());
+	private final class Autotranslator {
 		
-		final ResourceBundle messages = ResourceBundle.getBundle(messagesBase, this.getLocale(), this.getClass().getClassLoader());
+		private final Object object;
 		
-//		Locale.setDefault(globalLocale);
+		private final String textPropertyName;
 		
-		return messages;
-	}
-	
-	/**
-	 * 
-	 * @param <T>
-	 * @param component
-	 * <ul>
-	 *  <li>REF</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
-	 * @return <tt>component</tt>
-	 * <ul>
-	 *  <li>NOT_NEW</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
-	 */
-	public final <T> T translate(final T component) {
-		for (final Object c : new ComponentIterable(component)) {
-			this.translate(c, "getTitle", "setTitle");
-			this.translate(c, "getToolTipText", "setToolTipText");
+		private final String translationKey;
+		
+		private final String messagesBase;
+		
+		private final Object[] parameters;
+		
+		private final Method setter;
+		
+		/**
+		 * 
+		 * TODO doc
+		 * @param object
+		 * <br>Should not be null
+		 * <br>Shared parameter
+		 * @param textPropertyName
+		 * <br>Should not be null
+		 * <br>Shared parameter
+		 * @param translationKey
+		 * <br>Should not be null
+		 * <br>Shared parameter
+		 * @param messagesBase
+		 * <br>Should not be null
+		 * <br>Shared parameter
+		 * @param parameters 
+		 * <br>Should not be null
+		 * <br>Shared parameter
+		 * @throws RuntimeException if a setter cannot be retrieved for the property.
+		 */
+		public Autotranslator(final Object object, final String textPropertyName,
+				final String translationKey, final String messagesBase, final Object... parameters) {
+			this.object = object;
+			this.textPropertyName = textPropertyName;
+			this.translationKey = translationKey;
+			this.messagesBase = messagesBase;
+			this.parameters = parameters;
+			this.setter = getSetter(object, textPropertyName, String.class);
+		}
+		
+		/**
+		 * 
+		 * @return
+		 * <br>A non-null value
+		 * <br>A shared value
+		 */
+		public final Object getObject() {
+			return this.object;
+		}
+		
+		/**
+		 * 
+		 * @return
+		 * <br>A non-null value
+		 * <br>A shared value
+		 */
+		public final String getTextPropertyName() {
+			return this.textPropertyName;
+		}
+		
+		public final void translate() {
+			this.set(SwingTranslator.this.translate(this.translationKey, this.messagesBase, this.parameters));
+		}
+		
+		public final void untranslate() {
+			this.set(this.translationKey);
+		}
+		
+		@Override
+		public final boolean equals(final Object object) {
+			final Autotranslator that = cast(this.getClass(), object);
 			
-			if (!(c instanceof TextComponent) && !(c instanceof JTextComponent)) {
-				this.translate(c, "getText", "setText");
-			}
-			
-			if (c instanceof JTabbedPane) {
-				final JTabbedPane tabbedPane = (JTabbedPane) c;
-				
-				for (Integer index = 0; index < tabbedPane.getTabCount(); ++index) {
-					this.translate(new TabbedPaneTitleAccessor(tabbedPane, index), "getTitle", "setTitle");
-				}
-			}
-			
-			if (c instanceof AbstractButton) {
-				final Action action = ((AbstractButton) c).getAction();
-				
-				if (action != null) {
-					for (final String key : array(Action.SHORT_DESCRIPTION, Action.NAME, Action.LONG_DESCRIPTION)) {
-						this.translate(new ActionStringPropertyAccessor(action, key), "getStringValue", "setStringValue");
-					}
-				}
+			return that != null && this.getObject().equals(that.getObject()) && this.getTextPropertyName().equals(that.getTextPropertyName());
+		}
+		
+		@Override
+		public final int hashCode() {
+			return this.object.hashCode() + this.textPropertyName.hashCode();
+		}
+		
+		/**
+		 * 
+		 * TODO doc
+		 * @param text
+		 * <br>Should not be null
+		 * <br>Shared parameter
+		 */
+		private final void set(final String text) {
+			try {
+				this.setter.invoke(this.getObject(), text);
+			} catch (final Exception exception) {
+				getLoggerForThisMethod().log(Level.WARNING, "", exception);
 			}
 		}
 		
-		return component;
 	}
-	
-	/**
-	 * 
-	 * @param <T>
-	 * @param component
-	 * <ul>
-	 *  <li>REF</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
-	 * @return <tt>component</tt>
-	 * <ul>
-	 *  <li>NOT_NEW</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
-	 */
-	public final <T> T autotranslate(final T component) {
-		final String messagesBase = getCallerClass().getSimpleName();
-		
-		for (final Object c : new ComponentIterable(component)) {
-			this.autotranslate(c, "getTitle", "setTitle", messagesBase);
-			this.autotranslate(c, "getToolTipText", "setToolTipText", messagesBase);
-			
-			if (!(c instanceof TextComponent) && !(c instanceof JTextComponent)) {
-				this.autotranslate(c, "getText", "setText", messagesBase);
-			}
-			
-			if (c instanceof JTabbedPane) {
-				final JTabbedPane tabbedPane = (JTabbedPane) c;
-				
-				for (Integer index = 0; index < tabbedPane.getTabCount(); ++index) {
-					this.autotranslate(new TabbedPaneTitleAccessor(tabbedPane, index), "getTitle", "setTitle", messagesBase);
-				}
-			}
-			
-			if (c instanceof AbstractButton) {
-				final Action action = ((AbstractButton) c).getAction();
-				
-				if (action != null) {
-					for (final String key : array(Action.SHORT_DESCRIPTION, Action.NAME, Action.LONG_DESCRIPTION)) {
-						this.autotranslate(new ActionStringPropertyAccessor(action, key), "getStringValue", "setStringValue", messagesBase);
-					}
-				}
-			}
-		}
-		
-		return component;
-	}
-	
-	/**
-	 * 
-	 * @param <T>
-	 * @param component
-	 * <ul>
-	 *  <li>REF</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
-	 * @return <tt>component</tt>
-	 * <ul>
-	 *  <li>NOT_NEW</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
-	 */
-	public final <T> T stopAutotranslateComponent(final T component) {
-		for (final Object c : new ComponentIterable(component)) {
-			this.stopAutotranslate(c);
-		}
-		
-		return component;
-	}
-	
-	private static final long serialVersionUID = 1618686009215601072L;
 	
 	private static SwingTranslator defaultTranslator;
 	
 	/**
 	 * 
+	 * TODO doc
 	 * @return
-	 * <br>A possibly new value
 	 * <br>A non-null value
 	 * <br>A shared value
 	 */
@@ -697,423 +407,34 @@ public final class SwingTranslator implements Serializable {
 	
 	/**
 	 * 
-	 * @author codistmonk (creation 2009-09-28)
-	 *
-	 */
-	public static interface Listener {
-		
-		/**
-		 * 
-		 * @param oldLocale
-		 * <ul>
-		 *  <li>IN</li>
-		 *  <li>NOT_NULL</li>
-		 * </ul>
-		 * @param newLocale
-		 * <ul>
-		 *  <li>IN</li>
-		 *  <li>NOT_NULL</li>
-		 * </ul>
-		 */
-		public abstract void localeChanged(Locale oldLocale, Locale newLocale);
-		
-		/**
-		 * 
-		 * @param oldMessagesBase
-		 * <ul>
-		 *  <li>IN</li>
-		 *  <li>NOT_NULL</li>
-		 * </ul>
-		 * @param newMessagesBase
-		 * <ul>
-		 *  <li>IN</li>
-		 *  <li>NOT_NULL</li>
-		 * </ul>
-		 */
-		public abstract void messagesBaseChanged(String oldMessagesBase, String newMessagesBase);
-		
-	}
-	
-	/**
-	 * 
-	 * @author codistmonk (creation 2009-10-06)
-	 *
-	 */
-	public static final class TranslatedCharSequence implements CharSequence {
-		
-		private final String translationKey;
-		
-		private final SwingTranslator translator;
-		
-		/**
-		 * 
-		 * @param translationKey
-		 * <ul>
-		 *  <li>REF</li>
-		 *  <li>NOT_NULL</li>
-		 * </ul>
-		 * @param translator
-		 * <ul>
-		 *  <li>REF</li>
-		 *  <li>NOT_NULL</li>
-		 * </ul>
-		 */
-		public TranslatedCharSequence(final String translationKey, final SwingTranslator translator) {
-			this.translationKey = translationKey;
-			this.translator = translator;
-		}
-		
-		/**
-		 * 
-		 * @return
-		 * <ul>
-		 *  <li>NOT_NEW</li>
-		 *  <li>NOT_NULL</li>
-		 * </ul>
-		 */
-		public final String getTranslationKey() {
-			return this.translationKey;
-		}
-		
-		/**
-		 * 
-		 * @return
-		 * <ul>
-		 *  <li>NOT_NEW</li>
-		 *  <li>NOT_NULL</li>
-		 * </ul>
-		 */
-		public final SwingTranslator getTranslator() {
-			return this.translator;
-		}
-		
-		@Override
-		public final char charAt(final int index) {
-			return this.toString().charAt(index);
-		}
-		
-		@Override
-		public final int length() {
-			return this.toString().length();
-		}
-		
-		@Override
-		public final CharSequence subSequence(final int beginIndex, final int endIndex) {
-			return this.toString().subSequence(beginIndex, endIndex);
-		}
-		
-		@Override
-		public final boolean equals(final Object object) {
-			final TranslatedCharSequence that = cast(this.getClass(), object);
-			
-			return that != null && this.getTranslationKey().equals(that.getTranslationKey()) && this.getTranslator().equals(that.getTranslator());
-		}
-		
-		@Override
-		public final int hashCode() {
-			return this.getTranslationKey().hashCode() + this.getTranslator().hashCode();
-		}
-		
-		@Override
-		public final String toString() {
-			return this.getTranslator().translate(this.getTranslationKey());
-		}
-		
-	}
-	
-	/**
-	 * 
-	 * @author codistmonk (creation 2009-10-03)
-	 *
-	 */
-	public static final class ComponentIterable implements Iterable<Object> {
-		
-		private final Object component;
-		
-		/**
-		 * 
-		 * @param component
-		 * <ul>
-		 *  <li>REF</li>
-		 *  <li>NOT_NULL</li>
-		 * </ul>
-		 */
-		public ComponentIterable(final Object component) {
-			this.component = component;
-		}
-		
-		@Override
-		public final Iterator<Object> iterator() {
-			return new ComponentIterator(this.component);
-		}
-		
-		/**
-		 * 
-		 * @author codistmonk (creation 2009-10-03)
-		 *
-		 */
-		public static final class ComponentIterator implements Iterator<Object> {
-			
-			private final Set<Object> done = new HashSet<Object>();
-			
-			private final List<Object> nexts = new LinkedList<Object>();
-			
-			/**
-			 * 
-			 * @param component
-			 * <ul>
-			 *  <li>REF</li>
-			 *  <li>NOT_NULL</li>
-			 * </ul>
-			 */
-			public ComponentIterator(final Object component) {
-				this.nexts.add(component);
-			}
-			
-			@Override
-			public final void remove() {
-				throw new UnsupportedOperationException();
-			}
-			
-			@Override
-			public final Object next() {
-				final Object result = this.nexts.remove(0);
-				
-				this.done.add(result);
-				
-				if (result instanceof JComponent) {
-					this.nexts.add(((JComponent) result).getBorder());
-				}
-				
-				if (result instanceof Container) {
-					add(this.nexts, ((Container) result).getComponents());
-				}
-				
-				if (result instanceof Menu) {
-					final Menu menu = (Menu) result;
-					
-					for (Integer index = 0; index < menu.getItemCount(); ++index) {
-						this.nexts.add(menu.getItem(index));
-					}
-				}
-				
-				if (result instanceof Frame) {
-					final MenuBar menuBar = ((Frame) result).getMenuBar();
-					
-					if (menuBar != null) {
-						for (Integer index = 0; index < menuBar.getMenuCount(); ++index) {
-							this.nexts.add(menuBar.getMenu(index));
-						}
-					}
-				}
-				
-				if (result instanceof JMenu) {
-					add(this.nexts, ((JMenu) result).getMenuComponents());
-				}
-				
-				if (result instanceof JFrame) {
-					final JMenuBar menuBar = ((JFrame) result).getJMenuBar();
-					
-					if (menuBar != null) {
-						for (Integer index = 0; index < menuBar.getMenuCount(); ++index) {
-							this.nexts.add(menuBar.getComponent(index));
-						}
-					}
-				}
-				
-				this.nexts.removeAll(this.done);
-				
-				return result;
-			}
-			
-			@Override
-			public final boolean hasNext() {
-				return !this.nexts.isEmpty();
-			}
-			
-		}
-		
-	}
-	
-	/**
-	 * 
-	 * @author codistmonk (creation 2009-09-28)
-	 *
-	 */
-	public static final class ActionStringPropertyAccessor {
-		
-		private final Action action;
-		
-		private final String propertyKey;
-		
-		/**
-		 * 
-		 * @param action
-		 * <ul>
-		 *  <li>REF</li>
-		 *  <li>NOT_NULL</li>
-		 * </ul>
-		 * <ul>
-		 *  <li>REF</li>
-		 *  <li>NOT_NULL</li>
-		 * </ul>
-		 * @param propertyKey
-		 */
-		public ActionStringPropertyAccessor(final Action action, final String propertyKey) {
-			this.action = action;
-			this.propertyKey = propertyKey;
-		}
-		
-		/**
-		 * 
-		 * @return
-		 * <ul>
-		 *  <li>NOT_NEW</li>
-		 *  <li>MAYBE_NULL</li>
-		 * </ul>
-		 */
-		public final String getStringValue() {
-			final Object result = this.action.getValue(this.propertyKey);
-			
-			return result == null ? null : (String) result;
-		}
-		
-		/**
-		 * 
-		 * @param value
-		 * <ul>
-		 *  <li>REF</li>
-		 *  <li>MAYBE_NULL</li>
-		 * </ul>
-		 */
-		public final void setStringValue(final String value) {
-			this.action.putValue(this.propertyKey, value);
-		}
-		
-	}
-	
-	/**
-	 * 
-	 * @author codistmonk (creation 2009-09-28)
-	 *
-	 */
-	public static final class TabbedPaneTitleAccessor {
-		
-		private final JTabbedPane tabbedPane;
-		
-		private final Integer index;
-		
-		/**
-		 * 
-		 * @param tabbedPane
-		 * <ul>
-		 *  <li>REF</li>
-		 *  <li>NOT_NULL</li>
-		 * </ul>
-		 * @param index
-		 * <ul>
-		 *  <li>REF</li>
-		 *  <li>NOT_NULL</li>
-		 * </ul>
-		 */
-		public TabbedPaneTitleAccessor(final JTabbedPane tabbedPane, final Integer index) {
-			this.tabbedPane = tabbedPane;
-			this.index = index;
-		}
-		
-		/**
-		 * 
-		 * @param title
-		 * <ul>
-		 *  <li>REF</li>
-		 *  <li>MAYBE_NULL</li>
-		 * </ul>
-		 */
-		public final void setTitle(final String title) {
-			this.tabbedPane.setTitleAt(this.index, title);
-		}
-		
-		/**
-		 * 
-		 * @return
-		 * <ul>
-		 *  <li>NOT_NEW</li>
-		 *  <li>MAYBE_NULL</li>
-		 * </ul>
-		 */
-		public final String getTitle() {
-			return this.tabbedPane.getTitleAt(this.index);
-		}
-		
-	}
-	
-	/*
-	 * TODO move the following methods elsewhere
-	 * These methods are usually part of utility classes I use in my projects.
-	 * I put them here because I didn't want to create too much classes at first.
-	 */
-	
-	/**
-	 * 
-	 * @param string
-	 * <br>Can be null
-	 * <br>Shared parameter
-	 * @return {@code string}
+	 * TODO doc
+	 * @param translatedMessage
+	 * <br>Should not be null
+	 * <br>May be a shared parameter
+	 * @return
 	 * <br>A non-null value
-	 * <br>A shared value
+	 * <br>May be a shared value
 	 */
-	public static final String emptyIfNull(final String string) {
-		return string == null ? "" : string;
-	}
-	
-	/**
-	 * 
-	 * @param <Element>
-	 * @param elements IN MAYBE_NULL
-	 * @return MAYBE_NEW MAYBE_NULL
-	 */
-	public static final <Element> Element[] array(final Element... elements) {
-		return elements;
-	}
-	
-	/**
-	 * 
-	 * @param <E> element
-	 * @param <C> collection
-	 * @param collection
-	 * <ul>
-	 *  <li>IN_OUT</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
-	 * @param elements
-	 * <ul>
-	 *  <li>IN</li>
-	 *  <li>MAYBE_NULL</li>
-	 * </ul>
-	 * @return <tt>collection</tt>
-	 * <ul>
-	 *  <li>NOT_NEW</li>
-	 *  <li>NOT_NULL</li>
-	 * </ul>
-	 */
-	public static final <E, C extends Collection<? super E>> C add(final C collection, final E... elements) {
-		if (elements != null) {
-			for (final E element : elements) {
-				collection.add(element);
-			}
+	public static final String iso88591ToUTF8(final String translatedMessage) {
+		try {
+			return new String(translatedMessage.getBytes("ISO-8859-1"), "UTF-8");
+		} catch (final UnsupportedEncodingException exception) {
+			exception.printStackTrace();
+			return translatedMessage;
 		}
-		
-		return collection;
 	}
 	
 	/**
 	 * 
-	 * @param <Type>
-	 * @param cls IN NOT_NULL
-	 * @param object IN MAYBE_NULL
-	 * @return NOT_NEW MAYBE_NULL
+	 * @param <T> the type into which {@code object} is tentatively being cast
+	 * @param cls
+	 * <br>Should not be null
+	 * @param object
+	 * <br>Can be null
+	 * @return {@code null} if {@code object} is {@code null} or cannot be cast into {@code T}, otherwise {@code object}
+	 * <br>A possibly null value
 	 */
-	public static final <Type> Type cast(final Class<Type> cls, final Object object) {
+	public static final <T> T cast(final Class<T> cls, final Object object) {
 		if (object == null || !cls.isAssignableFrom(object.getClass()))
 			return null;
 		
@@ -1122,26 +443,8 @@ public final class SwingTranslator implements Serializable {
 	
 	/**
 	 * 
-	 * @param object0 IN MAYBE_NULL
-	 * @param object1 IN MAYBE_NULL
-	 * @return MAYBE_NEW NOT_NULL
-	 */
-	public static final Boolean equals(final Object object0, final Object object1) {
-		return object0 == object1 || (object0 != null && object0.equals(object1));
-	}
-	
-	/**
-	 * 
-	 * @param object IN MAYBE_NULL
-	 * @return MAYBE_NEW NOT_NULL
-	 */
-	public static final Integer hashCode(final Object object) {
-		return object == null ? 0 : object.hashCode();
-	}
-	
-	/**
-	 * 
-	 * @return MAYBE_NEW NOT_NULL
+	 * @return
+	 * <br>A non-null value
 	 */
 	public static final Logger getLoggerForThisMethod() {
 		return Logger.getLogger(getCallerClass().getCanonicalName() + "." + getCallerMethodName());
@@ -1149,7 +452,8 @@ public final class SwingTranslator implements Serializable {
 	
 	/**
 	 * 
-	 * @return MAYBE_NEW MAYBE_NULL
+	 * @return
+	 * <br>A possibly null value
 	 */
 	public static final Class<?> getCallerClass() {
 		final StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
@@ -1166,7 +470,8 @@ public final class SwingTranslator implements Serializable {
 	
 	/**
 	 * 
-	 * @return MAYBE_NEW MAYBE_NULL
+	 * @return
+	 * <br>A possibly null value
 	 */
 	public static final String getCallerMethodName() {
 		final StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
@@ -1176,277 +481,207 @@ public final class SwingTranslator implements Serializable {
 	
 	/**
 	 * 
-	 * @author codistmonk (creation 2009-08-04)
+	 * TODO doc
+	 * @param object
+	 * <br>Should not be null
+	 * @param propertyName
+	 * <br>Should not be null
+	 * @param propertyClass 
+	 * <br>Should not be null
+	 * @return
+	 * <br>A non-null value
+	 * @throws RuntimeException if an appropriate setter cannot be retrieved
+	 */
+	public static final Method getSetter(final Object object, final String propertyName, final Class<?> propertyClass) {
+		try {
+			return object.getClass().getMethod("set" + toUpperCamelCase(propertyName), propertyClass);
+		} catch (final Exception exception) {
+			return throwRuntimeException(exception);
+		}
+	}
+	
+	/**
+	 * 
+	 * TODO doc
+	 * @param object
+	 * <br>Should not be null
+	 * @param propertyName
+	 * <br>Should not be null
+	 * @return
+	 * <br>A non-null value
+	 * @throws RuntimeException if an appropriate getter cannot be retrieved
+	 */
+	public static final Method getGetter(final Object object, final String propertyName) {
+		final String upperCamelCase = toUpperCamelCase(propertyName);
+		
+		for (final String prefix : array("get", "is", "has")) {
+			try {
+				return object.getClass().getMethod(prefix + upperCamelCase);
+			} catch (final Exception exception) {
+				// Do nothing
+			}
+		}
+		
+		throw new RuntimeException("Unable to retrieve a getter for property " + propertyName);
+	}
+	
+	/**
+	 * 
+	 * TODO doc
+	 * @param lowerCamelCase
+	 * <br>Should not be null
+	 * @return
+	 * <br>A new value
+	 * <br>A non-null value
+	 */
+	public static final String toUpperCamelCase(final String lowerCamelCase) {
+		return Character.toUpperCase(lowerCamelCase.charAt(0)) + lowerCamelCase.substring(1);
+	}
+	
+	/**
+	 * 
+	 * @param string
+	 * <br>Can be null
+	 * <br>Shared parameter
+	 * @return {@code string}
+	 * <br>A non-null value
+	 * <br>A shared value
+	 */
+	public static final String emptyIfNull(final String string) {
+		return string == null ? "" : string;
+	}
+	
+	/**
+	 * 
+	 * @param <T> the actual type of the elements
+	 * @param elements
+	 * <br>Can be null
+	 * <br>Shared parameter
+	 * @return {@code elements}
+	 * <br>A possibly null value
+	 * <br>A shared value
+	 */
+	public static final <T> T[] array(final T... elements) {
+		return elements;
+	}
+	
+	/**
+	 * 
+	 * @param <T> the type that the caller is supposed to return
+	 * @param cause
+	 * <br>Should not be null
+	 * <br>Shared parameter
+	 * @return
+	 * <br>Does not return
+	 * @throws RuntimeException with {@code cause} as cause if it is a checked exception, otherwise {@code cause} is re-thrown
+	 */
+	public static final <T> T throwRuntimeException(final Throwable cause) {
+		if (cause instanceof RuntimeException) {
+			throw (RuntimeException) cause;
+		}
+		
+		throw new RuntimeException(cause);
+	}
+	
+	/**
+	 * 
+	 * TODO doc
+	 *
+	 * @author codistmonk (creation 2010-05-11)
 	 *
 	 */
-	public final class AutotranslationMethod implements Serializable {
+	public static final class Helpers {
 		
-		private final Method method;
-		
-		private final String translationKey;
-		
-		private final String messagesBase;
+		/**
+		 * Private constructor to prevent this class from being instantiated.
+		 */
+		private Helpers() {
+			// Do nothing
+		}
 		
 		/**
 		 * 
-		 * @param method
+		 * TODO doc
+		 * @param <T> the actual type of {@code object} 
+		 * @param object
+		 * <br>Should not be null
+		 * <br>Shared parameter
+		 * @param textPropertyName
 		 * <br>Should not be null
 		 * <br>Shared parameter
 		 * @param translationKey
 		 * <br>Should not be null
 		 * <br>Shared parameter
-		 * @param messagesBase
-		 * <br>Can be null
+		 * @param parameters 
+		 * <br>Should not be null
 		 * <br>Shared parameter
+		 * @return {@code object}
+		 * <br>A non-null value
+		 * <br>A shared value
 		 */
-		public AutotranslationMethod(final Method method, final String translationKey, final String messagesBase) {
-			this.method = method;
-			this.translationKey = translationKey;
-			this.messagesBase = messagesBase;
+		public static final <T> T translate(final T object, final String textPropertyName, final String translationKey, final Object... parameters) {
+			return getDefaultTranslator().set(object, textPropertyName, translationKey, getCallerClass().getSimpleName(), parameters);
 		}
 		
 		/**
 		 * 
-		 * @return
+		 * TODO doc
+		 * @param <T> the actual type of {@code component} 
+		 * @param component
+		 * <br>Should not be null
+		 * <br>Shared parameter
+		 * @param parameters
+		 * <br>Should not be null
+		 * <br>Shared parameter
+		 * @return {@code component}
 		 * <br>A non-null value
 		 * <br>A shared value
 		 */
-		public final Method getMethod() {
-			return this.method;
-		}
-		
-		/**
-		 * 
-		 * @return
-		 * <br>A non-null value
-		 * <br>A shared value
-		 */
-		public final String getTranslationKey() {
-			return this.translationKey;
-		}
-		
-		/**
-		 * 
-		 * @return
-		 * <br>A non-null value
-		 * <br>A shared value
-		 */
-		public final String getMessagesBase() {
-			return this.messagesBase;
-		}
-		
-		@Override
-		public final boolean equals(final Object object) {
-			final AutotranslationMethod that = cast(AutotranslationMethod.class, object);
+		public static final <T> T translate(final T component, final Object... parameters) {
+			for (final String textPropertyName : array("text", "title", "toolTipText")) {
+				try {
+					getDefaultTranslator().set(component, textPropertyName, (String) getGetter(component, textPropertyName).invoke(component), getCallerClass().getSimpleName(), parameters);
+				} catch (final Exception exception) {
+					// Do nothing
+				}
+			}
 			
-			return that != null && SwingTranslator.equals(this.getMethod(), that.getMethod()) && SwingTranslator.equals(this.getTranslationKey(), that.getTranslationKey());
-		}
-		
-		@Override
-		public final int hashCode() {
-			return SwingTranslator.hashCode(this.getMethod()) + SwingTranslator.hashCode(this.getTranslationKey());
-		}
-		
-		@Override
-		public final String toString() {
-			return "(" + this.getMethod() + ", " + this.getTranslationKey() + ")";
+			return component;
 		}
 		
 		/**
 		 * 
+		 * TODO doc
+		 * @param translationKey
+		 * <br>Should not be null
+		 * @param parameters 
+		 * <br>Should not be null
+		 * <br>Shared parameter
+		 * @return
+		 * <br>A non-null value
 		 */
-		private static final long serialVersionUID = -888016663679364439L;
+		public static final String translate(final String translationKey, final Object... parameters) {
+			return getDefaultTranslator().translate(translationKey, getCallerClass().getSimpleName(), parameters);
+		}
 		
 	}
 	
 	/**
 	 * 
-	 * @author codistmonk (creation 2009-05-29)
+	 * @author codistmonk (creation 2009-09-28)
 	 *
-	 * @param <K> key
-	 * @param <V> value
 	 */
-	@SuppressWarnings("unchecked")
-	public final class MultiMap<K, V> implements Map<K, Collection<V>> {
-
-		private final Map<K, Collection<V>> data;
-		
-		private final Class<? extends Collection> collectionClass;
+	public static interface Listener {
 		
 		/**
 		 * 
-		 * @param mapClass
-		 * <ul>
-		 *  <li>REF</li>
-		 *  <li>NOT_NULL</li>
-		 * </ul>
-		 * @param collectionClass
-		 * <ul>
-		 *  <li>REF</li>
-		 *  <li>NOT_NULL</li>
-		 * </ul>
+		 * @param oldLocale
+		 * <br>Should not be null
+		 * @param newLocale
+		 * <br>Should not be null
+		 * <br>Shared parameter
 		 */
-		public MultiMap(final Class<? extends Map> mapClass, final Class<? extends Collection> collectionClass) {
-			try {
-				this.data = mapClass.newInstance();
-				this.collectionClass = collectionClass;
-			} catch (final Exception exception) {
-				throw new RuntimeException(exception);
-			}
-		}
-		
-		@Override
-		public final void clear() {
-			this.data.clear();
-		}
-
-		@Override
-		public final boolean containsKey(final Object key) {
-			return this.data.containsKey(key);
-		}
-
-		@Override
-		public final boolean containsValue(final Object value) {
-			return this.data.containsValue(value);
-		}
-		
-		@Override
-		public final Set<java.util.Map.Entry<K, Collection<V>>> entrySet() {
-			return this.data.entrySet();
-		}
-
-		@Override
-		public final boolean equals(final Object o) {
-			return this.data.equals(o);
-		}
-
-		@Override
-		public final Collection<V> get(final Object key) {
-			return this.data.get(key);
-		}
-
-		@Override
-		public final int hashCode() {
-			return this.data.hashCode();
-		}
-
-		@Override
-		public final boolean isEmpty() {
-			return this.data.isEmpty();
-		}
-
-		@Override
-		public final Set<K> keySet() {
-			return this.data.keySet();
-		}
-
-		@Override
-		public final Collection<V> put(final K key, final Collection<V> value) {
-			return this.data.put(key, value);
-		}
-		
-		/**
-		 * 
-		 * @param key
-		 * <ul>
-		 *  <li>IN</li>
-		 *  <li>MAYBE_NULL</li>
-		 * </ul>
-		 * @param value
-		 * <ul>
-		 *  <li>IN</li>
-		 *  <li>MAYBE_NULL</li>
-		 * </ul>
-		 * @return
-		 * <ul>
-		 *  <li>MAYBE_NEW</li>
-		 *  <li>NOT_NULL</li>
-		 * </ul>
-		 */
-		public final Collection<V> put(final K key, final V value) {
-			final Collection<V> result = createCollection(key);
-			
-			result.add(value);
-			
-			return result;
-		}
-		
-		/**
-		 * 
-		 * @param key
-		 * <ul>
-		 *  <li>IN</li>
-		 *  <li>MAYBE_NULL</li>
-		 * </ul>
-		 * @param values
-		 * <ul>
-		 *  <li>IN</li>
-		 *  <li>MAYBE_NULL</li>
-		 * </ul>
-		 * @return
-		 * <ul>
-		 *  <li>MAYBE_NEW</li>
-		 *  <li>NOT_NULL</li>
-		 * </ul>
-		 */
-		public final Collection<V> putAll(final K key, final Collection<V> values) {
-			final Collection<V> result = createCollection(key);
-			
-			result.addAll(values);
-			
-			return result;
-		}
-		
-		@Override
-		public final void putAll(final Map<? extends K, ? extends Collection<V>> t) {
-			this.data.putAll(t);
-		}
-		
-		@Override
-		public final Collection<V> remove(final Object key) {
-			return this.data.remove(key);
-		}
-		
-		@Override
-		public final int size() {
-			return this.data.size();
-		}
-		
-		@Override
-		public final Collection<Collection<V>> values() {
-			return this.data.values();
-		}
-		
-		@Override
-		public final String toString() {
-			return this.data.toString();
-		}
-		
-		/**
-		 * 
-		 * @param key
-		 * <ul>
-		 *  <li>IN</li>
-		 *  <li>MAYBE_NULL</li>
-		 * </ul>
-		 * @return
-		 * <ul>
-		 *  <li>MAYBE_NEW</li>
-		 *  <li>NOT_NULL</li>
-		 * </ul>
-		 */
-		private final Collection<V> createCollection(final K key) {
-			Collection<V> result = this.data.get(key);
-			
-			if (result == null) {
-				try {
-					this.data.put(key, result = this.collectionClass.newInstance());
-				} catch (final Exception exception) {
-					throw new RuntimeException(exception);
-				}
-			}
-			return result;
-		}
+		public abstract void localeChanged(Locale oldLocale, Locale newLocale);
 		
 	}
 	

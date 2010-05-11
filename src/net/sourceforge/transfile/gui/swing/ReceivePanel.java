@@ -19,6 +19,8 @@
 
 package net.sourceforge.transfile.gui.swing;
 
+import static net.sourceforge.transfile.gui.swing.SwingTranslator.Helpers.translate;
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
@@ -80,14 +82,13 @@ class ReceivePanel extends TopLevelPanel {
 	protected void setup() {
 		setLayout(new GridBagLayout());
 		
-//		final JButton receiveButton = new JButton(getStrings().getString("button_receive_file"));
-		final JButton receiveButton = new JButton("button_receive_file");
+		final JButton receiveButton = translate(new JButton("button_receive_file"));
 		final GridBagConstraints receiveButtonConstraints = new GridBagConstraints();
 		receiveButtonConstraints.gridx = 0;
 		receiveButtonConstraints.gridy = 0;
 		add(receiveButton, receiveButtonConstraints);
 		
-		SwingTranslator.getDefaultTranslator().autotranslate(this);
+//		SwingTranslator.getDefaultTranslator().autotranslate(this);
 	}
 
 	/** 

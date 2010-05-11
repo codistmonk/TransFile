@@ -19,6 +19,8 @@
 
 package net.sourceforge.transfile.gui.swing;
 
+import static net.sourceforge.transfile.gui.swing.SwingTranslator.Helpers.translate;
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -66,7 +68,7 @@ public class StatusPanel extends TopLevelPanel {
 		GridBagConstraints c = new GridBagConstraints();
 		
 //		statusLabel = new JLabel(getStrings().getString("status_ready"));
-		statusLabel = new JLabel("status_ready");
+		statusLabel = translate(new JLabel("status_ready"));
 		c.gridx = 0;
 		c.gridy = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
@@ -76,7 +78,7 @@ public class StatusPanel extends TopLevelPanel {
 		c.insets = new Insets(2, 5, 2, 5);
 		add(statusLabel, c);
 		
-		SwingTranslator.getDefaultTranslator().autotranslate(this);
+//		SwingTranslator.getDefaultTranslator().autotranslate(this);
 	}
 
 	/**

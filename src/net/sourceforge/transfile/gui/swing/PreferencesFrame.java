@@ -30,7 +30,6 @@ import java.util.Locale;
 import java.util.PropertyResourceBundle;
 
 import javax.swing.AbstractAction;
-import javax.swing.AbstractCellEditor;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -43,7 +42,6 @@ import javax.swing.event.CellEditorListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableModel;
-import javax.swing.text.TabExpander;
 
 import net.sourceforge.transfile.settings.Settings;
 

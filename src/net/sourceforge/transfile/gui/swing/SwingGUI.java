@@ -22,6 +22,7 @@ package net.sourceforge.transfile.gui.swing;
 import static net.sourceforge.transfile.gui.swing.SwingTranslator.createLocale;
 import static net.sourceforge.transfile.gui.swing.SwingTranslator.emptyIfNull;
 import static net.sourceforge.transfile.gui.swing.SwingTranslator.getDefaultTranslator;
+import static net.sourceforge.transfile.gui.swing.SwingTranslator.Helpers.translate;
 
 import java.awt.Container;
 import java.awt.Dimension;
@@ -228,6 +229,16 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	 * 
 	 */
 	private void setup() {
+		getDefaultTranslator().setLocale(createLocale(emptyIfNull((String) Settings.getInstance().get("locale"))));
+		getDefaultTranslator().addTranslatorListener(new SwingTranslator.Listener() {
+			
+			@Override
+			public final void localeChanged(final Locale oldLocale, final Locale newLocale) {
+				SwingGUI.this.repaint();
+			}
+			
+		});
+		
 		setupMenuBar();
 		
 		// set up content pane
@@ -263,23 +274,6 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 		statusPanel.setPreferredSize(new Dimension(360, 20));
 		panels.add(statusPanel);
 		pane.add(statusPanel);
-		
-		getDefaultTranslator().setLocale(createLocale(emptyIfNull((String) Settings.getInstance().get("locale"))));
-		getDefaultTranslator().autotranslate(this);
-		SwingTranslator.getDefaultTranslator().addTranslatorListener(new SwingTranslator.Listener() {
-			
-			@Override
-			public final void messagesBaseChanged(final String oldMessagesBase,
-					final String newMessagesBase) {
-				// Do nothing
-			}
-			
-			@Override
-			public final void localeChanged(final Locale oldLocale, final Locale newLocale) {
-				SwingGUI.this.repaint();
-			}
-			
-		});
 	}
 	
 	/**
@@ -290,12 +284,12 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 		final JMenuBar menuBar = new JMenuBar();
 		this.setJMenuBar(menuBar);
 		
-		final JMenu fileMenu = new JMenu("File");
+		final JMenu fileMenu = translate(new JMenu("File"));
 		
 		// add the "Exit" item to the "File" menu, unless running on Mac OS (X) in which
 		// case there is already a "Quit" item in the application menu
 		if(!this.onMacOSX) {
-			final JMenuItem exitItem = new JMenuItem("Exit");
+			final JMenuItem exitItem = translate(new JMenuItem("Exit"));
 			
 			exitItem.addActionListener(new ActionListener() {
 				
@@ -309,12 +303,12 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 			fileMenu.add(exitItem);
 		}
 		
-		final JMenu settingsMenu = new JMenu("Settings");
+		final JMenu settingsMenu = translate(new JMenu("Settings"));
 		
 		// add the "Preferences..." item to the "Settings" menu, unless running on Mac OS (X) in which
 		// case there is already a "Preferences..." item in the application menu
 		if(!this.onMacOSX) {
-			final JMenuItem preferencesItem = new JMenuItem("Preferences...");
+			final JMenuItem preferencesItem = translate(new JMenuItem("Preferences..."));
 			
 			preferencesItem.addActionListener(new ActionListener() {
 				
@@ -411,7 +405,7 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	 * @param errorMessage the error message to show
 	 */
 	private void showErrorDialog(final String errorMessage) {
-		JOptionPane.showMessageDialog(this, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
+		JOptionPane.showMessageDialog(this, errorMessage, translate("Error"), JOptionPane.ERROR_MESSAGE);
 	}
 	
 	/**

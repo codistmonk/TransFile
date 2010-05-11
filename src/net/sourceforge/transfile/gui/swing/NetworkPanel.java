@@ -19,6 +19,8 @@
 
 package net.sourceforge.transfile.gui.swing;
 
+import static net.sourceforge.transfile.gui.swing.SwingTranslator.Helpers.translate;
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -28,7 +30,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.text.MessageFormat;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
@@ -185,8 +186,7 @@ public class NetworkPanel extends TopLevelPanel {
 		GridBagConstraints c = new GridBagConstraints();
 		
 		remoteURLPanel = new JPanel();
-//		remoteURLPanel.setBorder(BorderFactory.createTitledBorder(getStrings().getString("section_remote_peerurl")));
-		remoteURLPanel.setBorder(BorderFactory.createTitledBorder("section_remote_peerurl"));
+		remoteURLPanel.setBorder(translate(BorderFactory.createTitledBorder("section_remote_peerurl")));
 		c.gridx = 0;
 		c.gridy = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
@@ -196,8 +196,7 @@ public class NetworkPanel extends TopLevelPanel {
 		setupRemoteURLPanel();
 		
 		localURLPanel = new JPanel();
-//		localURLPanel.setBorder(BorderFactory.createTitledBorder(getStrings().getString("section_local_peerurl")));
-		localURLPanel.setBorder(BorderFactory.createTitledBorder("section_local_peerurl"));
+		localURLPanel.setBorder(translate(BorderFactory.createTitledBorder("section_local_peerurl")));
 		c.gridx = 0;
 		c.gridy = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
@@ -206,8 +205,7 @@ public class NetworkPanel extends TopLevelPanel {
 		add(localURLPanel, c);
 		setupLocalURLPanel();
 		
-//		connectButton = new JButton(getStrings().getString("button_connect"));
-		connectButton = new JButton("button_connect");
+		connectButton = translate(new JButton("button_connect"));
 		connectButton.addActionListener(new ActionListener() {
 			
 			@Override
@@ -222,8 +220,7 @@ public class NetworkPanel extends TopLevelPanel {
 		c.weightx = 1;
 		add(connectButton, c);
 		
-//		stopButton = new JButton(getStrings().getString("button_interrupt_connect"));
-		stopButton = new JButton("button_interrupt_connect");
+		stopButton = translate(new JButton("button_interrupt_connect"));
 		stopButton.setVisible(false);
 		stopButton.addActionListener(new ActionListener() {
 			
@@ -234,7 +231,7 @@ public class NetworkPanel extends TopLevelPanel {
 		});
 		add(stopButton, c);
 		
-		SwingTranslator.getDefaultTranslator().autotranslate(this);
+//		SwingTranslator.getDefaultTranslator().autotranslate(this);
 	}
 	
 	/**
@@ -321,19 +318,16 @@ public class NetworkPanel extends TopLevelPanel {
 		c.fill = GridBagConstraints.NONE;
 		c.weightx = 0;
 		c.anchor = GridBagConstraints.LINE_START;
-			
-//		localLANAddrLabel = new JLabel(getStrings().getString("label_local_lan_addresses"));
-		localLANAddrLabel = new JLabel("label_local_lan_addresses");
+		
+		localLANAddrLabel = translate(new JLabel("label_local_lan_addresses"));
 		c.gridy = 1;
 		localURLPanel.add(localLANAddrLabel, c);
 		
-//		localInternetAddrLabel = new JLabel(getStrings().getString("label_local_internet_address"));
-		localInternetAddrLabel = new JLabel("label_local_internet_address");
+		localInternetAddrLabel = translate(new JLabel("label_local_internet_address"));
 		c.gridy = 2;
 		localURLPanel.add(localInternetAddrLabel, c);
 		
-//		JLabel localPortLabel = new JLabel(getStrings().getString("label_local_port"));
-		JLabel localPortLabel = new JLabel("label_local_port");
+		JLabel localPortLabel = translate(new JLabel("label_local_port"));
 		c.gridy = 3;
 		localURLPanel.add(localPortLabel, c);
 		
@@ -408,10 +402,10 @@ public class NetworkPanel extends TopLevelPanel {
 					Throwable cause = e.getCause();
 					if(cause instanceof SocketException) {
 						//TODO log
-						getWindow().setStatus(getStrings().getString("error_discover_lan_sockets"));
+						translate(NetworkPanel.this.getWindow(), "status", "error_discover_lan_sockets");
 					} else {
 						//TODO log
-						getWindow().setStatus(getStrings().getString("error_discover_lan_unknown"));
+						translate(NetworkPanel.this.getWindow(), "status", "error_discover_lan_unknown");
 					}
 				}
 			}
@@ -446,17 +440,17 @@ public class NetworkPanel extends TopLevelPanel {
 				} catch(ExecutionException e) {
 					Throwable cause = e.getCause();
 					if(cause instanceof UnknownHostException) {
-						getWindow().setStatus((new MessageFormat(getStrings().getString("error_discover_internet_unknown_host"))).format(new Object[] { cause.getLocalizedMessage() }));
-						localInternetAddrField.setText(getStrings().getString("not_available"));
+						translate(getWindow(), "status", "error_discover_internet_unknown_host", cause);
+						localInternetAddrField.setText(translate("not_available"));
 					} else if(cause instanceof MalformedURLException) {
-						getWindow().setStatus((new MessageFormat(getStrings().getString("error_discover_internet_malformed_url"))).format(new Object[] { cause.getLocalizedMessage() }));
-						localInternetAddrField.setText(getStrings().getString("not_available"));
+						translate(getWindow(), "status", "error_discover_internet_malformed_url", cause);
+						localInternetAddrField.setText(translate("not_available"));
 					} else if(cause instanceof IOException) {
-						getWindow().setStatus(getStrings().getString("error_discover_internet_io_error"));
-						localInternetAddrField.setText(getStrings().getString("not_available"));
+						translate(getWindow(), "status", "error_discover_internet_io_error");
+						localInternetAddrField.setText(translate("not_available"));
 					} else {
-						getWindow().setStatus(getStrings().getString("error_discover_internet_unknown"));
-						localInternetAddrField.setText("N/A");
+						translate(getWindow(), "status", "error_discover_internet_unknown");
+						localInternetAddrField.setText(translate("N/A"));
 						e.printStackTrace();
 					}
 				}
@@ -597,13 +591,13 @@ public class NetworkPanel extends TopLevelPanel {
 		final String remoteURL = (String) remoteURLBar.getSelectedItem();
 		
 		if(remoteURL == null || "".equals(remoteURL)) {
-			getWindow().setStatus(getStrings().getString("error_invalid_peerurl"));
+			translate(getWindow(), "status", "error_invalid_peerurl");
 			return;
 		}
 		
 		showStopButton();
 		
-		getWindow().setStatus(getStrings().getString("status_connecting"));
+		translate(getWindow(), "status", "status_connecting");
 		
 		connectWorker = new SwingWorker<Void, Void>() {
 
@@ -620,7 +614,7 @@ public class NetworkPanel extends TopLevelPanel {
 					// if the flow reaches this / no exceptions are thrown, the connection has been established.
 					onConnectSuccessful();
 				} catch(CancellationException e) {
-					getWindow().setStatus(getStrings().getString("status_interrupted"));
+					translate(getWindow(), "status", "status_interrupted");
 				} catch(InterruptedException e) {
 					//TODO when exactly does this happen. should be while the third thread
 					// involved with this SwingWorker gets interrupted while waiting for get to
@@ -629,18 +623,18 @@ public class NetworkPanel extends TopLevelPanel {
 					Throwable cause = e.getCause();
 					
 					if(cause instanceof PeerURLFormatException) {
-						getWindow().setStatus(getStrings().getString("connect_fail_invalid_peerurl"));
+						translate(getWindow(), "status", "connect_fail_invalid_peerurl");
 					} else if(cause instanceof UnknownHostException) {
-						getWindow().setStatus(getStrings().getString("connect_fail_unknown_host"));
+						translate(getWindow(), "status", "connect_fail_unknown_host");
 					} else if(cause instanceof IllegalStateException) {
-						getWindow().setStatus(new MessageFormat(getStrings().getString("connect_fail_illegal_state")).format(new Object[] { cause.getLocalizedMessage() }));
+						translate(getWindow(), "status", "connect_fail_illegal_state", cause);
 					} else if(cause instanceof LinkFailedException) {
 						// TODO...
-						getWindow().setStatus(getStrings().getString("connect_fail_no_link"));
+						translate(getWindow(), "status", "connect_fail_no_link");
 					} else if(cause instanceof InterruptedException) {
 						// ignore, situation handled by CancellationException
 					} else {
-						getWindow().setStatus(getStrings().getString("connect_fail_unknown"));
+						translate(getWindow(), "status", "connect_fail_unknown");
 						cause.printStackTrace();
 					}
 				} finally {
