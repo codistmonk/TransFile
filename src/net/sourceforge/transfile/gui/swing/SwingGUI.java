@@ -292,12 +292,12 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 		final JMenuBar menuBar = new JMenuBar();
 		this.setJMenuBar(menuBar);
 		
-		final JMenu fileMenu = translate(new JMenu("File"));
+		final JMenu fileMenu = translate(new JMenu("menu_file"));
 		
 		// add the "Exit" item to the "File" menu, unless running on Mac OS (X) in which
 		// case there is already a "Quit" item in the application menu
 		if(!this.onMacOSX) {
-			final JMenuItem exitItem = translate(new JMenuItem("Exit"));
+			final JMenuItem exitItem = translate(new JMenuItem("menu_item_exit"));
 			
 			exitItem.addActionListener(new ActionListener() {
 				
@@ -311,12 +311,12 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 			fileMenu.add(exitItem);
 		}
 		
-		final JMenu settingsMenu = translate(new JMenu("Settings"));
+		final JMenu settingsMenu = translate(new JMenu("menu_settings"));
 		
 		// add the "Preferences..." item to the "Settings" menu, unless running on Mac OS (X) in which
 		// case there is already a "Preferences..." item in the application menu
 		if(!this.onMacOSX) {
-			final JMenuItem preferencesItem = translate(new JMenuItem("Preferences..."));
+			final JMenuItem preferencesItem = translate(new JMenuItem("menu_item_preferences"));
 			
 			preferencesItem.addActionListener(new ActionListener() {
 				
