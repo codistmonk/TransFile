@@ -19,8 +19,6 @@
 
 package net.sourceforge.transfile.gui.swing;
 
-import java.util.ResourceBundle;
-
 import javax.swing.JPanel;
 
 import net.sourceforge.transfile.gui.swing.exceptions.DoubleInitializationException;
