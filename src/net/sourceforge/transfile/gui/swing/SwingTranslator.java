@@ -34,7 +34,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * TODO doc
+ * Instances of this class can translate messages using locales and resource bundles.
+ * <br>The easiest way add translation to a Swing program with this class is by using the static methods in {@link SwingTranslator.Helpers}.
  *
  * @author codistmonk (2010-05-11)
  *
@@ -92,6 +93,7 @@ public class SwingTranslator {
 	 * @param <T> the actual type of {@code object}
 	 * @param object
 	 * <br>Should not be null
+	 * <br>Input-output parameter
 	 * <br>Shared parameter
 	 * @param textPropertyName
 	 * <br>Should not be null
@@ -128,6 +130,7 @@ public class SwingTranslator {
 	 * TODO doc
 	 * @param object
 	 * <br>Should not be null
+	 * <br>Input-output parameter
 	 * <br>Shared parameter
 	 * @param textPropertyName
 	 * <br>Should not be null
@@ -245,8 +248,8 @@ public class SwingTranslator {
 	
 	/**
 	 * 
-	 * TODO doc
-	 *
+	 * This class defines a property translation operation.
+	 * 
 	 * @author codistmonk (creation 2010-05-11)
 	 *
 	 */
@@ -266,7 +269,6 @@ public class SwingTranslator {
 		
 		/**
 		 * 
-		 * TODO doc
 		 * @param object
 		 * <br>Should not be null
 		 * <br>Shared parameter
@@ -318,6 +320,9 @@ public class SwingTranslator {
 			this.set(SwingTranslator.this.translate(this.translationKey, this.messagesBase, this.parameters));
 		}
 		
+		/**
+		 * Sets the property with the translation key.
+		 */
 		public final void untranslate() {
 			this.set(this.translationKey);
 		}
@@ -335,8 +340,8 @@ public class SwingTranslator {
 		}
 		
 		/**
+		 * Calls {@code this.setter} with parameter {@code text}.
 		 * 
-		 * TODO doc
 		 * @param text
 		 * <br>Should not be null
 		 * <br>Shared parameter
@@ -354,8 +359,8 @@ public class SwingTranslator {
 	private static SwingTranslator defaultTranslator;
 	
 	/**
+	 * This method creates the default translator if necessary, and then always returns the same value.
 	 * 
-	 * TODO doc
 	 * @return
 	 * <br>A non-null value
 	 * <br>A shared value
@@ -373,10 +378,10 @@ public class SwingTranslator {
 	 * <br>{@code languageCountryVariant} is a String made of 1 to 3 elements separated by "_":
 	 * <br>language ("" or ISO 639 2-letter code) ["_" country ("" or ISO 3166 2-letter code) ["_" variant (can be "")]]
 	 * @param languageCountryVariant
-	 * <br>NOT_NULL
+	 * <br>Should not be null
 	 * @return
-	 * <br>MAYBE_NEW
-	 * <br>NOT_NULL
+	 * <br>A possibly new value
+	 * <br>A non-null value
 	 */
 	public static final Locale createLocale(final String languageCountryVariant) {
 		final String[] tmp = languageCountryVariant.split("_");
@@ -396,10 +401,10 @@ public class SwingTranslator {
 	/**
 	 * 
 	 * @param locale
-	 * <br>NOT_NULL
+	 * <br>Should not be null
 	 * @return
-	 * <br>NEW
-	 * <br>NOT_NULL
+	 * <br>A new value
+	 * <br>A non-null value
 	 */
 	public static final String getLanguageCountryVariant(final Locale locale) {
 		return locale.getLanguage() + "_" + locale.getCountry() + "_" + locale.getVariant();
@@ -584,8 +589,8 @@ public class SwingTranslator {
 	}
 	
 	/**
-	 * 
-	 * TODO doc
+	 * This class contains static methods that help manipulate the default translator.
+	 * <br>It is recommended to use a static import so that the only name to remember is translate.
 	 *
 	 * @author codistmonk (creation 2010-05-11)
 	 *
@@ -600,19 +605,21 @@ public class SwingTranslator {
 		}
 		
 		/**
+		 * This method registers {@code object} in the default translator and translates it using the specified translation key and optional parameters.
+		 * <br>The messages bundle is the one associated with the caller class.
 		 * 
-		 * TODO doc
 		 * @param <T> the actual type of {@code object} 
-		 * @param object
+		 * @param object the object whose properties need to be translated
 		 * <br>Should not be null
+		 * <br>Input-output parameter
 		 * <br>Shared parameter
-		 * @param textPropertyName
+		 * @param textPropertyName the lowerCamelCase name of the property to translate; a setter named "set" + UpperCamelCase name is expected
 		 * <br>Should not be null
 		 * <br>Shared parameter
 		 * @param translationKey
 		 * <br>Should not be null
 		 * <br>Shared parameter
-		 * @param parameters 
+		 * @param parameters optional parameters to build the translated message; if an exception is passed, its localized message will be used
 		 * <br>Should not be null
 		 * <br>Shared parameter
 		 * @return {@code object}
@@ -624,11 +631,16 @@ public class SwingTranslator {
 		}
 		
 		/**
+		 * This method tries to translate {@code component}'s properties named "text", "title" and "toolTipText".
+		 * <br>If the property doesn't exist or is not accessible with public getter and setter, nothing happens.
+		 * <br>The translation key for each property is the value of the property before the call.
+		 * <br>Warning: {@code parameters} will be used for all 3 properties if they are accessible.
+		 * <br>The messages bundle is the one associated with the caller class.
 		 * 
-		 * TODO doc
 		 * @param <T> the actual type of {@code component} 
-		 * @param component
+		 * @param component 
 		 * <br>Should not be null
+		 * <br>Input-output parameter
 		 * <br>Shared parameter
 		 * @param parameters
 		 * <br>Should not be null
@@ -650,8 +662,9 @@ public class SwingTranslator {
 		}
 		
 		/**
+		 * This method tries to translate {@code translationKey} with the specified parameter using the caller's class
+		 * to obtain a resource bundle.
 		 * 
-		 * TODO doc
 		 * @param translationKey
 		 * <br>Should not be null
 		 * @param parameters 
