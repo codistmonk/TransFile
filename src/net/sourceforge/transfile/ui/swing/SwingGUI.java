@@ -219,7 +219,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 			//TODO inform the user (i.e. dialog)
 		}
 		
-		getDefaultTranslator().setLocale(locale);
+		getDefaultTranslator().setLocale(Locale.FRANCE);
 	}
 	
 	/**
