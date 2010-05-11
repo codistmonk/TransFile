@@ -17,68 +17,36 @@
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.transfile.gui.swing;
+package net.sourceforge.transfile.ui.swing;
 
-import static net.sourceforge.transfile.gui.swing.SwingTranslator.Helpers.translate;
-
-import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
+import java.io.File;
+import java.io.IOException;
 
-import javax.swing.JLabel;
+import javax.swing.JTextField;
 
 /**
- * A small panel whose sole purpose is to display textual status messages upon request 
+ * 
  * 
  * @author Martin Riedel
  *
  */
-public class StatusPanel extends TopLevelPanel {
+public class SendPanel extends TopLevelPanel {
 	
-	private static final long serialVersionUID = 63220329611742114L;
+	private static final long serialVersionUID = -3849684830598909661L;
+	
+	final JTextField fileText = new JTextField();
 
-	/*
-	 * Holds the status/error message shown
-	 */
-	private JLabel statusLabel;
-	
-	/**
-	 * Creates a StatusPanel
-	 * 
-	 */
-	public StatusPanel(final SwingGUI window) {
-		super(window);	
-	}
-	
-	/**
-	 * Displays the provided status message, overwriting the one currently being shown
-	 * 
-	 * @param status the message to display
-	 */
-	public void setStatus(final String status) {
-		statusLabel.setText(status);
+	public SendPanel(final SwingGUI window) {
+		super(window);
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void setup() {
-		setLayout(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
-		
-//		statusLabel = new JLabel(getStrings().getString("status_ready"));
-		statusLabel = translate(new JLabel("status_ready"));
-		c.gridx = 0;
-		c.gridy = 0;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 1;
-		c.weighty = 0;
-		c.anchor = GridBagConstraints.LINE_START;
-		c.insets = new Insets(2, 5, 2, 5);
-		add(statusLabel, c);
-		
-//		SwingTranslator.getDefaultTranslator().autotranslate(this);
+	protected void onQuit() {
+		// do nothing
 	}
 
 	/**
@@ -112,11 +80,48 @@ public class StatusPanel extends TopLevelPanel {
 	 * {@inheritDoc}
 	 */
 	@Override
-	protected void onQuit() {
-		// do nothing
+	protected void setup() {
+		setLayout(new GridBagLayout());	
+		
+		/*final JFileChooser fileChooser = new JFileChooser();
+		
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 1;
+		c.weighty = 1;
+		c.insets = new Insets(5, 5, 5, 5);
+		add(fileText, c);
+		
+		final JButton fileButton = new JButton("Select File");
+		fileButton.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(fileChooser.showOpenDialog(SendPanel.this) == JFileChooser.APPROVE_OPTION)
+					setFile(fileChooser.getSelectedFile());
+			}			
+		});
+		c.gridx = 1;
+		c.gridy = 0;
+		c.fill = GridBagConstraints.NONE;
+		c.weightx = 0;
+		c.weighty = 0;
+		c.insets = new Insets(5, 5, 5, 5);
+		add(fileButton, c); */
 	}
 	
-	/** 
+	private void setFile(final File file) {
+		try {
+			fileText.setText(file.getCanonicalFile().toString());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -125,7 +130,7 @@ public class StatusPanel extends TopLevelPanel {
 		
 	}
 
-	/** 
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override

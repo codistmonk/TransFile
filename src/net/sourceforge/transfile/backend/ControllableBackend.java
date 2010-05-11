@@ -31,7 +31,7 @@ import net.sourceforge.transfile.network.exceptions.PeerURLFormatException;
 
 
 /**
- * TODO doc
+ * The application's backend, controllable by a user interface. 
  * 
  * @author Martin Riedel
  *

@@ -17,7 +17,7 @@
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.transfile.gui.swing.exceptions;
+package net.sourceforge.transfile.ui.swing.exceptions;
 
 /**
  * Thrown when a native look and feel couldn't be loaded

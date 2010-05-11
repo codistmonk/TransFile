@@ -17,11 +17,11 @@
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.transfile.gui.swing;
+package net.sourceforge.transfile.ui.swing;
 
 import javax.swing.JPanel;
 
-import net.sourceforge.transfile.gui.swing.exceptions.DoubleInitializationException;
+import net.sourceforge.transfile.ui.swing.exceptions.DoubleInitializationException;
 
 
 /**

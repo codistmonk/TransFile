@@ -17,7 +17,7 @@
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.transfile.gui.swing;
+package net.sourceforge.transfile.ui.swing;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;

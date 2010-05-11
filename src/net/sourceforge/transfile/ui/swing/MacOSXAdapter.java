@@ -17,13 +17,13 @@
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.transfile.gui.swing;
+package net.sourceforge.transfile.ui.swing;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
-import net.sourceforge.transfile.gui.swing.exceptions.MacOSXAdaptationException;
+import net.sourceforge.transfile.ui.swing.exceptions.MacOSXAdaptationException;
 
 
 //TODO catch MacOSXAdaptationExceptions somewhere and handle them gracefully (log but don't exit)

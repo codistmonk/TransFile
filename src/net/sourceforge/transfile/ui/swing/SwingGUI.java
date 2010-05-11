@@ -17,11 +17,11 @@
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.transfile.gui.swing;
+package net.sourceforge.transfile.ui.swing;
 
-import static net.sourceforge.transfile.gui.swing.SwingTranslator.createLocale;
-import static net.sourceforge.transfile.gui.swing.SwingTranslator.getDefaultTranslator;
-import static net.sourceforge.transfile.gui.swing.SwingTranslator.Helpers.translate;
+import static net.sourceforge.transfile.ui.swing.SwingTranslator.createLocale;
+import static net.sourceforge.transfile.ui.swing.SwingTranslator.getDefaultTranslator;
+import static net.sourceforge.transfile.ui.swing.SwingTranslator.Helpers.translate;
 
 import java.awt.Container;
 import java.awt.Dimension;
@@ -46,10 +46,10 @@ import javax.swing.UIManager;
 
 import net.sourceforge.transfile.backend.BackendEventHandler;
 import net.sourceforge.transfile.backend.ControllableBackend;
-import net.sourceforge.transfile.gui.GUI;
-import net.sourceforge.transfile.gui.swing.exceptions.NativeLookAndFeelException;
 import net.sourceforge.transfile.settings.Settings;
 import net.sourceforge.transfile.settings.exceptions.IllegalConfigValueException;
+import net.sourceforge.transfile.ui.UserInterface;
+import net.sourceforge.transfile.ui.swing.exceptions.NativeLookAndFeelException;
 
 
 /**
@@ -59,7 +59,7 @@ import net.sourceforge.transfile.settings.exceptions.IllegalConfigValueException
  * @author Martin Riedel
  *
  */
-public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
+public class SwingGUI extends JFrame implements UserInterface, BackendEventHandler {
 	
 	private static final long serialVersionUID = 3087671371254147452L;
 
