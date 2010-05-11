@@ -25,17 +25,25 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.EventObject;
+import java.util.Locale;
 import java.util.PropertyResourceBundle;
 
 import javax.swing.AbstractAction;
+import javax.swing.AbstractCellEditor;
+import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.event.CellEditorListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableModel;
+import javax.swing.text.TabExpander;
 
 import net.sourceforge.transfile.settings.Settings;
 
@@ -89,6 +97,10 @@ public class PreferencesFrame extends JDialog {
 			final Object value = this.tableModel.getValueAt(i, 1);
 			
 			Settings.getInstance().put(key, value);
+			
+			if ("locale".equals(key)) {
+				SwingTranslator.getDefaultTranslator().setLocale((Locale) value);
+			}
 		}
 	}
 	
@@ -103,8 +115,109 @@ public class PreferencesFrame extends JDialog {
 		
 		result.setToolTipText("Double-click to edit a value");
 		result.getTableHeader().setReorderingAllowed(false);
+		result.setDefaultEditor(Object.class, new CellEditor(result.getDefaultEditor(Object.class)));
 		
 		return result;
+	}
+	
+	/**
+	 * 
+	 * TODO doc
+	 *
+	 * @author codistmonk (creation 2010-05-11)
+	 *
+	 */
+	private static final class CellEditor implements TableCellEditor {
+		
+		private final TableCellEditor defaultCellEditor;
+		
+		private TableCellEditor currentCellEditor;
+		
+		/**
+		 * 
+		 * @param defaultCellEditor
+		 * <br>Should not be null
+		 * <br>Shared parameter
+		 */
+		public CellEditor(final TableCellEditor defaultCellEditor) {
+			this.defaultCellEditor = defaultCellEditor;
+			this.currentCellEditor = this.defaultCellEditor;
+		}
+		
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public final Component getTableCellEditorComponent(final JTable table,
+				final Object value, final boolean isSelected, final int row, final int column) {
+			if ("locale".equals(table.getValueAt(row, 0))) {
+				this.currentCellEditor = new DefaultCellEditor(new JComboBox(SwingTranslator.getDefaultTranslator().getAvailableLocales()));
+			}
+			else {
+				this.currentCellEditor = this.defaultCellEditor;
+			}
+			
+			return this.currentCellEditor.getTableCellEditorComponent(table, value, isSelected, row, column);
+		}
+		
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public final Object getCellEditorValue() {
+			return this.currentCellEditor.getCellEditorValue();
+		}
+		
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public final void addCellEditorListener(final CellEditorListener listener) {
+			this.currentCellEditor.addCellEditorListener(listener);
+		}
+		
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public final void cancelCellEditing() {
+			this.currentCellEditor.cancelCellEditing();
+		}
+		
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public final boolean isCellEditable(final EventObject event) {
+			return this.currentCellEditor.isCellEditable(event);
+		}
+		
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public final void removeCellEditorListener(final CellEditorListener listener) {
+			this.currentCellEditor.removeCellEditorListener(listener);
+		}
+		
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public final boolean shouldSelectCell(final EventObject event) {
+			return this.currentCellEditor.shouldSelectCell(event);
+		}
+		
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public final boolean stopCellEditing() {
+			return this.currentCellEditor.stopCellEditing();
+		}
+		
+		private static final long serialVersionUID = -3204827079123577279L;
+		
 	}
 	
 	/**
@@ -195,6 +308,8 @@ public class PreferencesFrame extends JDialog {
 			
 			result.addRow(new Object[] { key, Settings.getInstance().getProperty(key, defaultValue) });
 		}
+		
+		result.addRow(new Object[] { "locale", Settings.getInstance().get("locale") });
 		
 		return result;
 	}

@@ -185,7 +185,8 @@ public class NetworkPanel extends TopLevelPanel {
 		GridBagConstraints c = new GridBagConstraints();
 		
 		remoteURLPanel = new JPanel();
-		remoteURLPanel.setBorder(BorderFactory.createTitledBorder(getStrings().getString("section_remote_peerurl")));
+//		remoteURLPanel.setBorder(BorderFactory.createTitledBorder(getStrings().getString("section_remote_peerurl")));
+		remoteURLPanel.setBorder(BorderFactory.createTitledBorder("section_remote_peerurl"));
 		c.gridx = 0;
 		c.gridy = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
@@ -195,7 +196,8 @@ public class NetworkPanel extends TopLevelPanel {
 		setupRemoteURLPanel();
 		
 		localURLPanel = new JPanel();
-		localURLPanel.setBorder(BorderFactory.createTitledBorder(getStrings().getString("section_local_peerurl")));
+//		localURLPanel.setBorder(BorderFactory.createTitledBorder(getStrings().getString("section_local_peerurl")));
+		localURLPanel.setBorder(BorderFactory.createTitledBorder("section_local_peerurl"));
 		c.gridx = 0;
 		c.gridy = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
@@ -204,7 +206,8 @@ public class NetworkPanel extends TopLevelPanel {
 		add(localURLPanel, c);
 		setupLocalURLPanel();
 		
-		connectButton = new JButton(getStrings().getString("button_connect"));
+//		connectButton = new JButton(getStrings().getString("button_connect"));
+		connectButton = new JButton("button_connect");
 		connectButton.addActionListener(new ActionListener() {
 			
 			@Override
@@ -219,7 +222,8 @@ public class NetworkPanel extends TopLevelPanel {
 		c.weightx = 1;
 		add(connectButton, c);
 		
-		stopButton = new JButton(getStrings().getString("button_interrupt_connect"));
+//		stopButton = new JButton(getStrings().getString("button_interrupt_connect"));
+		stopButton = new JButton("button_interrupt_connect");
 		stopButton.setVisible(false);
 		stopButton.addActionListener(new ActionListener() {
 			
@@ -229,6 +233,8 @@ public class NetworkPanel extends TopLevelPanel {
 			}
 		});
 		add(stopButton, c);
+		
+		SwingTranslator.getDefaultTranslator().autotranslate(this);
 	}
 	
 	/**
