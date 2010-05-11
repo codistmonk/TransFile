@@ -65,9 +65,6 @@ abstract class TopLevelPanel extends JPanel {
 	public TopLevelPanel(final SwingGUI window) {
 		this.window = window;
 		
-		// inherit the main window's locale
-		setLocale(window.getLocale());
-		
 		// create GUI elements
 		setup();
 		
