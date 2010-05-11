@@ -178,19 +178,21 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 	 */
 	private void _start() {
 		try {
-			setNativeLookAndFeel();
+			this.setNativeLookAndFeel();
 		} catch(NativeLookAndFeelException e) {
-			showErrorDialog(e);
+			this.showErrorDialog(e);
 		}
 		
-		addWindowListener(new MainWindowListener());
+		this.addWindowListener(this.new MainWindowListener());
 		
-		setup();
+		this.setup();
 		
-		showConnectScreen();
+		this.showConnectScreen();
 		
-		setBounds(300, 200, 0, 0);
-		setVisible(true);
+//		setBounds(300, 200, 0, 0);
+		this.pack();
+		this.setLocationRelativeTo(null);
+		this.setVisible(true);
 	}
 	
 	/**
@@ -257,6 +259,8 @@ public class SwingGUI extends JFrame implements GUI, BackendEventHandler {
 		statusPanel.setPreferredSize(new Dimension(360, 20));
 		panels.add(statusPanel);
 		pane.add(statusPanel);
+		
+		SwingTranslator.getDefaultTranslator().autotranslate(this);
 	}
 	
 	/**

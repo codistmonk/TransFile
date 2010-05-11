@@ -233,8 +233,6 @@ public class NetworkPanel extends TopLevelPanel {
 			}
 		});
 		add(stopButton, c);
-		
-		SwingTranslator.getDefaultTranslator().autotranslate(this);
 	}
 	
 	/**
@@ -322,15 +320,18 @@ public class NetworkPanel extends TopLevelPanel {
 		c.weightx = 0;
 		c.anchor = GridBagConstraints.LINE_START;
 			
-		localLANAddrLabel = new JLabel(getStrings().getString("label_local_lan_addresses"));
+//		localLANAddrLabel = new JLabel(getStrings().getString("label_local_lan_addresses"));
+		localLANAddrLabel = new JLabel("label_local_lan_addresses");
 		c.gridy = 1;
 		localURLPanel.add(localLANAddrLabel, c);
 		
-		localInternetAddrLabel = new JLabel(getStrings().getString("label_local_internet_address"));
+//		localInternetAddrLabel = new JLabel(getStrings().getString("label_local_internet_address"));
+		localInternetAddrLabel = new JLabel("label_local_internet_address");
 		c.gridy = 2;
 		localURLPanel.add(localInternetAddrLabel, c);
 		
-		JLabel localPortLabel = new JLabel(getStrings().getString("label_local_port"));
+//		JLabel localPortLabel = new JLabel(getStrings().getString("label_local_port"));
+		JLabel localPortLabel = new JLabel("label_local_port");
 		c.gridy = 3;
 		localURLPanel.add(localPortLabel, c);
 		
