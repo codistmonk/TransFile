@@ -35,7 +35,9 @@ import java.util.logging.Logger;
 
 /**
  * Instances of this class can translate messages using locales and resource bundles.
- * <br>The easiest way add translation to a Swing program with this class is by using the static methods in {@link SwingTranslator.Helpers}.
+ * <br>The easiest way to add translation to a Swing program with this class is by using the static methods in {@link SwingTranslator.Helpers}.
+ * <br>To improve performance, call {@code this.setAutoCollectiongLocales(false)} after all available locales have been collected.
+ * <br>You can manually collect locales with {@link #collectAvailableLocales(String)}.
  *
  * @author codistmonk (2010-05-11)
  *
@@ -50,10 +52,14 @@ public class SwingTranslator {
 	
 	private Locale locale;
 	
+	private boolean autoCollectingLocales;
+	
 	public SwingTranslator() {
 		this.listeners = new ArrayList<Listener>();
 		this.autotranslators = new HashSet<Autotranslator>();
 		this.availableLocales = new HashSet<Locale>();
+		this.locale = Locale.getDefault();
+		this.autoCollectingLocales = true;
 	}
 	
 	/**
@@ -73,6 +79,22 @@ public class SwingTranslator {
 	 */
 	public final synchronized void removeTranslatorListener(final Listener listener) {
 		this.listeners.remove(listener);
+	}
+	
+	/**
+	 * 
+	 * @return {@code true} if {@link #collectAvailableLocales(String)} is called automatically each time a translation is performed
+	 */
+	public final boolean isAutoCollectingLocales() {
+		return this.autoCollectingLocales;
+	}
+	
+	/**
+	 * 
+	 * @param autoCollectingLocales {@code true} if {@link #collectAvailableLocales(String)} should be called automatically each time a translation is performed
+	 */
+	public final void setAutoCollectingLocales(final boolean autoCollectingLocales) {
+		this.autoCollectingLocales = autoCollectingLocales;
 	}
 	
 	/**
@@ -108,14 +130,14 @@ public class SwingTranslator {
 	 * <br>A non-null value
 	 * <br>A shared value
 	 */
-	public final synchronized <T> T set(final T object, final String textPropertyName, final String translationKey, final String messagesBase, final Object... parameters) {
-		final Autotranslator autotranslator = this.new Autotranslator(object, textPropertyName, translationKey, messagesBase, parameters);
+	public final synchronized <T> T translate(final T object, final String textPropertyName, final String translationKey, final String messagesBase, final Object... parameters) {
+		this.autoCollectLocales(messagesBase);
 		
-		this.collectAvailableLocales(messagesBase);
+		final Autotranslator autotranslator = this.new Autotranslator(object, textPropertyName, translationKey, messagesBase, parameters);
 		
 		autotranslator.translate();
 		
-		// If there is already another autotranslator with the same object and textProprtyName
+		// If there is already another autotranslator with the same object and textPropertyName
 		// remove it before adding the new autotranslator
 		this.autotranslators.remove(autotranslator);
 		this.autotranslators.add(autotranslator);
@@ -134,7 +156,7 @@ public class SwingTranslator {
 	 * <br>Should not be null
 	 * <br>Shared parameter
 	 */
-	public final synchronized void reset(final Object object, final String textPropertyName) {
+	public final synchronized void untranslate(final Object object, final String textPropertyName) {
 		for (final Iterator<Autotranslator> iterator = this.autotranslators.iterator(); iterator.hasNext();) {
 			final Autotranslator autotranslator = iterator.next();
 			
@@ -150,7 +172,6 @@ public class SwingTranslator {
 	
 	/**
 	 * 
-	 * TODO doc
 	 * @return
 	 * <br>A non-null value
 	 * <br>A shared value
@@ -160,14 +181,15 @@ public class SwingTranslator {
 	}
 	
 	/**
+	 * If {@code this.getLocale()} is not equal to {@code locale},
+	 * then the locale is changed, the autotranslators are updated and the listeners are notified.
 	 * 
-	 * TODO doc
 	 * @param locale
 	 * <br>Should not be null
 	 * <br>Shared parameter
 	 */
 	public final synchronized void setLocale(final Locale locale) {
-		if (this.getLocale() != locale) {
+		if (!this.getLocale().equals(locale)) {
 			final Locale oldLocale = this.getLocale();
 			
 			this.locale = locale;
@@ -183,6 +205,8 @@ public class SwingTranslator {
 	}
 	
 	/**
+	 * The set of available locales can be augmented with {@link #getAvailableLocales()}.
+	 * <br>{@link #getAvailableLocales()} is called each time a translation is performed.
 	 * 
 	 * @return
 	 * <br>A new value
@@ -205,14 +229,16 @@ public class SwingTranslator {
 	 * <br>A non-null value
 	 */
 	public final synchronized String translate(final String translationKey, final String messagesBase, final Object... parameters) {
-		final ResourceBundle messages = ResourceBundle.getBundle(messagesBase, this.getLocale());
+		this.autoCollectLocales(messagesBase);
 		
 		String translatedMessage = translationKey;
 		
 		try {
+			final ResourceBundle messages = ResourceBundle.getBundle(messagesBase, this.getLocale());
+			
 			translatedMessage = iso88591ToUTF8(messages.getString(translationKey));
 		} catch (final MissingResourceException exception) {
-			getLoggerForThisMethod().log(Level.WARNING, "Missing translation for locale (" + SwingTranslator.this.getLocale() + ") of " + exception.getKey());
+			getLoggerForThisMethod().log(Level.WARNING, "Missing translation for locale (" + SwingTranslator.this.getLocale() + ") of " + translationKey);
 		}
 		
 		final Object[] localizedParameters = parameters.clone();
@@ -227,12 +253,14 @@ public class SwingTranslator {
 	}
 	
 	/**
+	 * Scans {@code messagesBase} using {@link Locale#getAvailableLocales()} and adds the available locales to {@code this}.
+	 * <br>A locale is "available" to the translator if an appropriate resource bundle is found.
 	 * 
-	 * TODO doc
 	 * @param messagesBase
 	 * <br>Should not be null
 	 */
-	private final void collectAvailableLocales(final String messagesBase) {
+	public final synchronized void collectAvailableLocales(final String messagesBase) {
+		// TODO don't rely on Locale.getAvailableLocales(), use only messagesBase if possible
 		for (final Locale locale : Locale.getAvailableLocales()) {
 			try {
 				if (locale.equals(ResourceBundle.getBundle(messagesBase, locale).getLocale())) {
@@ -241,6 +269,18 @@ public class SwingTranslator {
 			} catch (final Exception exception) {
 				// Do nothing
 			}
+		}
+	}
+	
+	/**
+	 * Calls {@link #collectAvailableLocales(String)} if {@code this.isAutoCollectingLocales()}.
+	 * 
+	 * @param messagesBase
+	 * <br>Should not be null
+	 */
+	private final void autoCollectLocales(final String messagesBase) {
+		if (this.isAutoCollectingLocales()) {
+			this.collectAvailableLocales(messagesBase);
 		}
 	}
 	
@@ -625,7 +665,7 @@ public class SwingTranslator {
 		 * <br>A shared value
 		 */
 		public static final <T> T translate(final T object, final String textPropertyName, final String translationKey, final Object... parameters) {
-			return getDefaultTranslator().set(object, textPropertyName, translationKey, getCallerClass().getSimpleName(), parameters);
+			return getDefaultTranslator().translate(object, textPropertyName, translationKey, getCallerClass().getSimpleName(), parameters);
 		}
 		
 		/**
@@ -650,7 +690,11 @@ public class SwingTranslator {
 		public static final <T> T translate(final T component, final Object... parameters) {
 			for (final String textPropertyName : array("text", "title", "toolTipText")) {
 				try {
-					getDefaultTranslator().set(component, textPropertyName, (String) getGetter(component, textPropertyName).invoke(component), getCallerClass().getSimpleName(), parameters);
+					final String translationKey = (String) getGetter(component, textPropertyName).invoke(component);
+					
+					if (translationKey != null && !translationKey.isEmpty()) {
+						getDefaultTranslator().translate(component, textPropertyName, translationKey, getCallerClass().getSimpleName(), parameters);
+					}
 				} catch (final Exception exception) {
 					// Do nothing
 				}
