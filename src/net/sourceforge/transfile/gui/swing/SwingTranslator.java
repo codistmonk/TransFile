@@ -62,7 +62,7 @@ public class SwingTranslator {
 	 * <br>Should not be null
 	 * <br>Shared parameter
 	 */
-	public final void addTranslatorListener(final Listener listener) {
+	public final synchronized void addTranslatorListener(final Listener listener) {
 		this.listeners.add(listener);
 	}
 	
@@ -71,7 +71,7 @@ public class SwingTranslator {
 	 * @param listener
 	 * <br>Can be null
 	 */
-	public final void removeTranslatorListener(final Listener listener) {
+	public final synchronized void removeTranslatorListener(final Listener listener) {
 		this.listeners.remove(listener);
 	}
 	
@@ -81,7 +81,7 @@ public class SwingTranslator {
 	 * <br>A non-null value
 	 * <br>A new value
 	 */
-	public final Listener[] getTranslatorListeners() {
+	public final synchronized Listener[] getTranslatorListeners() {
 		return this.listeners.toArray(new Listener[this.listeners.size()]);
 	}
 	
@@ -108,7 +108,7 @@ public class SwingTranslator {
 	 * <br>A non-null value
 	 * <br>A shared value
 	 */
-	public final <T> T set(final T object, final String textPropertyName, final String translationKey, final String messagesBase, final Object... parameters) {
+	public final synchronized <T> T set(final T object, final String textPropertyName, final String translationKey, final String messagesBase, final Object... parameters) {
 		final Autotranslator autotranslator = this.new Autotranslator(object, textPropertyName, translationKey, messagesBase, parameters);
 		
 		this.collectAvailableLocales(messagesBase);
@@ -134,7 +134,7 @@ public class SwingTranslator {
 	 * <br>Should not be null
 	 * <br>Shared parameter
 	 */
-	public final void reset(final Object object, final String textPropertyName) {
+	public final synchronized void reset(final Object object, final String textPropertyName) {
 		for (final Iterator<Autotranslator> iterator = this.autotranslators.iterator(); iterator.hasNext();) {
 			final Autotranslator autotranslator = iterator.next();
 			
@@ -155,7 +155,7 @@ public class SwingTranslator {
 	 * <br>A non-null value
 	 * <br>A shared value
 	 */
-	public final Locale getLocale() {
+	public final synchronized Locale getLocale() {
 		return this.locale;
 	}
 	
@@ -166,7 +166,7 @@ public class SwingTranslator {
 	 * <br>Should not be null
 	 * <br>Shared parameter
 	 */
-	public final void setLocale(final Locale locale) {
+	public final synchronized void setLocale(final Locale locale) {
 		if (this.getLocale() != locale) {
 			final Locale oldLocale = this.getLocale();
 			
@@ -188,7 +188,7 @@ public class SwingTranslator {
 	 * <br>A new value
 	 * <br>A non-null value
 	 */
-	public final Locale[] getAvailableLocales() {
+	public final synchronized Locale[] getAvailableLocales() {
 		return this.availableLocales.toArray(new Locale[this.availableLocales.size()]);
 	}
 	
@@ -204,7 +204,7 @@ public class SwingTranslator {
 	 * @return
 	 * <br>A non-null value
 	 */
-	public final String translate(final String translationKey, final String messagesBase, final Object... parameters) {
+	public final synchronized String translate(final String translationKey, final String messagesBase, final Object... parameters) {
 		final ResourceBundle messages = ResourceBundle.getBundle(messagesBase, this.getLocale());
 		
 		String translatedMessage = translationKey;
