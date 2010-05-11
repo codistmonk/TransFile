@@ -127,6 +127,18 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	}
 	
 	/**
+	 * <p>Tells the main window to display the provided status (or error) message</p>
+	 * 
+	 * <p>Public only so that reflective access is possible. <b>Do not use from outside 
+	 * the net.sourceforge.transfile.ui package!</b></p>
+	 * 
+	 * @param status the message to display
+	 */
+	public void setStatus(final String status) {
+		statusPanel.setStatus(status);
+	}
+	
+	/**
 	 * Invoked when a connection to a peer has been established
 	 * 
 	 */
@@ -134,15 +146,6 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		setStatus("Connected");
 		
 		showTransferScreen();
-	}
-	
-	/**
-	 * Tells the main window to display the provided status (or error) message
-	 * 
-	 * @param status the message to display
-	 */
-	public void setStatus(final String status) {
-		statusPanel.setStatus(status);
 	}
 	
 	/**
