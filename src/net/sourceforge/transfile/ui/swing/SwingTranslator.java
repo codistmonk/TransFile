@@ -643,6 +643,17 @@ public class SwingTranslator {
 		}
 		
 		/**
+		 * 
+		 * @param cls
+		 * <br>Should not be null
+		 * @return the top level class enclosing {@code cls}, or {@code cls} itself if it is a top level class
+		 * <br>A non-null value
+		 */
+		private static final Class<?> getTopLevelEnclosingClass(final Class<?> cls) {
+			return cls.getEnclosingClass() == null ? cls : getTopLevelEnclosingClass(cls.getEnclosingClass());
+		}
+		
+		/**
 		 * This method registers {@code object} in the default translator and translates it using the specified translation key and optional parameters.
 		 * <br>The messages bundle is the one associated with the caller class.
 		 * 
@@ -665,7 +676,7 @@ public class SwingTranslator {
 		 * <br>A shared value
 		 */
 		public static final <T> T translate(final T object, final String textPropertyName, final String translationKey, final Object... parameters) {
-			return getDefaultTranslator().translate(object, textPropertyName, translationKey, getCallerClass().getSimpleName(), parameters);
+			return getDefaultTranslator().translate(object, textPropertyName, translationKey, getTopLevelEnclosingClass(getCallerClass()).getSimpleName(), parameters);
 		}
 		
 		/**
@@ -693,7 +704,7 @@ public class SwingTranslator {
 					final String translationKey = (String) getGetter(component, textPropertyName).invoke(component);
 					
 					if (translationKey != null && !translationKey.isEmpty()) {
-						getDefaultTranslator().translate(component, textPropertyName, translationKey, getCallerClass().getSimpleName(), parameters);
+						getDefaultTranslator().translate(component, textPropertyName, translationKey, getTopLevelEnclosingClass(getCallerClass()).getSimpleName(), parameters);
 					}
 				} catch (final Exception exception) {
 					// Do nothing
@@ -716,7 +727,7 @@ public class SwingTranslator {
 		 * <br>A non-null value
 		 */
 		public static final String translate(final String translationKey, final Object... parameters) {
-			return getDefaultTranslator().translate(translationKey, getCallerClass().getSimpleName(), parameters);
+			return getDefaultTranslator().translate(translationKey, getTopLevelEnclosingClass(getCallerClass()).getSimpleName(), parameters);
 		}
 		
 	}
