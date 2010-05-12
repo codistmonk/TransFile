@@ -20,7 +20,6 @@
 package net.sourceforge.transfile.ui.swing;
 
 import static net.sourceforge.transfile.ui.swing.SwingTranslator.getDefaultTranslator;
-import static net.sourceforge.transfile.ui.swing.SwingTranslator.Helpers.translate;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -57,18 +56,7 @@ public class StatusPanel extends TopLevelPanel {
 		
 		// reset the label text to the translated version of the most recent StatusMessage
 		// whenever the active locale changes
-		getDefaultTranslator().addTranslatorListener(new SwingTranslator.Listener() {
-
-			/**
-			 * {@inheritDoc}
-			 */
-			@Override
-			public void localeChanged(Locale oldLocale, Locale newLocale) {
-				if(StatusPanel.this.getWindow().getStatusService().iterator().hasNext())
-					StatusPanel.this.statusLabel.setText(StatusPanel.this.getWindow().getStatusService().iterator().next().getText());
-			}
-			
-		});
+		getDefaultTranslator().addTranslatorListener(new TranslatorListener());
 	}
 	
 	/**
@@ -143,14 +131,27 @@ public class StatusPanel extends TopLevelPanel {
 		
 	}
 	
-	private class StatusChangeListener implements StatusListener {
+	private class StatusChangeListener implements StatusService.StatusChangeListener {
 
 		/** 
 		 * {@inheritDoc}
 		 */
 		@Override
-		public void onNewStatusMessage(final StatusMessage message) {
+		public void newStatusMessage(final StatusMessage message) {
 			statusLabel.setText(message.getText());
+		}
+		
+	}
+	
+	private class TranslatorListener implements SwingTranslator.Listener {
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void localeChanged(Locale oldLocale, Locale newLocale) {
+			if(StatusPanel.this.getWindow().getStatusService().iterator().hasNext())
+				StatusPanel.this.statusLabel.setText(StatusPanel.this.getWindow().getStatusService().iterator().next().getText());
 		}
 		
 	}

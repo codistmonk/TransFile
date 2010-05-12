@@ -19,31 +19,44 @@
 
 package net.sourceforge.transfile.ui.swing;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
- * Receives new status messages and stores them in a last-in first-out fashion
+ * Keeps track of status messages in a LIFO (last-in first-out) fashion
  *
  * @author Martin Riedel
  *
  */
-interface StatusServiceProvider extends Iterable<StatusMessage> {
+class StatusServiceProvider extends LinkedList<StatusMessage> implements StatusService {
 	
-	/**
-	 * Posts the provided status message, making it the newest one
-	 * 
-	 * @param message 
-	 * <br />the status message to post
-	 * <br />should not be null
-	 * <br />should not be empty
+	private static final long serialVersionUID = 1083092863888029986L;
+
+	/*
+	 * List of all registered StatusListeners to notify about status changes
 	 */
-	public void postStatusMessage(final StatusMessage message);
+	private List<StatusChangeListener> statusListeners = new LinkedList<StatusChangeListener>();
 	
-	/**
-	 * Adds a {@link StatusListener} that will be informed about new status messages
-	 * 
-	 * @param listener
-	 * <br />the listener to inform about new status messages
-	 * <br />should not be null
+
+	/** 
+	 * {@inheritDoc}
 	 */
-	public void addStatusListener(final StatusListener listener);
+	@Override
+	public void postStatusMessage(final StatusMessage message) {
+		// StatusService is LIFO, so add the new message at the beginning of the list
+		super.add(0, message);
+		
+		// inform all registered StatusListeners about the new status message
+		for(StatusChangeListener listener: statusListeners)
+			listener.newStatusMessage(message);
+	}
+
+	/** 
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void addStatusListener(StatusChangeListener listener) {
+		this.statusListeners.add(listener);
+	}
 
 }

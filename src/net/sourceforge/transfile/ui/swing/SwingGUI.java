@@ -76,7 +76,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	/*
 	 * Handles status messages
 	 */
-	private final StatusServiceProvider statusService;
+	private final StatusService statusService;
 	
 	/*
 	 * References to the TopLevelPanels
@@ -104,7 +104,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	public SwingGUI() {
 		super(title);
 		
-		this.statusService = new StatusService();
+		this.statusService = new StatusServiceProvider();
 		
 		// check whether the application is running on Mac OS X and store the result
 		onMacOSX = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
@@ -135,9 +135,9 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		
 	/**
 	 * 
-	 * @return the {@link StatusServiceProvider} handling status messages for this window
+	 * @return the {@link StatusService} handling status messages for this window
 	 */
-	public StatusServiceProvider getStatusService() {
+	public StatusService getStatusService() {
 		return this.statusService;
 	}
 	
