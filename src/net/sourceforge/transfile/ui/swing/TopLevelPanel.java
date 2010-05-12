@@ -25,15 +25,15 @@ import net.sourceforge.transfile.ui.swing.exceptions.DoubleInitializationExcepti
 
 
 /**
- * TopLevelPanels are the highest level components inside SwingGUI. SwingGUI only aggregates
+ * <p>TopLevelPanels are the highest level components inside SwingGUI. SwingGUI only aggregates
  * TopLevelPanels, and there is bilateral communication between SwingGUI and the individual
- * TopLevelPanels to inform each other of major events.
+ * TopLevelPanels to inform each other of major events.</p>
  * 
- * TopLevelPanels typically encapsulate a particular feature of the application, i.e. the area
- * where the user configures and initiates a connection.
+ * <p>TopLevelPanels typically encapsulate a particular feature of the application, i.e. the area
+ * where the user configures and initiates a connection.</p>
  * 
- * TopLevelPanels should NOT perform any expensive operations in their constructors 
- * and should instead use their onInit() methods for that.
+ * <p>TopLevelPanels should NOT perform any expensive operations in their constructors 
+ * and should instead use their onInit() methods for that.</p>
  * 
  * @author Martin Riedel
  *
@@ -56,6 +56,7 @@ abstract class TopLevelPanel extends JPanel {
 	 * True when the panel is currently being shown to the user
 	 */
 	private boolean isShown = false;
+	
 	
 	/**
 	 * Constructs a TopLevelPanel instance
