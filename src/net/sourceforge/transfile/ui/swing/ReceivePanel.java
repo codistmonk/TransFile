@@ -87,8 +87,6 @@ class ReceivePanel extends TopLevelPanel {
 		receiveButtonConstraints.gridx = 0;
 		receiveButtonConstraints.gridy = 0;
 		add(receiveButton, receiveButtonConstraints);
-		
-//		SwingTranslator.getDefaultTranslator().autotranslate(this);
 	}
 
 	/** 

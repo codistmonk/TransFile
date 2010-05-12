@@ -38,6 +38,7 @@ import java.util.logging.Logger;
  * <br>The easiest way to add translation to a Swing program with this class is by using the static methods in {@link SwingTranslator.Helpers}.
  * <br>To improve performance, call {@code this.setAutoCollectiongLocales(false)} after all available locales have been collected.
  * <br>You can manually collect locales with {@link #collectAvailableLocales(String)}.
+ * <br>Instances of this class are thread-safe as long as the listeners don't cause synchronization problems.
  *
  * @author codistmonk (2010-05-11)
  *
@@ -437,6 +438,7 @@ public class SwingTranslator {
 	}
 	
 	/**
+	 * This method does the opposite of {@link #createLocale(String)}.
 	 * 
 	 * @param locale
 	 * <br>Should not be null
@@ -449,14 +451,14 @@ public class SwingTranslator {
 	}
 	
 	/**
+	 * TODO this utility method should be moved into a utility class
 	 * 
-	 * TODO doc
 	 * @param translatedMessage
 	 * <br>Should not be null
-	 * <br>May be a shared parameter
-	 * @return
+	 * <br>Shared parameter
+	 * @return a new string or {@code translatedMessage} if the conversion fails
 	 * <br>A non-null value
-	 * <br>May be a shared value
+	 * <br>Shared value
 	 */
 	public static final String iso88591ToUTF8(final String translatedMessage) {
 		try {
@@ -468,6 +470,7 @@ public class SwingTranslator {
 	}
 	
 	/**
+	 * TODO this utility method should be moved into a utility class
 	 * 
 	 * @param <T> the type into which {@code object} is tentatively being cast
 	 * @param cls
@@ -485,17 +488,24 @@ public class SwingTranslator {
 	}
 	
 	/**
+	 * Warning: this method can only be used directly.
+	 * <br>If you want to refactor your code, you can re-implement the functionality using {@code Thread.currentThread().getStackTrace()}.
+	 * <br>TODO this utility method should be moved into a utility class
 	 * 
 	 * @return
 	 * <br>A non-null value
+	 * @throws NullPointerException if the caller class cannot be retrieved
 	 */
 	public static final Logger getLoggerForThisMethod() {
 		return Logger.getLogger(getCallerClass().getCanonicalName() + "." + getCallerMethodName());
 	}
 	
 	/**
+	 * Warning: this method can only be used directly.
+	 * <br>If you want to refactor your code, you can re-implement the functionality using {@code Thread.currentThread().getStackTrace()}.
+	 * <br>TODO this utility method should be moved into a utility class
 	 * 
-	 * @return
+	 * @return {@code null} if the caller class cannot be retrieved
 	 * <br>A possibly null value
 	 */
 	public static final Class<?> getCallerClass() {
@@ -512,8 +522,11 @@ public class SwingTranslator {
 	}
 	
 	/**
+	 * Warning: this method can only be used directly.
+	 * <br>If you want to refactor your code, you can re-implement the functionality using {@code Thread.currentThread().getStackTrace()}.
+	 * <br>TODO this utility method should be moved into a utility class
 	 * 
-	 * @return
+	 * @return {@code null} if the caller method cannot be retrieved
 	 * <br>A possibly null value
 	 */
 	public static final String getCallerMethodName() {
@@ -523,8 +536,10 @@ public class SwingTranslator {
 	}
 	
 	/**
-	 * 
-	 * TODO doc
+	 * This method tries to find a setter starting with "set" for the specified property of the object.
+	 * <br>Eg: {@code getSetter(object, "text", String.class)} tries to find a method {@code setText(String)}
+	 * <br>TODO this utility method should be moved into a utility class
+	 *
 	 * @param object
 	 * <br>Should not be null
 	 * @param propertyName
@@ -544,11 +559,13 @@ public class SwingTranslator {
 	}
 	
 	/**
+	 * This method tries to find a getter starting with "get", "is", or "has" (in that order) for the specified property of the object.
+	 * <br>Eg: {@code getGetter(object, "empty")} tries to find a method {@code getEmpty()} or {@code isEmpty()} or {@code hasEmpty()}
+	 * <br>TODO this utility method should be moved into a utility class
 	 * 
-	 * TODO doc
 	 * @param object
 	 * <br>Should not be null
-	 * @param propertyName
+	 * @param propertyName the camelCase name of the property
 	 * <br>Should not be null
 	 * @return
 	 * <br>A non-null value
@@ -569,8 +586,8 @@ public class SwingTranslator {
 	}
 	
 	/**
+	 * TODO this utility method should be moved into a utility class
 	 * 
-	 * TODO doc
 	 * @param lowerCamelCase
 	 * <br>Should not be null
 	 * @return
@@ -582,6 +599,7 @@ public class SwingTranslator {
 	}
 	
 	/**
+	 * TODO this utility method should be moved into a utility class
 	 * 
 	 * @param string
 	 * <br>Can be null
@@ -595,6 +613,7 @@ public class SwingTranslator {
 	}
 	
 	/**
+	 * TODO this utility method should be moved into a utility class
 	 * 
 	 * @param <T> the actual type of the elements
 	 * @param elements
@@ -609,6 +628,7 @@ public class SwingTranslator {
 	}
 	
 	/**
+	 * TODO this utility method should be moved into a utility class
 	 * 
 	 * @param <T> the type that the caller is supposed to return
 	 * @param cause
@@ -734,12 +754,16 @@ public class SwingTranslator {
 	
 	/**
 	 * 
+	 * Listener interface for translator events.
+	 * 
 	 * @author codistmonk (creation 2009-09-28)
 	 *
 	 */
 	public static interface Listener {
 		
 		/**
+		 * Called whenever the translator's locale has been changed, and after the registered
+		 * objects have been translated.
 		 * 
 		 * @param oldLocale
 		 * <br>Should not be null
