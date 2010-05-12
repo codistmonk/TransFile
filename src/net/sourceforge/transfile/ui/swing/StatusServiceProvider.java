@@ -20,7 +20,10 @@
 package net.sourceforge.transfile.ui.swing;
 
 import java.util.LinkedList;
+
 import java.util.List;
+
+import static net.sourceforge.transfile.ui.swing.StatusService.StatusMessage;
 
 /**
  * Keeps track of status messages in a LIFO (last-in first-out) fashion

@@ -25,7 +25,7 @@ package net.sourceforge.transfile.ui.swing;
  * @author Martin Riedel
  *
  */
-interface StatusService extends Iterable<StatusMessage> {
+interface StatusService extends Iterable<StatusService.StatusMessage> {
 	
 	/**
 	 * Posts the provided status message, making it the newest one
@@ -52,7 +52,7 @@ interface StatusService extends Iterable<StatusMessage> {
 	 * @author Martin Riedel
 	 *
 	 */
-	interface StatusChangeListener {
+	public interface StatusChangeListener {
 		
 		/**
 		 * Invoked after a new status message is posted
@@ -61,6 +61,65 @@ interface StatusService extends Iterable<StatusMessage> {
 		 */
 		public void newStatusMessage(final StatusMessage message);
 
+	}
+	
+	/**
+	 * A mutable (and translatable) status message
+	 *
+	 * @author Martin Riedel
+	 *
+	 */
+	public static class StatusMessage {
+		
+		/*
+		 * The actual status message.
+		 * DO NOT RENAME THIS PROPERTY as it used is reflectively by SwingTranslator
+		 */
+		private String text;
+		
+		/**
+		 * Constructs a new StatusMessage.
+		 * 
+		 * @param text
+		 * <br />the status message text
+		 * <br />should be a translation key
+		 * <br />should not be null
+		 */
+		public StatusMessage(final String text) {
+			this.text = text;
+		}
+		
+		/**
+		 * <p>Returns the message text.</p>
+		 * 
+		 * <p>DO NOT RENAME THIS GETTER as it used is reflectively by {@link SwingTranslator}.</p>
+		 * 
+		 * @return the message 
+		 */
+		public String getText() {
+			return this.text;
+		}
+		
+		/**
+		 * <p>Sets the message text.</p>
+		 * 
+		 * <p><b>DO NOT USE THIS SETTER.</b> It is meant for reflective use by {@link SwingTranslator} only.</p>
+		 * 
+		 * <p><b>DO NOT RENAME THIS SETTER</b> as it used is reflectively by {@link SwingTranslator}.</p>
+		 * 
+		 * @param text
+		 * <br />should not be null
+		 */
+		public void setText(final String text) {
+			this.text = text;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public String toString() {
+			return this.getText();
+		}
 	}
 
 }

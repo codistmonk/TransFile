@@ -22,6 +22,7 @@ package net.sourceforge.transfile.ui.swing;
 import static net.sourceforge.transfile.ui.swing.SwingTranslator.createLocale;
 import static net.sourceforge.transfile.ui.swing.SwingTranslator.getDefaultTranslator;
 import static net.sourceforge.transfile.ui.swing.SwingTranslator.Helpers.translate;
+import static net.sourceforge.transfile.ui.swing.StatusService.StatusMessage;
 
 import java.awt.Container;
 import java.awt.Dimension;

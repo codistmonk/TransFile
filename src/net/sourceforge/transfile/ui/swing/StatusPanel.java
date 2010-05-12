@@ -20,6 +20,7 @@
 package net.sourceforge.transfile.ui.swing;
 
 import static net.sourceforge.transfile.ui.swing.SwingTranslator.getDefaultTranslator;
+import static net.sourceforge.transfile.ui.swing.StatusService.StatusMessage;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
