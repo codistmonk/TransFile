@@ -19,11 +19,13 @@
 
 package net.sourceforge.transfile.ui.swing;
 
+import static net.sourceforge.transfile.ui.swing.SwingTranslator.getDefaultTranslator;
 import static net.sourceforge.transfile.ui.swing.SwingTranslator.Helpers.translate;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.util.Locale;
 
 import javax.swing.JLabel;
 
@@ -42,21 +44,31 @@ public class StatusPanel extends TopLevelPanel {
 	 */
 	private JLabel statusLabel;
 	
+	
 	/**
 	 * Creates a StatusPanel
 	 * 
 	 */
 	public StatusPanel(final SwingGUI window) {
-		super(window);	
-	}
-	
-	/**
-	 * Displays the provided status message, overwriting the one currently being shown
-	 * 
-	 * @param status the message to display
-	 */
-	public void setStatus(final String status) {
-		statusLabel.setText(status);
+		super(window);
+		
+		// listen for new status messages
+		getWindow().getStatusService().addStatusListener(new StatusChangeListener());
+		
+		// reset the label text to the translated version of the most recent StatusMessage
+		// whenever the active locale changes
+		getDefaultTranslator().addTranslatorListener(new SwingTranslator.Listener() {
+
+			/**
+			 * {@inheritDoc}
+			 */
+			@Override
+			public void localeChanged(Locale oldLocale, Locale newLocale) {
+				if(StatusPanel.this.getWindow().getStatusService().iterator().hasNext())
+					StatusPanel.this.statusLabel.setText(StatusPanel.this.getWindow().getStatusService().iterator().next().getText());
+			}
+			
+		});
 	}
 	
 	/**
@@ -67,8 +79,7 @@ public class StatusPanel extends TopLevelPanel {
 		setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		
-//		statusLabel = new JLabel(getStrings().getString("status_ready"));
-		statusLabel = translate(new JLabel("status_ready"));
+		statusLabel = new JLabel("");
 		c.gridx = 0;
 		c.gridy = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
@@ -77,8 +88,6 @@ public class StatusPanel extends TopLevelPanel {
 		c.anchor = GridBagConstraints.LINE_START;
 		c.insets = new Insets(2, 5, 2, 5);
 		add(statusLabel, c);
-		
-//		SwingTranslator.getDefaultTranslator().autotranslate(this);
 	}
 
 	/**
@@ -131,6 +140,18 @@ public class StatusPanel extends TopLevelPanel {
 	@Override
 	protected void saveState() {
 		// TODO Auto-generated method stub
+		
+	}
+	
+	private class StatusChangeListener implements StatusListener {
+
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void onNewStatusMessage(final StatusMessage message) {
+			statusLabel.setText(message.getText());
+		}
 		
 	}
 

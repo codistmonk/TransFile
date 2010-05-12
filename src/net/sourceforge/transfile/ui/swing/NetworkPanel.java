@@ -402,10 +402,10 @@ public class NetworkPanel extends TopLevelPanel {
 					Throwable cause = e.getCause();
 					if(cause instanceof SocketException) {
 						//TODO log
-						translate(NetworkPanel.this.getWindow(), "status", "error_discover_lan_sockets");
+						NetworkPanel.this.getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_lan_sockets")));
 					} else {
 						//TODO log
-						translate(NetworkPanel.this.getWindow(), "status", "error_discover_lan_unknown");
+						NetworkPanel.this.getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_lan_unknown")));
 					}
 				}
 			}
@@ -440,17 +440,18 @@ public class NetworkPanel extends TopLevelPanel {
 				} catch(ExecutionException e) {
 					Throwable cause = e.getCause();
 					if(cause instanceof UnknownHostException) {
-						translate(getWindow(), "status", "error_discover_internet_unknown_host", cause);
+						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_internet_unknown_host")));
 						localInternetAddrField.setText(translate("not_available"));
 					} else if(cause instanceof MalformedURLException) {
-						translate(getWindow(), "status", "error_discover_internet_malformed_url", cause);
+						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_internet_malformed_url"), cause));
 						localInternetAddrField.setText(translate("not_available"));
 					} else if(cause instanceof IOException) {
-						translate(getWindow(), "status", "error_discover_internet_io_error");
+						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_internet_io_error")));
 						localInternetAddrField.setText(translate("not_available"));
 					} else {
-						translate(getWindow(), "status", "error_discover_internet_unknown");
+						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_internet_unknown")));
 						localInternetAddrField.setText(translate("N/A"));
+						//TODO log, don't print stacktrace to stdout
 						e.printStackTrace();
 					}
 				}
@@ -591,13 +592,13 @@ public class NetworkPanel extends TopLevelPanel {
 		final String remoteURL = (String) remoteURLBar.getSelectedItem();
 		
 		if(remoteURL == null || "".equals(remoteURL)) {
-			translate(getWindow(), "status", "error_invalid_peerurl");
+			getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_invalid_peerurl")));
 			return;
 		}
 		
 		showStopButton();
 		
-		translate(getWindow(), "status", "status_connecting");
+		getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("status_connecting")));
 		
 		connectWorker = new SwingWorker<Void, Void>() {
 
@@ -614,7 +615,7 @@ public class NetworkPanel extends TopLevelPanel {
 					// if the flow reaches this / no exceptions are thrown, the connection has been established.
 					onConnectSuccessful();
 				} catch(CancellationException e) {
-					translate(getWindow(), "status", "status_interrupted");
+					getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("status_interrupted")));
 				} catch(InterruptedException e) {
 					//TODO when exactly does this happen. should be while the third thread
 					// involved with this SwingWorker gets interrupted while waiting for get to
@@ -623,18 +624,19 @@ public class NetworkPanel extends TopLevelPanel {
 					Throwable cause = e.getCause();
 					
 					if(cause instanceof PeerURLFormatException) {
-						translate(getWindow(), "status", "connect_fail_invalid_peerurl");
+						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_invalid_peerurl")));
 					} else if(cause instanceof UnknownHostException) {
-						translate(getWindow(), "status", "connect_fail_unknown_host");
+						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_unknown_host")));
 					} else if(cause instanceof IllegalStateException) {
-						translate(getWindow(), "status", "connect_fail_illegal_state", cause);
+						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_illegal_state"), cause));
 					} else if(cause instanceof LinkFailedException) {
 						// TODO...
-						translate(getWindow(), "status", "connect_fail_no_link");
+						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_no_link")));
 					} else if(cause instanceof InterruptedException) {
 						// ignore, situation handled by CancellationException
 					} else {
-						translate(getWindow(), "status", "connect_fail_unknown");
+						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_unknown")));
+						//TODO log, don't print stacktrace to stdout
 						cause.printStackTrace();
 					}
 				} finally {

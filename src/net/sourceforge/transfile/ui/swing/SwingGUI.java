@@ -74,6 +74,11 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	private final static String title = "TransFile";
 	
 	/*
+	 * Handles status messages
+	 */
+	private final StatusServiceProvider statusService;
+	
+	/*
 	 * References to the TopLevelPanels
 	 */
 	private NetworkPanel networkPanel;
@@ -98,6 +103,8 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	 */
 	public SwingGUI() {
 		super(title);
+		
+		this.statusService = new StatusService();
 		
 		// check whether the application is running on Mac OS X and store the result
 		onMacOSX = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
@@ -125,17 +132,13 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 			
 		});
 	}
-	
+		
 	/**
-	 * <p>Tells the main window to display the provided status (or error) message</p>
 	 * 
-	 * <p>Public only so that reflective access is possible. <b>Do not use from outside 
-	 * the net.sourceforge.transfile.ui package!</b></p>
-	 * 
-	 * @param status the message to display
+	 * @return the {@link StatusServiceProvider} handling status messages for this window
 	 */
-	public void setStatus(final String status) {
-		statusPanel.setStatus(status);
+	public StatusServiceProvider getStatusService() {
+		return this.statusService;
 	}
 	
 	/**
@@ -143,7 +146,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	 * 
 	 */
 	void onConnectSuccessful() {
-		setStatus("Connected");
+		getStatusService().postStatusMessage(translate(new StatusMessage("status_connected")));
 		
 		showTransferScreen();
 	}
@@ -191,6 +194,8 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		this.setup();
 		
 		this.showConnectScreen();
+		
+		this.statusService.postStatusMessage(translate(new StatusMessage("status_ready")));
 		
 //		setBounds(300, 200, 0, 0);
 		this.pack();
