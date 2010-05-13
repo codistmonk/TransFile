@@ -19,6 +19,7 @@
 
 package net.sourceforge.transfile.ui.swing;
 
+import static net.sourceforge.transfile.ui.swing.PreferencesFrame.debugPrint;
 import static net.sourceforge.transfile.ui.swing.SwingTranslator.createLocale;
 import static net.sourceforge.transfile.ui.swing.SwingTranslator.getDefaultTranslator;
 import static net.sourceforge.transfile.ui.swing.SwingTranslator.Helpers.translate;
@@ -28,6 +29,8 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.HashSet;
@@ -198,8 +201,12 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		
 		this.statusService.postStatusMessage(translate(new StatusMessage("status_ready")));
 		
-//		setBounds(300, 200, 0, 0);
+		// Pack the window and use the resulting size as a minimum size which will be enforced by the listener
+		// added in setup()
 		this.pack();
+		this.setMinimumSize(this.getSize());
+		
+		// Center the window on the screen and show it
 		this.setLocationRelativeTo(null);
 		this.setVisible(true);
 	}
@@ -247,6 +254,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	 * 
 	 */
 	private void setup() {
+		// Add a translator listener to update the display when the user changes the language
 		getDefaultTranslator().addTranslatorListener(new SwingTranslator.Listener() {
 			
 			@Override
@@ -291,6 +299,19 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		statusPanel.setPreferredSize(new Dimension(360, 20));
 		panels.add(statusPanel);
 		pane.add(statusPanel);
+		
+		// Add a resize listener to prevent the window from becoming too small
+		// The minimum size must be set after calling pack() (cf _start())
+		this.addComponentListener(new ComponentAdapter() {
+			
+			@Override
+			public final void componentResized(final ComponentEvent event) {
+				SwingGUI.this.setSize(
+						Math.max(SwingGUI.this.getWidth(), SwingGUI.this.getMinimumSize().width),
+						Math.max(SwingGUI.this.getHeight(), SwingGUI.this.getMinimumSize().height));
+			}
+			
+		});
 	}
 	
 	/**
