@@ -139,8 +139,11 @@ class PortSpinner extends JSpinner {
 		 * 
 		 */
 		public PortSpinnerEditor() {
-			super(PortSpinner.this);
-			
+			// Initialize this NumberEditor.
+			// Secound parameter is the number format as described for the DecimalFormat class.
+			// 0 represents an integer value with no grouping
+			super(PortSpinner.this, "0");
+					
 			textField = getTextField();
 			
 			if(!(textField.getDocument() instanceof AbstractDocument))
@@ -151,10 +154,7 @@ class PortSpinner extends JSpinner {
 			textField.setHorizontalAlignment(JTextField.LEFT);
 			
 			// limit the text editor to a maximum of 5 columns
-			//textField.setColumns(maxDigits);
-											
-			// disable grouping of digits (65,535 -> 65535)
-			getFormat().setGroupingUsed(false);
+			//textField.setColumns(maxDigits);			
 			
 			// when focus is gained through a mouse click, set the cursor to where the click occurred
 			textField.addMouseListener(new MouseAdapter() {
