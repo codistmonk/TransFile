@@ -458,9 +458,14 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	 *
 	 */
 	private class MainWindowListener extends WindowAdapter {
+		
+		/**
+		 * {@inheritDoc}
+		 */
 		public void windowClosing(WindowEvent e) {
 			quit();
 		}
+		
 	}
 	
 	/**
