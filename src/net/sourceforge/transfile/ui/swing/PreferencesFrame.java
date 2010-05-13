@@ -307,7 +307,7 @@ public class PreferencesFrame extends JDialog {
 			result.addRow(new Object[] { key, Settings.getInstance().getProperty(key, defaultValue) });
 		}
 		
-		result.addRow(new Object[] { "locale", Settings.getInstance().get("locale") });
+		result.addRow(new Object[] { "locale", SwingTranslator.createLocale(Settings.getInstance().get("locale").toString()) });
 		
 		return result;
 	}
