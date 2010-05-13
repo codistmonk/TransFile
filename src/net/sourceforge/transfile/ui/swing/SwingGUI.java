@@ -146,6 +146,15 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	}
 	
 	/**
+	 * Packs the window and uses the resulting size as a minimum size which will be
+	 * enforced by the listener added in setup().
+	 */
+	public final void packAndSetMinimumSize() {
+		this.pack();
+		this.setMinimumSize(this.getSize());
+	}
+	
+	/**
 	 * Invoked when a connection to a peer has been established
 	 * 
 	 */
@@ -201,10 +210,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		
 		this.statusService.postStatusMessage(translate(new StatusMessage("status_ready")));
 		
-		// Pack the window and use the resulting size as a minimum size which will be enforced by the listener
-		// added in setup()
-		this.pack();
-		this.setMinimumSize(this.getSize());
+		this.packAndSetMinimumSize();
 		
 		// Center the window on the screen and show it
 		this.setLocationRelativeTo(null);
