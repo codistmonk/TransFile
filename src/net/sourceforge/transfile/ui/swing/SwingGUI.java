@@ -304,19 +304,6 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		statusPanel.setPreferredSize(new Dimension(360, 20));
 		panels.add(statusPanel);
 		pane.add(statusPanel);
-		
-		// Add a resize listener to prevent the window from becoming too small
-		// The minimum size must be set after calling pack() (cf _start())
-		this.addComponentListener(new ComponentAdapter() {
-			
-			@Override
-			public final void componentResized(final ComponentEvent event) {
-				SwingGUI.this.setSize(
-						Math.max(SwingGUI.this.getWidth(), SwingGUI.this.getMinimumSize().width),
-						Math.max(SwingGUI.this.getHeight(), SwingGUI.this.getMinimumSize().height));
-			}
-			
-		});
 	}
 	
 	/**
