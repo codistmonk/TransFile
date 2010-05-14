@@ -87,7 +87,7 @@ public class PreferencesFrame extends JDialog {
 	
 	final void saveSettings() {
 		this.putTableDataIntoSettings();
-		Settings.getInstance().save();
+//		Settings.getInstance().save();
 	}
 	
 	private final void putTableDataIntoSettings() {
@@ -95,7 +95,7 @@ public class PreferencesFrame extends JDialog {
 			final Object key = this.tableModel.getValueAt(i, 0);
 			final Object value = this.tableModel.getValueAt(i, 1);
 			
-			Settings.getInstance().put(key, value);
+			Settings.getPreferences().put(key.toString(), value.toString());
 			
 			if ("locale".equals(key)) {
 				Translator.getDefaultTranslator().setLocale((Locale) value);
@@ -305,10 +305,10 @@ public class PreferencesFrame extends JDialog {
 		for (final String key : defaultProperties.keySet()) {
 			final String defaultValue = defaultProperties.getObject(key).toString();
 			
-			result.addRow(new Object[] { key, Settings.getInstance().getProperty(key, defaultValue) });
+			result.addRow(new Object[] { key, Settings.getPreferences().get(key, defaultValue) });
 		}
 		
-		result.addRow(new Object[] { "locale", Translator.createLocale(Settings.getInstance().get("locale").toString()) });
+		result.addRow(new Object[] { "locale", Translator.createLocale(Settings.getPreferences().get("locale", "en").toString()) });
 		
 		return result;
 	}

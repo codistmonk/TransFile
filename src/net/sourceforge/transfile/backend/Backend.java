@@ -71,8 +71,6 @@ public class Backend implements ControllableBackend {
 	public void quit() {
 		//TODO ...
 		
-		Settings.getInstance().save();
-		
 		System.exit(0);
 	}
 	

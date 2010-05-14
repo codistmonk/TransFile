@@ -75,17 +75,17 @@ class PortSpinner extends JSpinner {
 	/*
 	 * Initial port (later to be overwritten by the user's last selected port, if present (loaded from the user's settings file)
 	 */
-	private static final int initialPort = Settings.getInstance().getDefaultInt("local_port");
+	private static final int initialPort = Settings.getDefaultInt("local_port");
 	
 	/*
 	 * The minimum valid port (usually 1 or 1024)
 	 */
-	private static final int minPort = Settings.getInstance().getInt("local_port_min");
+	private static final int minPort = Settings.getPreferences().getInt("local_port_min", 0);
 	
 	/*
 	 * The maximum valid port (usually 65535)
 	 */
-	private static final int maxPort = Settings.getInstance().getInt("local_port_max");
+	private static final int maxPort = Settings.getPreferences().getInt("local_port_max", 0);
 	
 	/*
 	 * The foreground (text) color of the text field at startup

@@ -48,7 +48,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import net.sourceforge.transfile.backend.ControllableBackend;
-import net.sourceforge.transfile.exceptions.SerializationException;
 import net.sourceforge.transfile.network.exceptions.LinkFailedException;
 import net.sourceforge.transfile.network.exceptions.PeerURLFormatException;
 import net.sourceforge.transfile.settings.Settings;
@@ -240,7 +239,7 @@ public class NetworkPanel extends TopLevelPanel {
 	 */
 	protected void loadState() {
 		// load last entered local port (property always exists because there is a default)
-		localPort.setValue(Settings.getInstance().getInt("local_port"));
+		localPort.setValue(Settings.getPreferences().getInt("local_port", 0));
 		
 		// selected local IP address is loaded in onLANAddressesDiscovered() (if applicable)
 	}
@@ -248,21 +247,23 @@ public class NetworkPanel extends TopLevelPanel {
 	/**
 	 * {@inheritDoc} 
 	 */
+	@Override
 	protected void saveState() {
-		// save PeerURLBar state
-		try {
-			PeerURLBar.getInstance().saveModel();
-		} catch (SerializationException e) {
-			//TODO LOG
-			e.printStackTrace(); //TODO remove
+		final StringBuilder builder = new StringBuilder();
+		
+		for (int i = 0; i < PeerURLBar.getInstance().getItemCount(); ++i) {
+			builder.append(PeerURLBar.getInstance().getItemAt(i)).append(',');
 		}
 		
+		Settings.getPreferences().put("peer_url_bar.state", builder.toString());
+		
 		// save local port
-		Settings.getInstance().setProperty("local_port", localPort.getValue().toString());
+		Settings.getPreferences().put("local_port", this.localPort.getValue().toString());
 		
 		// save selected local IP address
-		if(selectedLocalAddress != null && !("".equals(selectedLocalAddress)))
-			Settings.getInstance().setProperty("selected_local_ip", selectedLocalAddress);
+		if(this.selectedLocalAddress != null && !("".equals(this.selectedLocalAddress))) {
+			Settings.getPreferences().put("selected_local_ip", this.selectedLocalAddress);
+		}
 	}
 	
 	/**
@@ -536,7 +537,7 @@ public class NetworkPanel extends TopLevelPanel {
 		// IP is still present.
 		String ipToSelect = userHasSelectedALocalIP ?
 							lastSelectedLocalAddress :
-							Settings.getInstance().getProperty("selected_local_ip");
+							Settings.getPreferences().get("selected_local_ip", "");
 
 		if(ipToSelect == null || "".equals(ipToSelect))
 			return;

@@ -19,13 +19,9 @@
 
 package net.sourceforge.transfile.settings;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
-import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
-
-import net.sourceforge.transfile.settings.exceptions.IllegalConfigValueException;
 
 /**
  * Provides simple key-value pair persistence. Default values are in transfile.settings.defaults.properties,
@@ -34,79 +30,70 @@ import net.sourceforge.transfile.settings.exceptions.IllegalConfigValueException
  * <br>Singleton class.
  * 
  * @author Martin Riedel
+ * @author codistmonk (modifications since 2010-05-10)
  *
  */
-public class Settings extends Properties {
-
+public class Settings {
+	
+	/**
+	 * Private constructor to prevent this class from being instantiated.
+	 */
+	private Settings() {
+		// Do nothing
+	}
+	
 	private static final long serialVersionUID = 312178159322230641L;
-
-	/*
-	 * Singleton instance.
-	 * Deliberately NOT using the Initialization on Demand Holder idiom to avoid 
-	 * concurrency issues and because it wouldn't produce any advantage for this class.
-	 */
-	private static final Settings _instance = makeInstance();
 	
-	/*
-	 * Configuration file directory
-	 */
-	private final File cfgDir;
-	
-	/*
-	 * True if the user home directory couldn't be determined, making it impossible to load or save
-	 * user-specific settings
-	 */
-	private final boolean persistent; 
-
+	private static Properties defaults;
 	
 	/**
-	 * Returns the Singleton instance. 
+	 * Loads the default preferences values from the resource "defaults.properties".
 	 * 
-	 * @return the Singleton instance of Settings
+	 * @return
+	 * <br>A non-null value
+	 * <br>A shared value
+	 * <br>A possibly new value
 	 */
-	public static Settings getInstance() {
-		return _instance;
-	}
-	
-	/**
-	 * Returns the user-specific configuration directory (i.e. USER_HOME/.transfile/)
-	 * 
-	 * @return the user-specific configuration directory
-	 */
-	public File getCfgDir() {
-		return this.cfgDir;
-	}
-	
-	/**
-	 * Saves the current key-value pairs to user preferences.
-	 * 
-	 */
-	public final void save() {
-		if(!this.persistent) {
-			return;
+	private static final synchronized Properties getDefaults() {
+		if (defaults == null) {
+			defaults = new Properties();
+			
+			try {
+				// TODO check if this works with WebStart
+				// When run by WebStart, class.getResourceAsStream() uses the default class loader
+				// in a way that may prevent it from finding the resources in the jar
+				// As it is now, class.getClassLoader().getResourceAsStream() (the correct way, I think)
+				// cannot be used because getDefaults() is called during other classes static initialization while
+				// this class  hasn't been loaded yet
+				// If it turns out there is no problem, then remove all these comments
+				// Otherwise, a possible fix could be to use C.class.getClassLoader().getResourceAsStream() where C
+				// is a class that doesn't depend directly or indirectly on this class.
+				defaults.load(Settings.class.getResourceAsStream("defaults.properties"));
+			} catch (final IOException exception) {
+				exception.printStackTrace();
+			}
+			
+			for (final java.util.Map.Entry<Object, Object> entry : defaults.entrySet()) {
+				if (getPreferences().get(entry.getKey().toString(), null) == null) {
+					getPreferences().put(entry.getKey().toString(), entry.getValue().toString());
+				}
+			}
 		}
 		
-		final Preferences userPreferences = Preferences.userNodeForPackage(Settings.class);
-		
-		for (final Object key : this.keySet()) {
-			userPreferences.put(key.toString(), this.get(key).toString());
-		}
+		return defaults;
 	}
 	
 	/**
-	 * Returns the value for the specified property key as an integer
+	 * Returns the user preferences for this package.
 	 * 
-	 * @param key the property key to look up
-	 * @return the value for the specified property key as an integer, or null if the key could not be found
-	 * @throws IllegalConfigValueException if the value is not an integer
+	 * @return {@code null} if the user preferences for this package could not be created or retrieved
+	 * <br>A non-null value
+	 * <br>A possibly new value
+	 * @see Preferences#userNodeForPackage(Class)
+	 * @throws SecurityException if the preferences cannot be loaded
 	 */
-	public int getInt(final String key) {
-		String value = getProperty(key);
-		try {
-			return Integer.parseInt(getProperty(key));
-		} catch(NumberFormatException e) {
-			throw new IllegalConfigValueException(key, value, e);
-		}
+	public static final Preferences getPreferences() {
+		return Preferences.userNodeForPackage(Settings.class);
 	}
 	
 	/**
@@ -115,8 +102,8 @@ public class Settings extends Properties {
 	 * @param key the property key to look up
 	 * @return the default for the specified property key, or null if the key could no be found
 	 */
-	public String getDefault(final String key) {
-		return this.defaults.getProperty(key);
+	public static final String getDefault(final String key) {
+		return getDefaults().getProperty(key);
 	}
 
 	/**
@@ -124,89 +111,11 @@ public class Settings extends Properties {
 	 * 
 	 * @param key the property key to look up
 	 * @return the default for the specified property key as an integer, or null if the key could not be found
-	 * @throws IllegalConfigValueException if the value is not an integer
 	 */
-	public int getDefaultInt(final String key) {
-		String value = this.defaults.getProperty(key);
-		try {
-			return Integer.parseInt(value);
-		} catch(NumberFormatException e) {
-			throw new IllegalConfigValueException(key, value, e);
-		}
+	public static final int getDefaultInt(final String key) {
+		final Object value = getDefaults().get(key);
+		
+		return value == null ? null : Integer.valueOf(value.toString());
 	}
 	
-	/**
-	 * Constructs a Settings instance. Internal use only.
-	 * 
-	 * @param defaults Properties object containing default values
-	 */
-	private Settings(final Properties defaults) {
-		super(defaults);
-		
-		this.persistent = getPreferences() != null;
-		
-		this.cfgDir = new File(System.getProperty("user.home"), ".transfile");
-		
-		if(!this.cfgDir.isDirectory()) {
-			this.cfgDir.mkdir();
-		}
-		
-		load();
-	}
-	
-	/**
-	 * Returns the user preferences for this package.
-	 * 
-	 * @return {@code null} if the user preferences for this package could not be created or retrieved
-	 * <br>A possibly null value
-	 * <br>A possibly new value
-	 * @see Preferences#userNodeForPackage(Class)
-	 */
-	private static final Preferences getPreferences() {
-		try {
-			return Preferences.userNodeForPackage(Settings.class);
-		} catch (final Exception exception) {
-			exception.printStackTrace();
-			
-			return null;
-		}
-	}
-	
-	/**
-	 * Factory method for Settings
-	 * 
-	 * @return a Settings instance
-	 */
-	private static Settings makeInstance() {
-		Properties defaults = new Properties();
-		
-		try {
-			defaults.load(Settings.class.getResourceAsStream("defaults.properties"));
-		} catch (final IOException exception) {
-			exception.printStackTrace();
-		}
-		
-		return new Settings(defaults);
-	}
-	
-	/**
-	 * Loads settings from user preferences
-	 * 
-	 */
-	private final void load() {
-		if (!this.persistent) {
-			return;
-		}
-		
-		final Preferences userPreferences = Preferences.userNodeForPackage(Settings.class);
-
-		try {
-			for (final String key : userPreferences.keys()) {
-				this.put(key, userPreferences.get(key, this.getDefault(key)));
-			}
-		} catch (final BackingStoreException exception) {
-			throw new RuntimeException(exception);
-		}
-	}
-
 }

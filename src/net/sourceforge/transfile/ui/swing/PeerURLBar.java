@@ -22,6 +22,9 @@ package net.sourceforge.transfile.ui.swing;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.prefs.BackingStoreException;
 
 import javax.swing.AbstractListModel;
 import javax.swing.JComboBox;
@@ -29,6 +32,7 @@ import javax.swing.MutableComboBoxModel;
 
 import net.sourceforge.transfile.exceptions.SerializationException;
 import net.sourceforge.transfile.exceptions.SerializationFileNotFoundException;
+import net.sourceforge.transfile.i18n.Translator;
 import net.sourceforge.transfile.network.PeerURL;
 import net.sourceforge.transfile.settings.Settings;
 
@@ -68,12 +72,12 @@ class PeerURLBar extends JComboBox {
 	 * Typically, entering a (valid) PeerURL and pressing enter causes such a request to add for an item
 	 * to be added, with said item being the PeerURL entered.
 	 */
-	private static final int maxRetainedItems = Integer.parseInt(Settings.getInstance().getProperty("peerurlbar_max_retained_items"));
+	private static final int maxRetainedItems = Settings.getPreferences().getInt("peerurlbar_max_retained_items", 1);
 	
 	/*
 	 * The file the data model will be serialized and saved to to achieve persistence
 	 */
-	private final File stateFile = new File(Settings.getInstance().getCfgDir(), "PeerURLBar.state");
+	private final File stateFile = new File(""/*Settings.getInstance().getCfgDir()*/, "PeerURLBar.state");
 	
 	/*
 	 * A reference to the data model used by the PeerURLBar
@@ -154,22 +158,9 @@ class PeerURLBar extends JComboBox {
 		 * 
 		 */
 		public PeerURLBarModel() {
-			ComboBoxItemsHolder holder = null;
+			this.holder = new ComboBoxItemsHolder(maxRetainedItems, stateFile);
 			
-			try {
-				holder = ComboBoxItemsHolder.load(stateFile);
-			} catch(SerializationFileNotFoundException e) {
-				//TODO LOG
-				e.printStackTrace(); //TODO remove
-			} catch(SerializationException e) {
-				//TODO LOG
-				e.printStackTrace(); //TODO remove
-			} finally {
-				if(holder == null)
-					holder = new ComboBoxItemsHolder(maxRetainedItems, stateFile);
-			}
-			
-			this.holder = holder; 
+			this.holder.items.addAll(Arrays.asList(Settings.getPreferences().get("peer_url_bar.state", "").split(",")));
 		}
 		
 		/**
@@ -178,6 +169,9 @@ class PeerURLBar extends JComboBox {
 		 * @throws SerializationException if serializing or saving the serialized data to disk failed
 		 */
 		public void saveHolder() throws SerializationException {
+			if (true) {
+				return;
+			}
 			holder.save();
 		}
 
