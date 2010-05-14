@@ -133,7 +133,7 @@ public class Translator {
 	 */
 	public final synchronized <T> T translate(final T object, final String textPropertyName, final String translationKey, final String messagesBase, final Object... parameters) {
 		this.autoCollectLocales(messagesBase);
-		
+			
 		final Autotranslator autotranslator = this.new Autotranslator(object, textPropertyName, translationKey, messagesBase, parameters);
 		
 		autotranslator.translate();
@@ -235,7 +235,7 @@ public class Translator {
 		String translatedMessage = translationKey;
 		
 		try {
-			final ResourceBundle messages = ResourceBundle.getBundle(messagesBase, this.getLocale());
+			final ResourceBundle messages = ResourceBundle.getBundle(messagesBase);
 			
 			translatedMessage = iso88591ToUTF8(messages.getString(translationKey));
 		} catch (final MissingResourceException exception) {
@@ -674,6 +674,18 @@ public class Translator {
 		}
 		
 		/**
+		 * 
+		 * 
+		 * @param callerClass
+		 * <br />The class {@code translate} was called from
+		 * <br />Should not be null
+		 * @return the correct ResourceBundle base name for the calling class
+		 */
+		private static final String makeResourceBundleBaseName(final Class<?> callerClass) {
+			return "l10n/" + getTopLevelEnclosingClass(callerClass).getName().substring("net.sourceforge.transfile.".length()).replace(".", "/");
+		}
+		
+		/**
 		 * This method registers {@code object} in the default translator and translates it using the specified translation key and optional parameters.
 		 * <br>The messages bundle is the one associated with the caller class.
 		 * 
@@ -696,7 +708,7 @@ public class Translator {
 		 * <br>A shared value
 		 */
 		public static final <T> T translate(final T object, final String textPropertyName, final String translationKey, final Object... parameters) {
-			return getDefaultTranslator().translate(object, textPropertyName, translationKey, getTopLevelEnclosingClass(getCallerClass()).getSimpleName(), parameters);
+			return getDefaultTranslator().translate(object, textPropertyName, translationKey, makeResourceBundleBaseName(getCallerClass()), parameters);
 		}
 		
 		/**
@@ -724,7 +736,7 @@ public class Translator {
 					final String translationKey = (String) getGetter(component, textPropertyName).invoke(component);
 					
 					if (translationKey != null && !translationKey.isEmpty()) {
-						getDefaultTranslator().translate(component, textPropertyName, translationKey, getTopLevelEnclosingClass(getCallerClass()).getSimpleName(), parameters);
+						getDefaultTranslator().translate(component, textPropertyName, translationKey, makeResourceBundleBaseName(getCallerClass()), parameters);
 					}
 				} catch (final Exception exception) {
 					// Do nothing
@@ -747,7 +759,7 @@ public class Translator {
 		 * <br>A non-null value
 		 */
 		public static final String translate(final String translationKey, final Object... parameters) {
-			return getDefaultTranslator().translate(translationKey, getTopLevelEnclosingClass(getCallerClass()).getSimpleName(), parameters);
+			return getDefaultTranslator().translate(translationKey, makeResourceBundleBaseName(getCallerClass()), parameters);
 		}
 		
 	}
