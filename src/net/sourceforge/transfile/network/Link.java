@@ -108,13 +108,11 @@ public class Link {
 				InetAddress address = addresses.nextElement();
 				
 				if(ipv4Only) {
-					// At the current state of the Java Networking API an InetAddress is either
-					// implemented by Inet4Adress or Inet6Address
-					if(address instanceof Inet4Address) {
+					// InetAddress is implemented by either Inet4Adress or Inet6Address
+					if(address instanceof Inet4Address)
 						localAddresses.add(address.getHostAddress());
-					}
 				} else {
-					localAddresses.add(address.toString());
+					localAddresses.add(address.getHostAddress());
 				}
 			}
 		}
