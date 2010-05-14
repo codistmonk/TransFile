@@ -23,6 +23,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.NetworkInterface;
@@ -33,8 +34,6 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import net.sourceforge.transfile.network.exceptions.LinkFailedException;
 import net.sourceforge.transfile.network.exceptions.PeerURLFormatException;
@@ -107,24 +106,15 @@ public class Link {
 			// iterate through all IP addresses of the current local network interface
 			for(Enumeration<InetAddress> addresses = iface.getInetAddresses(); addresses.hasMoreElements(); ) {
 				InetAddress address = addresses.nextElement();
-				String addressString = address.toString();
 				
 				if(ipv4Only) {
-					// regular expression that matches 4 blocks of 1-3 digits each, separated by dots
-					Pattern p = Pattern.compile("^/(([0-9]{1,3})\\.([0-9]{1,3})\\.([0-9]{1,3})\\.([0-9]{1,3}))$");
-					Matcher m = p.matcher(addressString);
-
-					// checks if all 4 blocks are <= 255 as decimal integers
-					if(m.find()) {
-						if(Integer.parseInt(m.group(2)) < 256 && 
-								Integer.parseInt(m.group(3)) < 256 && 
-								Integer.parseInt(m.group(4)) < 256 && 
-								Integer.parseInt(m.group(5)) < 256)
-							// if all the above applies, the current IP address should be an IPv4 address
-							localAddresses.add(m.group(1));
+					// At the current state of the Java Networking API an InetAddress is either
+					// implemented by Inet4Adress or Inet6Address
+					if(address instanceof Inet4Address) {
+						localAddresses.add(address.getHostAddress());
 					}
 				} else {
-					localAddresses.add(addressString);
+					localAddresses.add(address.toString());
 				}
 			}
 		}
