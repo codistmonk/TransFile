@@ -28,8 +28,6 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.HashSet;
@@ -145,11 +143,18 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	}
 	
 	/**
-	 * Packs the window and uses the resulting size as a minimum size which will be
-	 * enforced by the listener added in setup().
+	 * Packs the window and uses the resulting size as a minimum size, so that the user cannot
+	 * make it any smaller.
+	 * 
 	 */
-	public final void packAndSetMinimumSize() {
-		this.pack();
+	@Override
+	public void pack() {
+		// unset minimum size so that pack can reduce window size if appropriate
+		this.setMinimumSize(null);
+		
+		super.pack();
+		
+		// set minimum size again
 		this.setMinimumSize(this.getSize());
 	}
 	
@@ -209,7 +214,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		
 		this.statusService.postStatusMessage(translate(new StatusMessage("status_ready")));
 		
-		this.packAndSetMinimumSize();
+		this.pack();
 		
 		// Center the window on the screen and show it
 		this.setLocationRelativeTo(null);
