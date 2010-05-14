@@ -17,7 +17,7 @@
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.transfile.ui.swing;
+package net.sourceforge.transfile.i18n;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 
 /**
  * Instances of this class can translate messages using locales and resource bundles.
- * <br>The easiest way to add translation to a Swing program with this class is by using the static methods in {@link SwingTranslator.Helpers}.
+ * <br>The easiest way to add translation to a Swing program with this class is by using the static methods in {@link Translator.Helpers}.
  * <br>To improve performance, call {@code this.setAutoCollectingLocales(false)} after all available locales have been collected.
  * <br>You can manually collect locales with {@link #collectAvailableLocales(String)}.
  * <br>Instances of this class are thread-safe as long as the listeners don't cause synchronization problems.
@@ -43,7 +43,7 @@ import java.util.logging.Logger;
  * @author codistmonk (2010-05-11)
  *
  */
-public class SwingTranslator {
+public class Translator {
 	
 	private final Collection<Listener> listeners;
 	
@@ -55,7 +55,7 @@ public class SwingTranslator {
 	
 	private boolean autoCollectingLocales;
 	
-	public SwingTranslator() {
+	public Translator() {
 		this.listeners = new ArrayList<Listener>();
 		this.autotranslators = new HashSet<Autotranslator>();
 		this.availableLocales = new HashSet<Locale>();
@@ -239,7 +239,7 @@ public class SwingTranslator {
 			
 			translatedMessage = iso88591ToUTF8(messages.getString(translationKey));
 		} catch (final MissingResourceException exception) {
-			getLoggerForThisMethod().log(Level.WARNING, "Missing translation for locale (" + SwingTranslator.this.getLocale() + ") of " + translationKey);
+			getLoggerForThisMethod().log(Level.WARNING, "Missing translation for locale (" + Translator.this.getLocale() + ") of " + translationKey);
 		}
 		
 		final Object[] localizedParameters = parameters.clone();
@@ -356,7 +356,7 @@ public class SwingTranslator {
 		}
 		
 		public final void translate() {
-			this.set(SwingTranslator.this.translate(this.translationKey, this.messagesBase, this.parameters));
+			this.set(Translator.this.translate(this.translationKey, this.messagesBase, this.parameters));
 		}
 		
 		/**
@@ -395,7 +395,7 @@ public class SwingTranslator {
 		
 	}
 	
-	private static SwingTranslator defaultTranslator;
+	private static Translator defaultTranslator;
 	
 	/**
 	 * This method creates the default translator if necessary, and then always returns the same value.
@@ -404,9 +404,9 @@ public class SwingTranslator {
 	 * <br>A non-null value
 	 * <br>A shared value
 	 */
-	public static final synchronized SwingTranslator getDefaultTranslator() {
+	public static final synchronized Translator getDefaultTranslator() {
 		if (defaultTranslator == null) {
-			defaultTranslator = new SwingTranslator();
+			defaultTranslator = new Translator();
 		}
 		
 		return defaultTranslator;

@@ -19,9 +19,9 @@
 
 package net.sourceforge.transfile.ui.swing;
 
-import static net.sourceforge.transfile.ui.swing.SwingTranslator.createLocale;
-import static net.sourceforge.transfile.ui.swing.SwingTranslator.getDefaultTranslator;
-import static net.sourceforge.transfile.ui.swing.SwingTranslator.Helpers.translate;
+import static net.sourceforge.transfile.i18n.Translator.createLocale;
+import static net.sourceforge.transfile.i18n.Translator.getDefaultTranslator;
+import static net.sourceforge.transfile.i18n.Translator.Helpers.translate;
 import static net.sourceforge.transfile.ui.swing.StatusService.StatusMessage;
 
 import java.awt.Container;
@@ -47,6 +47,7 @@ import javax.swing.UIManager;
 
 import net.sourceforge.transfile.backend.BackendEventHandler;
 import net.sourceforge.transfile.backend.ControllableBackend;
+import net.sourceforge.transfile.i18n.Translator;
 import net.sourceforge.transfile.settings.Settings;
 import net.sourceforge.transfile.settings.exceptions.IllegalConfigValueException;
 import net.sourceforge.transfile.ui.UserInterface;
@@ -264,7 +265,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	 */
 	private void setup() {
 		// Add a translator listener to update the display when the user changes the language
-		getDefaultTranslator().addTranslatorListener(new SwingTranslator.Listener() {
+		getDefaultTranslator().addTranslatorListener(new Translator.Listener() {
 			
 			@Override
 			public final void localeChanged(final Locale oldLocale, final Locale newLocale) {

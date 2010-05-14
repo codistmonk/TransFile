@@ -19,6 +19,8 @@
 
 package net.sourceforge.transfile.ui.swing;
 
+import net.sourceforge.transfile.i18n.Translator;
+
 /**
  * Receives new status messages and stores them in a last-in first-out fashion
  *
@@ -92,7 +94,7 @@ interface StatusService extends Iterable<StatusService.StatusMessage> {
 		/**
 		 * <p>Returns the message text.</p>
 		 * 
-		 * <p>DO NOT RENAME THIS GETTER as it used is reflectively by {@link SwingTranslator}.</p>
+		 * <p>DO NOT RENAME THIS GETTER as it used is reflectively by {@link Translator}.</p>
 		 * 
 		 * @return the message 
 		 */
@@ -103,9 +105,9 @@ interface StatusService extends Iterable<StatusService.StatusMessage> {
 		/**
 		 * <p>Sets the message text.</p>
 		 * 
-		 * <p><b>DO NOT USE THIS SETTER.</b> It is meant for reflective use by {@link SwingTranslator} only.</p>
+		 * <p><b>DO NOT USE THIS SETTER.</b> It is meant for reflective use by {@link Translator} only.</p>
 		 * 
-		 * <p><b>DO NOT RENAME THIS SETTER</b> as it used is reflectively by {@link SwingTranslator}.</p>
+		 * <p><b>DO NOT RENAME THIS SETTER</b> as it used is reflectively by {@link Translator}.</p>
 		 * 
 		 * @param text
 		 * <br />should not be null

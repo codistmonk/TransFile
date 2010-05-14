@@ -43,6 +43,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableModel;
 
+import net.sourceforge.transfile.i18n.Translator;
 import net.sourceforge.transfile.settings.Settings;
 
 /**
@@ -97,7 +98,7 @@ public class PreferencesFrame extends JDialog {
 			Settings.getInstance().put(key, value);
 			
 			if ("locale".equals(key)) {
-				SwingTranslator.getDefaultTranslator().setLocale((Locale) value);
+				Translator.getDefaultTranslator().setLocale((Locale) value);
 			}
 		}
 	}
@@ -149,7 +150,7 @@ public class PreferencesFrame extends JDialog {
 		public final Component getTableCellEditorComponent(final JTable table,
 				final Object value, final boolean isSelected, final int row, final int column) {
 			if ("locale".equals(table.getValueAt(row, 0))) {
-				this.currentCellEditor = new DefaultCellEditor(new JComboBox(SwingTranslator.getDefaultTranslator().getAvailableLocales()));
+				this.currentCellEditor = new DefaultCellEditor(new JComboBox(Translator.getDefaultTranslator().getAvailableLocales()));
 			}
 			else {
 				this.currentCellEditor = this.defaultCellEditor;
@@ -307,7 +308,7 @@ public class PreferencesFrame extends JDialog {
 			result.addRow(new Object[] { key, Settings.getInstance().getProperty(key, defaultValue) });
 		}
 		
-		result.addRow(new Object[] { "locale", SwingTranslator.createLocale(Settings.getInstance().get("locale").toString()) });
+		result.addRow(new Object[] { "locale", Translator.createLocale(Settings.getInstance().get("locale").toString()) });
 		
 		return result;
 	}

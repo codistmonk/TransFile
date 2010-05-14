@@ -19,8 +19,8 @@
 
 package net.sourceforge.transfile.ui.swing;
 
+import static net.sourceforge.transfile.i18n.Translator.getDefaultTranslator;
 import static net.sourceforge.transfile.ui.swing.StatusService.StatusMessage;
-import static net.sourceforge.transfile.ui.swing.SwingTranslator.getDefaultTranslator;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -33,6 +33,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 
 import net.sourceforge.transfile.exceptions.LogicError;
+import net.sourceforge.transfile.i18n.Translator;
 
 /**
  * <p>Custom JList displaying {@link StatusService.StatusMessage}s, from most recent (first position) to oldest (last position).</p>
@@ -173,7 +174,7 @@ public class StatusList extends JList {
 		 * @author Martin Riedel
 		 *
 		 */
-		private class TranslatorListener implements SwingTranslator.Listener {
+		private class TranslatorListener implements Translator.Listener {
 
 			/**
 			 * {@inheritDoc}
