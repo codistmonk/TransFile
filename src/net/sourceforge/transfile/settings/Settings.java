@@ -85,6 +85,7 @@ public class Settings {
 	
 	/**
 	 * Returns the user preferences for this package.
+	 * <br>The preferences are initialized with default values if needed. 
 	 * 
 	 * @return {@code null} if the user preferences for this package could not be created or retrieved
 	 * <br>A non-null value
@@ -93,6 +94,8 @@ public class Settings {
 	 * @throws SecurityException if the preferences cannot be loaded
 	 */
 	public static final Preferences getPreferences() {
+		getDefaults();
+		
 		return Preferences.userNodeForPackage(Settings.class);
 	}
 	

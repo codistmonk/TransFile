@@ -235,7 +235,7 @@ public class Translator {
 		String translatedMessage = translationKey;
 		
 		try {
-			final ResourceBundle messages = ResourceBundle.getBundle(messagesBase);
+			final ResourceBundle messages = ResourceBundle.getBundle(messagesBase, this.getLocale());
 			
 			translatedMessage = iso88591ToUTF8(messages.getString(translationKey));
 		} catch (final MissingResourceException exception) {
