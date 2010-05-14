@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="net/sourceforge/transfile/gui/swing/l10n/" kind="src" path="src"/>
-	<classpathentry kind="src" path="l10n/ui/swing"/>
-	<classpathentry excluding="ui/swing/|ui/" kind="src" path="l10n"/>
-	<classpathentry excluding="swing/" kind="src" path="l10n/ui"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
