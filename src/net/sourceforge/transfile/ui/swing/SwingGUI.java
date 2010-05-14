@@ -155,16 +155,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 				
 		super.pack();
 		
-		// restore window position and set new minimum size
-		SwingUtilities.invokeLater(new Runnable() {
-			
-			@Override
-			public void run() {
-				//SwingGUI.this.setLocation(location);
-				SwingGUI.this.setMinimumSize(SwingGUI.this.getSize());
-			}
-		});
-		
+		this.setMinimumSize(SwingGUI.this.getSize());	
 	}
 	
 	/**
