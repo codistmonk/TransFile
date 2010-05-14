@@ -26,6 +26,7 @@ import static net.sourceforge.transfile.ui.swing.StatusService.StatusMessage;
 
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -151,11 +152,19 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	public void pack() {
 		// unset minimum size so that pack can reduce window size if appropriate
 		this.setMinimumSize(null);
-		
+				
 		super.pack();
 		
-		// set minimum size again
-		this.setMinimumSize(this.getSize());
+		// restore window position and set new minimum size
+		SwingUtilities.invokeLater(new Runnable() {
+			
+			@Override
+			public void run() {
+				//SwingGUI.this.setLocation(location);
+				SwingGUI.this.setMinimumSize(SwingGUI.this.getSize());
+			}
+		});
+		
 	}
 	
 	/**
@@ -285,7 +294,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		// "Network" panel
 		
 		networkPanel = new NetworkPanel(this, backend);
-		networkPanel.setPreferredSize(new Dimension(340, 300));
+		networkPanel.setPreferredSize(new Dimension(340, 285));
 		panels.add(networkPanel);
 		pane.add(networkPanel);
 		
@@ -306,7 +315,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		// "Status" panel
 		
 		statusPanel = new StatusPanel(this);
-		statusPanel.setPreferredSize(new Dimension(360, 20));
+		statusPanel.setPreferredSize(new Dimension(360, 28));
 		panels.add(statusPanel);
 		pane.add(statusPanel);
 	}
