@@ -64,6 +64,11 @@ public class StatusPanel extends TopLevelPanel {
 	private StatusList statusList;
 	
 	/*
+	 * JScrollPane wrapping StatusList
+	 */
+	JScrollPane statusListScrollPane;
+	
+	/*
 	 * "more" / "less" buttons
 	 */
 	private JButton expandButton;
@@ -92,7 +97,7 @@ public class StatusPanel extends TopLevelPanel {
 		statusList = new StatusList(maxMessages);
 		statusList.setLayoutOrientation(JList.VERTICAL);
 		statusList.setVisibleRowCount(maxMessages);
-		JScrollPane scrollPane = new JScrollPane(statusList,
+		statusListScrollPane = new JScrollPane(statusList,
 												 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
 												 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		
@@ -104,7 +109,7 @@ public class StatusPanel extends TopLevelPanel {
 		c.anchor = GridBagConstraints.FIRST_LINE_START;
 		c.insets = new Insets(0, 5, 2, 5);
 		
-		add(scrollPane, c);
+		add(statusListScrollPane, c);
 		
 		expandButton = new JButton("\u2193");
 		unexpandButton = new JButton("\u2191");
@@ -267,6 +272,8 @@ public class StatusPanel extends TopLevelPanel {
 		@Override
 		public void newStatusMessage(final StatusMessage message) {
 			statusList.addMessage(message);
+			// reset the scroll pane so that the new message is visible
+			statusListScrollPane.getVerticalScrollBar().setValue(statusListScrollPane.getVerticalScrollBar().getMinimum());
 		}
 		
 	}
