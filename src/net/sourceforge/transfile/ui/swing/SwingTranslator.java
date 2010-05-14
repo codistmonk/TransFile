@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 /**
  * Instances of this class can translate messages using locales and resource bundles.
  * <br>The easiest way to add translation to a Swing program with this class is by using the static methods in {@link SwingTranslator.Helpers}.
- * <br>To improve performance, call {@code this.setAutoCollectiongLocales(false)} after all available locales have been collected.
+ * <br>To improve performance, call {@code this.setAutoCollectingLocales(false)} after all available locales have been collected.
  * <br>You can manually collect locales with {@link #collectAvailableLocales(String)}.
  * <br>Instances of this class are thread-safe as long as the listeners don't cause synchronization problems.
  *
