@@ -19,6 +19,8 @@
 
 package net.sourceforge.transfile.network;
 
+import static net.sourceforge.transfile.tools.Tools.getLoggerForThisMethod;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -28,6 +30,7 @@ import java.nio.channels.IllegalBlockingModeException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
+import java.util.logging.Level;
 
 import net.sourceforge.transfile.exceptions.LogicError;
 import net.sourceforge.transfile.network.exceptions.ConnectFailedToSetTimeoutException;
@@ -198,7 +201,7 @@ class ConnectionFromPeer extends Connection {
 								break;
 							else
 								// if not, discard the connection and keep going
-								//TODO log
+								getLoggerForThisMethod().log(Level.WARNING, "dropped connection from remote host " + clientSocket.getInetAddress().toString() + ": host is not the expected peer");
 								clientSocket = null;
 						}
 					}
@@ -226,7 +229,7 @@ class ConnectionFromPeer extends Connection {
 						throw new ServerFailedToCloseException(e);
 					}
 				}
-				// unless the connection was successfully established, close the client socket if it exists
+				// unless the connection has been established successfully, close the client socket if it exists
 				if(!isConnected()) {
 					if(clientSocket != null) {
 						try {

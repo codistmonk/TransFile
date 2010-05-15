@@ -22,6 +22,7 @@ package net.sourceforge.transfile.ui.swing;
 import static net.sourceforge.transfile.i18n.Translator.createLocale;
 import static net.sourceforge.transfile.i18n.Translator.getDefaultTranslator;
 import static net.sourceforge.transfile.i18n.Translator.Helpers.translate;
+import static net.sourceforge.transfile.tools.Tools.getLoggerForThisMethod;
 import static net.sourceforge.transfile.ui.swing.StatusService.StatusMessage;
 
 import java.awt.Container;
@@ -35,6 +36,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.logging.Level;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
@@ -238,7 +240,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		} catch(final IllegalConfigValueException e) {
 			// user set an invalid locale, fall back to host's default locale
 			locale = getLocale();
-			//TODO log: value e.getValue() illegal for key e.getKey()
+			getLoggerForThisMethod().log(Level.WARNING, "failed to load user locale preference; illegal locale: " + e.getValue(), e);
 			//TODO inform the user (i.e. dialog)
 		}
 		

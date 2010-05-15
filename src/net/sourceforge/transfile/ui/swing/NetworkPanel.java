@@ -21,6 +21,7 @@ package net.sourceforge.transfile.ui.swing;
 
 import static net.sourceforge.transfile.i18n.Translator.Helpers.translate;
 import static net.sourceforge.transfile.ui.swing.StatusService.StatusMessage;
+import static net.sourceforge.transfile.tools.Tools.getLoggerForThisMethod;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -35,6 +36,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -402,13 +404,13 @@ public class NetworkPanel extends TopLevelPanel {
 					// stop blocking - handle? if yes, how?
 				} catch(ExecutionException e) {
 					Throwable cause = e.getCause();
-					if(cause instanceof SocketException) {
-						//TODO log
+					
+					getLoggerForThisMethod().log(Level.WARNING, "failed to discover local LAN addresses", cause);
+
+					if(cause instanceof SocketException)
 						NetworkPanel.this.getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_lan_sockets")));
-					} else {
-						//TODO log
+					else
 						NetworkPanel.this.getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_lan_unknown")));
-					}
 				}
 			}
 			
@@ -441,6 +443,9 @@ public class NetworkPanel extends TopLevelPanel {
 					// stop blocking - handle? if yes, how?
 				} catch(ExecutionException e) {
 					Throwable cause = e.getCause();
+					
+					getLoggerForThisMethod().log(Level.WARNING, "failed to discover external IP address", cause);
+					
 					if(cause instanceof UnknownHostException) {
 						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_internet_unknown_host")));
 						localInternetAddrField.setText(translate("not_available"));
@@ -453,8 +458,6 @@ public class NetworkPanel extends TopLevelPanel {
 					} else {
 						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_internet_unknown")));
 						localInternetAddrField.setText(translate("N/A"));
-						//TODO log, don't print stacktrace to stdout
-						e.printStackTrace();
 					}
 				}
 			}
@@ -627,19 +630,22 @@ public class NetworkPanel extends TopLevelPanel {
 					
 					if(cause instanceof PeerURLFormatException) {
 						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_invalid_peerurl")));
+						getLoggerForThisMethod().log(Level.INFO, "failed to connect", cause);
 					} else if(cause instanceof UnknownHostException) {
 						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_unknown_host")));
+						getLoggerForThisMethod().log(Level.INFO, "failed to connect", cause);
 					} else if(cause instanceof IllegalStateException) {
 						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_illegal_state"), cause));
+						getLoggerForThisMethod().log(Level.SEVERE, "failed to connect", cause);
 					} else if(cause instanceof LinkFailedException) {
 						// TODO...
 						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_no_link")));
+						getLoggerForThisMethod().log(Level.INFO, "failed to connect", cause);
 					} else if(cause instanceof InterruptedException) {
 						// ignore, situation handled by CancellationException
 					} else {
 						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_unknown")));
-						//TODO log, don't print stacktrace to stdout
-						cause.printStackTrace();
+						getLoggerForThisMethod().log(Level.SEVERE, "failed to connect (unknown error)", cause);
 					}
 				} finally {
 					// in any case, revert to default connection state
