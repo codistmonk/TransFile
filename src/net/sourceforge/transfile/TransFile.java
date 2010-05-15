@@ -19,9 +19,13 @@
 
 package net.sourceforge.transfile;
 
-import static net.sourceforge.transfile.tools.Tools.configureLogger;
-
+import java.io.File;
 import java.io.IOException;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 import net.sourceforge.transfile.backend.Backend;
 import net.sourceforge.transfile.ui.UserInterface;
@@ -104,6 +108,23 @@ public class TransFile implements Runnable {
 		
 		TransFile application = swingFactory();
 		application.run();
+	}
+	
+	/**
+	 * Sets up the base logger for the project (net.sourceforge.transfile) 
+	 * 
+	 * @throws IOException if an I/O error occurred while trying to access the log file
+	 */
+	private static final void configureLogger() throws IOException {
+		// log to a file (in addition to logging to the console)
+		//TODO make logging location configurable
+		Handler fileHandler = new FileHandler(new File(System.getProperty("user.home"), ".transfile/log.txt").getAbsolutePath());
+		fileHandler.setFormatter(new SimpleFormatter());
+		Logger.getLogger("net.sourceforge.transfile").addHandler(fileHandler);
+		
+		// set log level to finest, logging the maximum amount of information
+		//TODO make logging level configurable
+		Logger.getLogger("net.sourceforge.transfile").setLevel(Level.FINEST);
 	}
 
 }

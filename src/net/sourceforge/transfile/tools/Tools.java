@@ -236,23 +236,6 @@ public final class Tools {
 		throw new RuntimeException(cause);
 	}
 	
-	/**
-	 * Sets up the base logger for the project (net.sourceforge.transfile) 
-	 * 
-	 * @throws IOException if an I/O error occurred while trying to access the log file
-	 */
-	public static final void configureLogger() throws IOException {
-		// log to a file (in addition to logging to the console)
-		//TODO make logging location configurable
-		Handler fileHandler = new FileHandler(new File(System.getProperty("user.home"), ".transfile/log.txt").getAbsolutePath());
-		fileHandler.setFormatter(new SimpleFormatter());
-		Logger.getLogger("net.sourceforge.transfile").addHandler(fileHandler);
-		
-		// set log level to finest, logging the maximum amount of information
-		//TODO make logging level configurable
-		Logger.getLogger("net.sourceforge.transfile").setLevel(Level.FINEST);
-	}
-	
 	
 	private Tools() {
 		// do nothing, just prevent instantiation
