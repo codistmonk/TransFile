@@ -238,6 +238,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 			if(locale == null)
 				locale = getLocale();
 		} catch(final IllegalConfigValueException e) {
+			//TODO this code is never reached as IllegalConfigValueException is never thrown
 			// user set an invalid locale, fall back to host's default locale
 			locale = getLocale();
 			getLoggerForThisMethod().log(Level.WARNING, "failed to load user locale preference; illegal locale: " + e.getValue(), e);
@@ -253,7 +254,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	 * @throws IllegalConfigValueException if the "locale" setting is present but invalid
 	 */
 	private static Locale loadLocale() {
-		String userLocaleSetting = Settings.getPreferences().get("locale", "en");
+		String userLocaleSetting = Settings.getPreferences().get("locale", null);
 
 		if(userLocaleSetting == null || "".equals(userLocaleSetting))
 			return null;
