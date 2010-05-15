@@ -19,17 +19,9 @@
 
 package net.sourceforge.transfile.tools;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
-
-import net.sourceforge.transfile.settings.Settings;
 
 /**
  * Holder for static utility methods. Should not be instantiated.
@@ -235,6 +227,39 @@ public final class Tools {
 		
 		throw new RuntimeException(cause);
 	}
+	
+    /**
+     * Concatenates the source location of the call and the string representations
+     * of the parameters separated by spaces.
+     * <br>This is method helps to perform console debugging using System.out or System.err.
+     * @param stackIndex 1 is the source of this method, 2 is the source of the call, 3 is the source of the call's caller, and so forth
+     * <br>Range: {@code [O .. Integer.MAX_VALUE]}
+     * @param objects
+     * <br>Should not be null
+     * @return
+     * <br>A new value
+     * <br>A non-null value
+     * @throws IndexOutOfBoundsException if {@code stackIndex} is invalid
+     */
+    public static final String debug(final int stackIndex, final Object... objects) {
+        final StringBuilder builder = new StringBuilder(Thread.currentThread().getStackTrace()[stackIndex].toString());
+
+        for (final Object object : objects) {
+            builder.append(" ").append(object);
+        }
+
+        return builder.toString();
+    }
+    
+    /**
+     * Prints on the standard output the concatenation of the source location of the call
+     * and the string representations of the parameters separated by spaces.
+     * @param objects
+     * <br>Should not be null
+     */
+    public static final void debugPrint(final Object... objects) {
+        System.out.println(debug(3, objects));
+    }
 	
 	
 	private Tools() {

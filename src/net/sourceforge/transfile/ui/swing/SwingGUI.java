@@ -250,15 +250,19 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	
 	/**
 	 * Loads the user's selected locale from the user-specific config file
+	 * @return
+	 * <br>A possibly null value
+	 * <br>A possibly new value
 	 * 
 	 * @throws IllegalConfigValueException if the "locale" setting is present but invalid
 	 */
-	private static Locale loadLocale() {
-		String userLocaleSetting = Settings.getPreferences().get("locale", null);
-
-		if(userLocaleSetting == null || "".equals(userLocaleSetting))
+	private static final Locale loadLocale() {
+		final String userLocaleSetting = Settings.getOrCreate("locale", "en");
+		
+		if(userLocaleSetting == null || "".equals(userLocaleSetting)) {
 			return null;
-
+		}
+		
 		return createLocale(userLocaleSetting);	
 	}
 	

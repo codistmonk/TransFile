@@ -25,9 +25,12 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.EventObject;
 import java.util.Locale;
 import java.util.PropertyResourceBundle;
+import java.util.Vector;
 
 import javax.swing.AbstractAction;
 import javax.swing.DefaultCellEditor;
@@ -87,7 +90,6 @@ public class PreferencesFrame extends JDialog {
 	
 	final void saveSettings() {
 		this.putTableDataIntoSettings();
-//		Settings.getInstance().save();
 	}
 	
 	private final void putTableDataIntoSettings() {
@@ -290,6 +292,7 @@ public class PreferencesFrame extends JDialog {
 	 * <br>A new value
 	 * <br>A non-null value
 	 */
+	@SuppressWarnings("unchecked")
 	private static final DefaultTableModel createTableModel(final PropertyResourceBundle defaultProperties) {
 		final DefaultTableModel result = new DefaultTableModel(new Object[] { "key", "value" }, 0) {
 			
@@ -308,7 +311,14 @@ public class PreferencesFrame extends JDialog {
 			result.addRow(new Object[] { key, Settings.getPreferences().get(key, defaultValue) });
 		}
 		
-		result.addRow(new Object[] { "locale", Translator.createLocale(Settings.getPreferences().get("locale", "en").toString()) });
+		Collections.sort(result.getDataVector(), new Comparator<Vector<String>>() {
+			
+			@Override
+			public final int compare(final Vector<String> row1, final Vector<String> row2) {
+				return row1.get(0).compareTo(row2.get(0));
+			}
+			
+		});
 		
 		return result;
 	}
@@ -348,38 +358,5 @@ public class PreferencesFrame extends JDialog {
 	public static final InputStream getResourceAsStream(final String resourcePath) {
 		return PreferencesFrame.class.getClassLoader().getResourceAsStream(resourcePath);
 	}
-	
-    /**
-     * Concatenates the source location of the call and the string representations
-     * of the parameters separated by spaces.
-     * <br>This is method helps to perform console debugging using System.out or System.err.
-     * @param stackIndex 1 is the source of this method, 2 is the source of the call, 3 is the source of the call's caller, and so forth
-     * <br>Range: {@code [O .. Integer.MAX_VALUE]}
-     * @param objects
-     * <br>Should not be null
-     * @return
-     * <br>A new value
-     * <br>A non-null value
-     * @throws IndexOutOfBoundsException if {@code stackIndex} is invalid
-     */
-    public static final String debug(final int stackIndex, final Object... objects) {
-        final StringBuilder builder = new StringBuilder(Thread.currentThread().getStackTrace()[stackIndex].toString());
-
-        for (final Object object : objects) {
-            builder.append(" ").append(object);
-        }
-
-        return builder.toString();
-    }
-    
-    /**
-     * Prints on the standard output the concatenation of the source location of the call
-     * and the string representations of the parameters separated by spaces.
-     * @param objects
-     * <br>Should not be null
-     */
-    public static final void debugPrint(final Object... objects) {
-        System.out.println(debug(3, objects));
-    }
     
 }
