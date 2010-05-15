@@ -19,6 +19,10 @@
 
 package net.sourceforge.transfile;
 
+import static net.sourceforge.transfile.tools.Tools.configureLogger;
+
+import java.io.IOException;
+
 import net.sourceforge.transfile.backend.Backend;
 import net.sourceforge.transfile.ui.UserInterface;
 import net.sourceforge.transfile.ui.swing.SwingGUI;
@@ -88,6 +92,16 @@ public class TransFile implements Runnable {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		try {
+			configureLogger();
+		} catch (SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		TransFile application = swingFactory();
 		application.run();
 	}

@@ -19,7 +19,14 @@
 
 package net.sourceforge.transfile.i18n;
 
-import java.io.UnsupportedEncodingException;
+import static net.sourceforge.transfile.tools.Tools.getCallerClass;
+import static net.sourceforge.transfile.tools.Tools.getLoggerForThisMethod;
+import static net.sourceforge.transfile.tools.Tools.iso88591ToUTF8;
+import static net.sourceforge.transfile.tools.Tools.cast;
+import static net.sourceforge.transfile.tools.Tools.array;
+import static net.sourceforge.transfile.tools.Tools.getGetter;
+import static net.sourceforge.transfile.tools.Tools.getSetter;
+
 import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -31,7 +38,6 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Instances of this class can translate messages using locales and resource bundles.
@@ -448,202 +454,6 @@ public class Translator {
 	 */
 	public static final String getLanguageCountryVariant(final Locale locale) {
 		return locale.getLanguage() + "_" + locale.getCountry() + "_" + locale.getVariant();
-	}
-	
-	/**
-	 * TODO this utility method should be moved into a utility class
-	 * 
-	 * @param translatedMessage
-	 * <br>Should not be null
-	 * <br>Shared parameter
-	 * @return a new string or {@code translatedMessage} if the conversion fails
-	 * <br>A non-null value
-	 * <br>Shared value
-	 */
-	public static final String iso88591ToUTF8(final String translatedMessage) {
-		try {
-			return new String(translatedMessage.getBytes("ISO-8859-1"), "UTF-8");
-		} catch (final UnsupportedEncodingException exception) {
-			exception.printStackTrace();
-			return translatedMessage;
-		}
-	}
-	
-	/**
-	 * TODO this utility method should be moved into a utility class
-	 * 
-	 * @param <T> the type into which {@code object} is tentatively being cast
-	 * @param cls
-	 * <br>Should not be null
-	 * @param object
-	 * <br>Can be null
-	 * @return {@code null} if {@code object} is {@code null} or cannot be cast into {@code T}, otherwise {@code object}
-	 * <br>A possibly null value
-	 */
-	public static final <T> T cast(final Class<T> cls, final Object object) {
-		if (object == null || !cls.isAssignableFrom(object.getClass()))
-			return null;
-		
-		return cls.cast(object);
-	}
-	
-	/**
-	 * Warning: this method can only be used directly.
-	 * <br>If you want to refactor your code, you can re-implement the functionality using {@code Thread.currentThread().getStackTrace()}.
-	 * <br>TODO this utility method should be moved into a utility class
-	 * 
-	 * @return
-	 * <br>A non-null value
-	 * @throws NullPointerException if the caller class cannot be retrieved
-	 */
-	public static final Logger getLoggerForThisMethod() {
-		return Logger.getLogger(getCallerClass().getCanonicalName() + "." + getCallerMethodName());
-	}
-	
-	/**
-	 * Warning: this method can only be used directly.
-	 * <br>If you want to refactor your code, you can re-implement the functionality using {@code Thread.currentThread().getStackTrace()}.
-	 * <br>TODO this utility method should be moved into a utility class
-	 * 
-	 * @return {@code null} if the caller class cannot be retrieved
-	 * <br>A possibly null value
-	 */
-	public static final Class<?> getCallerClass() {
-		final StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-		
-		if (stackTrace.length > 3)
-			try {
-				return Class.forName(stackTrace[3].getClassName());
-			} catch (final ClassNotFoundException exception) {
-				// Nothing
-			}
-		
-		return null;
-	}
-	
-	/**
-	 * Warning: this method can only be used directly.
-	 * <br>If you want to refactor your code, you can re-implement the functionality using {@code Thread.currentThread().getStackTrace()}.
-	 * <br>TODO this utility method should be moved into a utility class
-	 * 
-	 * @return {@code null} if the caller method cannot be retrieved
-	 * <br>A possibly null value
-	 */
-	public static final String getCallerMethodName() {
-		final StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-		
-		return stackTrace.length > 3 ? stackTrace[3].getMethodName() : null;
-	}
-	
-	/**
-	 * This method tries to find a setter starting with "set" for the specified property of the object.
-	 * <br>Eg: {@code getSetter(object, "text", String.class)} tries to find a method {@code setText(String)}
-	 * <br>TODO this utility method should be moved into a utility class
-	 *
-	 * @param object
-	 * <br>Should not be null
-	 * @param propertyName
-	 * <br>Should not be null
-	 * @param propertyClass 
-	 * <br>Should not be null
-	 * @return
-	 * <br>A non-null value
-	 * @throws RuntimeException if an appropriate setter cannot be retrieved
-	 */
-	public static final Method getSetter(final Object object, final String propertyName, final Class<?> propertyClass) {
-		try {
-			return object.getClass().getMethod("set" + toUpperCamelCase(propertyName), propertyClass);
-		} catch (final Exception exception) {
-			return throwRuntimeException(exception);
-		}
-	}
-	
-	/**
-	 * This method tries to find a getter starting with "get", "is", or "has" (in that order) for the specified property of the object.
-	 * <br>Eg: {@code getGetter(object, "empty")} tries to find a method {@code getEmpty()} or {@code isEmpty()} or {@code hasEmpty()}
-	 * <br>TODO this utility method should be moved into a utility class
-	 * 
-	 * @param object
-	 * <br>Should not be null
-	 * @param propertyName the camelCase name of the property
-	 * <br>Should not be null
-	 * @return
-	 * <br>A non-null value
-	 * @throws RuntimeException if an appropriate getter cannot be retrieved
-	 */
-	public static final Method getGetter(final Object object, final String propertyName) {
-		final String upperCamelCase = toUpperCamelCase(propertyName);
-		
-		for (final String prefix : array("get", "is", "has")) {
-			try {
-				return object.getClass().getMethod(prefix + upperCamelCase);
-			} catch (final Exception exception) {
-				// Do nothing
-			}
-		}
-		
-		throw new RuntimeException("Unable to retrieve a getter for property " + propertyName);
-	}
-	
-	/**
-	 * TODO this utility method should be moved into a utility class
-	 * 
-	 * @param lowerCamelCase
-	 * <br>Should not be null
-	 * @return
-	 * <br>A new value
-	 * <br>A non-null value
-	 */
-	public static final String toUpperCamelCase(final String lowerCamelCase) {
-		return Character.toUpperCase(lowerCamelCase.charAt(0)) + lowerCamelCase.substring(1);
-	}
-	
-	/**
-	 * TODO this utility method should be moved into a utility class
-	 * 
-	 * @param string
-	 * <br>Can be null
-	 * <br>Shared parameter
-	 * @return {@code string}
-	 * <br>A non-null value
-	 * <br>A shared value
-	 */
-	public static final String emptyIfNull(final String string) {
-		return string == null ? "" : string;
-	}
-	
-	/**
-	 * TODO this utility method should be moved into a utility class
-	 * 
-	 * @param <T> the actual type of the elements
-	 * @param elements
-	 * <br>Can be null
-	 * <br>Shared parameter
-	 * @return {@code elements}
-	 * <br>A possibly null value
-	 * <br>A shared value
-	 */
-	public static final <T> T[] array(final T... elements) {
-		return elements;
-	}
-	
-	/**
-	 * TODO this utility method should be moved into a utility class
-	 * 
-	 * @param <T> the type that the caller is supposed to return
-	 * @param cause
-	 * <br>Should not be null
-	 * <br>Shared parameter
-	 * @return
-	 * <br>Does not return
-	 * @throws RuntimeException with {@code cause} as cause if it is a checked exception, otherwise {@code cause} is re-thrown
-	 */
-	public static final <T> T throwRuntimeException(final Throwable cause) {
-		if (cause instanceof RuntimeException) {
-			throw (RuntimeException) cause;
-		}
-		
-		throw new RuntimeException(cause);
 	}
 	
 	/**
