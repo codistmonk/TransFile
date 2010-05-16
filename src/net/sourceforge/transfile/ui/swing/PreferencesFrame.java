@@ -100,7 +100,7 @@ public class PreferencesFrame extends JDialog {
 			Settings.getPreferences().put(key.toString(), value.toString());
 			
 			if ("locale".equals(key)) {
-				Translator.getDefaultTranslator().setLocale((Locale) value);
+				Translator.getDefaultTranslator().setLocale(Translator.createLocale(value.toString()));
 			}
 		}
 	}
@@ -307,7 +307,7 @@ public class PreferencesFrame extends JDialog {
 		
 		for (final String key : defaultProperties.keySet()) {
 			final String defaultValue = defaultProperties.getObject(key).toString();
-			
+
 			result.addRow(new Object[] { key, Settings.getPreferences().get(key, defaultValue) });
 		}
 		
