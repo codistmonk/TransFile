@@ -29,6 +29,8 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.HashSet;
@@ -152,14 +154,17 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	 */
 	@Override
 	public void pack() {
-		// unset minimum size so that pack can reduce window size if appropriate
+		// unset minimum and maximum size so that pack can reduce window size if appropriate
 		this.setMinimumSize(null);
+		this.setMaximumSize(null);
 				
 		super.pack();
 		
-		this.setMinimumSize(SwingGUI.this.getSize());	
+		this.setMinimumSize(this.getSize());
+		this.setMaximumSize(new Dimension(Integer.MAX_VALUE, this.getSize().height));
+		this.enforceMaximumSize();
 	}
-	
+
 	/**
 	 * Invoked when a connection to a peer has been established
 	 * 
@@ -386,6 +391,24 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		// Mac-specific adaptations
 		if(onMacOSX)
 			MacOSXAdapter.adapt(this);
+	}
+	
+	/**
+	 * Enforces the window's maximum size
+	 *  
+	 */
+	private void enforceMaximumSize() {
+		this.addComponentListener(new ComponentAdapter() {
+
+			/**
+			 * {@inheritDoc}
+			 */
+			@Override
+			public void componentResized(final ComponentEvent event) {
+				if(SwingGUI.this.getSize().height > SwingGUI.this.getMaximumSize().height)
+					SwingGUI.this.setSize(SwingGUI.this.getSize().width, SwingGUI.this.getMaximumSize().height);
+			}
+		});
 	}
 	
 	/**
