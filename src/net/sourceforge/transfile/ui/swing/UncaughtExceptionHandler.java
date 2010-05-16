@@ -19,9 +19,13 @@
 
 package net.sourceforge.transfile.ui.swing;
 
-import java.lang.Thread.UncaughtExceptionHandler;
+import static net.sourceforge.transfile.tools.Tools.getLoggerForThisMethod;
+
+import java.util.logging.Level;
 
 import javax.swing.SwingUtilities;
+
+import net.sourceforge.transfile.ui.swing.StatusService.StatusMessage;
 
 /**
  * Handles uncaught exceptions
@@ -29,7 +33,24 @@ import javax.swing.SwingUtilities;
  * @author Martin Riedel
  *
  */
-class SwingUncaughtExceptionHandler implements UncaughtExceptionHandler {
+class UncaughtExceptionHandler implements java.lang.Thread.UncaughtExceptionHandler {
+	
+	/*
+	 * Reference to the StatusService used by this UncaughtExceptionHandler
+	 */
+	private final StatusService statusService;
+	
+	
+	/**
+	 * Constructs a new {@code UncaughtExceptionHandler} instance
+	 * 
+	 * @param statusService
+	 * <br />The {@link StatusService} to use
+	 * <br />Should not be null
+	 */
+	public UncaughtExceptionHandler(final StatusService statusService) {
+		this.statusService = statusService;
+	}
 
 	/** 
 	 * {@inheritDoc}
@@ -57,8 +78,8 @@ class SwingUncaughtExceptionHandler implements UncaughtExceptionHandler {
 	 * <br />Never null
 	 */
 	private void handleUncaughtException(final Throwable exception) {
-		//TODO implement properly
-		exception.printStackTrace();
+		getLoggerForThisMethod().log(Level.SEVERE, "unexpected error / uncaught exception", exception);
+		statusService.postStatusMessage(new StatusMessage("status_unexpected_error"));
 	}
 
 }

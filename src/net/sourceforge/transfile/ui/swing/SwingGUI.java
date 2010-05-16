@@ -214,6 +214,8 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		
 		this.showConnectScreen();
 		
+		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(statusService));
+		
 		this.statusService.postStatusMessage(translate(new StatusMessage("status_ready")));
 		
 		this.pack();
