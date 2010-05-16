@@ -20,6 +20,7 @@
 package net.sourceforge.transfile.ui.swing;
 
 import static net.sourceforge.transfile.tools.Tools.getLoggerForThisMethod;
+import static net.sourceforge.transfile.i18n.Translator.Helpers.translate;
 
 import java.util.logging.Level;
 
@@ -79,7 +80,8 @@ class UncaughtExceptionHandler implements java.lang.Thread.UncaughtExceptionHand
 	 */
 	private void handleUncaughtException(final Throwable exception) {
 		getLoggerForThisMethod().log(Level.SEVERE, "unexpected error / uncaught exception", exception);
-		statusService.postStatusMessage(new StatusMessage("status_unexpected_error"));
+		statusService.postStatusMessage(exception.getCause() == null ? translate(new StatusMessage("status_unexpected_error"), exception.getClass().getSimpleName())
+																	 : translate(new StatusMessage("status_unexpected_error_with_cause"), exception.getClass().getSimpleName(), exception.getCause().getClass().getSimpleName()));
 	}
 
 }
