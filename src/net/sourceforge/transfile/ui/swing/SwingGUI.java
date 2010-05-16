@@ -162,7 +162,6 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		
 		this.setMinimumSize(this.getSize());
 		this.setMaximumSize(new Dimension(Integer.MAX_VALUE, this.getSize().height));
-		this.enforceMaximumSize();
 	}
 
 	/**
@@ -224,6 +223,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		this.statusService.postStatusMessage(translate(new StatusMessage("status_ready")));
 		
 		this.pack();
+		this.enforceMaximumSize();
 		
 		// Center the window on the screen and show it
 		this.setLocationRelativeTo(null);
