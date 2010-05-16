@@ -28,7 +28,6 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EventObject;
-import java.util.Locale;
 import java.util.PropertyResourceBundle;
 import java.util.Vector;
 

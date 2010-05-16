@@ -19,8 +19,6 @@
 
 package net.sourceforge.transfile;
 
-import static net.sourceforge.transfile.settings.Settings.getPreferences;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.FileHandler;

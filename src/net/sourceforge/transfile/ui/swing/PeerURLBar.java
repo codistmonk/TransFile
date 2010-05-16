@@ -21,18 +21,12 @@ package net.sourceforge.transfile.ui.swing;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.prefs.BackingStoreException;
 
 import javax.swing.AbstractListModel;
 import javax.swing.JComboBox;
 import javax.swing.MutableComboBoxModel;
 
-import net.sourceforge.transfile.exceptions.SerializationException;
-import net.sourceforge.transfile.exceptions.SerializationFileNotFoundException;
-import net.sourceforge.transfile.i18n.Translator;
 import net.sourceforge.transfile.network.PeerURL;
 import net.sourceforge.transfile.settings.Settings;
 

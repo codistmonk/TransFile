@@ -29,7 +29,6 @@ import net.sourceforge.transfile.network.Link;
 import net.sourceforge.transfile.network.PeerURL;
 import net.sourceforge.transfile.network.exceptions.LinkFailedException;
 import net.sourceforge.transfile.network.exceptions.PeerURLFormatException;
-import net.sourceforge.transfile.settings.Settings;
 
 
 /**
