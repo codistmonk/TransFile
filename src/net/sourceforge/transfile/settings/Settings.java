@@ -20,9 +20,11 @@
 package net.sourceforge.transfile.settings;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 import java.util.prefs.Preferences;
 
+import net.sourceforge.transfile.exceptions.MissingResourceException;
 import net.sourceforge.transfile.tools.Tools;
 
 /**
@@ -70,7 +72,13 @@ public class Settings {
 				// If it turns out there is no problem, then remove all these comments
 				// Otherwise, a possible fix could be to use C.class.getClassLoader().getResourceAsStream() where C
 				// is a class that doesn't depend directly or indirectly on this class.
-				defaults.load(Settings.class.getResourceAsStream("defaults.properties"));
+				InputStream defaultProperties = Settings.class.getResourceAsStream("/defaults.properties");
+				
+				if(defaultProperties == null)
+					throw new MissingResourceException("defaults.properties");
+					
+				
+				defaults.load(defaultProperties);
 			} catch (final IOException exception) {
 				exception.printStackTrace();
 			}
