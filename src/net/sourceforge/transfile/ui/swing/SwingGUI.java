@@ -405,8 +405,12 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 			 */
 			@Override
 			public void componentResized(final ComponentEvent event) {
+				// enforce maximum height
 				if(SwingGUI.this.getSize().height > SwingGUI.this.getMaximumSize().height)
 					SwingGUI.this.setSize(SwingGUI.this.getSize().width, SwingGUI.this.getMaximumSize().height);
+				// enforce maximum width
+				if(SwingGUI.this.getSize().width > SwingGUI.this.getMaximumSize().width)
+					SwingGUI.this.setSize(SwingGUI.this.getSize().height, SwingGUI.this.getMaximumSize().width);
 			}
 		});
 	}
