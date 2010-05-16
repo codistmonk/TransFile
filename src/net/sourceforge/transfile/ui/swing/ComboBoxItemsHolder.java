@@ -19,18 +19,8 @@
 
 package net.sourceforge.transfile.ui.swing;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-
-import net.sourceforge.transfile.exceptions.SerializationException;
-import net.sourceforge.transfile.exceptions.SerializationFileNotFoundException;
 
 
 /**
@@ -46,11 +36,6 @@ import net.sourceforge.transfile.exceptions.SerializationFileNotFoundException;
 class ComboBoxItemsHolder implements Serializable {
 
 	private static final long serialVersionUID = -7872331666395629697L;
-	
-	/*
-	 * The file this ComboBox items holder will be serialized and saved to to achieve persistence
-	 */
-	private final File stateFile;
 
 	/*
 	 * The container the items in the combo box' drop-down menu are stored in.
@@ -67,85 +52,9 @@ class ComboBoxItemsHolder implements Serializable {
 	 * Constructs a new ComboBoxItemsHolder WITHOUT loading state from a previously serialized instance
 	 * 
 	 * @param maxRetainedItems the maximum number of items in the combo box' drop-down menu
-	 * @param stateFile the file to serialize to to achieve persistence
 	 */
-	public ComboBoxItemsHolder(final int maxRetainedItems, final File stateFile) {
-		this.stateFile = stateFile;
-		items = new ArrayList<Object>(maxRetainedItems);
-	}
-
-	/**
-	 * Loads the previously serialized and saved data model state from disk.
-	 *  
-	 * @throws SerializationFileNotFoundException if no ComboBoxItemsHolder has been saved to the provided file yet  
-	 * @throws SerializationException if an error occurred while trying to load the model from disk
-	 */
-	public static ComboBoxItemsHolder load(final File stateFile) throws SerializationException {
-		FileInputStream fis = null;
-		ObjectInputStream ois = null;
-
-		try {
-			fis = new FileInputStream(stateFile);
-			ois = new ObjectInputStream(fis);
-			return (ComboBoxItemsHolder) ois.readObject();
-		} catch (FileNotFoundException e) {
-			throw new SerializationFileNotFoundException(e);
-		} catch (IOException e) {
-			throw new SerializationException(e);
-		} catch (ClassNotFoundException e) {
-			throw new SerializationException(e);
-		} finally {
-			if(ois != null) {
-				try {
-					ois.close();
-				} catch(IOException e) {
-					throw new SerializationException(e);
-				};
-			}
-			if(fis != null) {
-				try {
-					fis.close();
-				} catch(IOException e) {
-					throw new SerializationException(e);
-				}
-			}
-		}	
-	}
-
-	/**
-	 * Saves the state of the ComboBoxItemsHolder to disk
-	 * 
-	 * @throws SerializationException if serializing or saving the serialized data to disk failed
-	 */
-	public void save() throws SerializationException {
-		FileOutputStream fos = null;
-		ObjectOutputStream oos = null;
-
-		try {
-			fos = new FileOutputStream(stateFile);
-			oos = new ObjectOutputStream(fos);
-			oos.writeObject(this);
-		} catch (FileNotFoundException e) {
-			throw new SerializationException(e);
-		} catch (IOException e) {
-			throw new SerializationException(e);
-		} finally {
-			if(oos != null) {
-				try {
-					oos.close();
-				} catch (IOException e) {
-					throw new SerializationException(e);
-				}
-			}
-			if(fos != null) {
-				try {
-					fos.close();
-				} catch (IOException e) {
-					throw new SerializationException(e);
-				}
-			}
-		}			
-
+	public ComboBoxItemsHolder(final int maxRetainedItems) {
+		this.items = new ArrayList<Object>(maxRetainedItems);
 	}
 
 }

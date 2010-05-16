@@ -19,6 +19,8 @@
 
 package net.sourceforge.transfile;
 
+import static net.sourceforge.transfile.settings.Settings.getPreferences;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.FileHandler;
@@ -28,6 +30,7 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 import net.sourceforge.transfile.backend.Backend;
+import net.sourceforge.transfile.settings.Settings;
 import net.sourceforge.transfile.ui.UserInterface;
 import net.sourceforge.transfile.ui.swing.SwingGUI;
 
@@ -117,14 +120,24 @@ public class TransFile implements Runnable {
 	 */
 	private static final void configureLogger() throws IOException {
 		// log to a file (in addition to logging to the console)
-		//TODO make logging location configurable
-		Handler fileHandler = new FileHandler(new File(System.getProperty("user.home"), ".transfile/log.txt").getAbsolutePath());
+		final Handler fileHandler = new FileHandler(Settings.getOrCreate("log_path", DEFAULT_LOG_PATH));
+		
 		fileHandler.setFormatter(new SimpleFormatter());
+		
 		Logger.getLogger("net.sourceforge.transfile").addHandler(fileHandler);
 		
-		// set log level to finest, logging the maximum amount of information
-		//TODO make logging level configurable
-		Logger.getLogger("net.sourceforge.transfile").setLevel(Level.FINEST);
+		Logger.getLogger("net.sourceforge.transfile").setLevel(Level.parse(Settings.getOrCreate("log_level", DEFAULT_LOG_LEVEL)));
 	}
+	
+	/**
+	 * The default log file location is directly in the user home directory,
+	 * so that it is visible and easy to access.
+	 */
+	private static final String DEFAULT_LOG_PATH = new File(System.getProperty("user.home"), "transfile_log.txt").getAbsolutePath();
+	
+	/**
+	 * The default log level is {@value}, logging the maximum amount of information
+	 */
+	private static final String DEFAULT_LOG_LEVEL = Level.FINEST.getName();
 
 }

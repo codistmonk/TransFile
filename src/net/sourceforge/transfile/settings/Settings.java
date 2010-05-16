@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.prefs.Preferences;
 
+import net.sourceforge.transfile.tools.Tools;
+
 /**
  * Provides simple key-value pair persistence. Default values are in transfile.settings.defaults.properties,
  * per-user configuration files are saved to user preferences (Java mechanism).
@@ -97,6 +99,59 @@ public class Settings {
 		getDefaults();
 		
 		return Preferences.userNodeForPackage(Settings.class);
+	}
+	
+	/**
+	 * If {@code key} is associated with a non-null and non-empty value in the preferences,
+	 * then this value is returned, otherwise {@code defaultValue} is associated with {@code key} and returned.
+	 * 
+	 * @param key
+	 * <br>Should not be null
+	 * <br>Possibly shared parameter
+	 * @param defaultValue
+	 * <br>Should not be null
+	 * <br>Possibly shared parameter
+	 * @return
+	 * <br>A non-null value
+	 * <br>A possibly shared value
+	 */
+	public static final String getOrCreate(final String key, final String defaultValue) {
+		final String value = getPreferences().get(key, null);
+		
+		if (value != null && value.length() > 0) {
+			return value;
+		}
+		
+		getPreferences().put(key, defaultValue);
+		
+		return defaultValue;
+	}
+	
+	/**
+	 * If {@code key} is associated with a non-null value in the preferences, then this value is returned, otherwise
+	 * an empty string is returned.
+	 * 
+	 * @param key
+	 * <br>Should not be null
+	 * @return
+	 * <br>A non-null value
+	 */
+	public static final String get(final String key) {
+		return Tools.emptyIfNull(getPreferences().get(key, ""));
+	}
+	
+	/**
+	 * If {@code key} is associated with a value in the preferences, then this value is parsed to an integer,
+	 * otherwise 0 is returned.
+	 * 
+	 * @param key
+	 * <br>Should not be null
+	 * @return
+	 * <br>Range: any integer
+	 * @throws NumberFormatException if the existing preference cannot be parsed to an integer
+	 */
+	public static final int getInt(final String key) {
+		return Integer.parseInt(getPreferences().get(key, "0"));
 	}
 	
 	/**
