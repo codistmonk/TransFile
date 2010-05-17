@@ -22,6 +22,7 @@ package net.sourceforge.transfile.tools;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.sourceforge.transfile.settings.Settings;
@@ -58,17 +59,24 @@ public final class Tools {
 		try {
 
 			if(!userApplicationDirectory.isDirectory()) {
+				getLoggerForThisMethod().log(Level.INFO, "user application directory nonexistent, creating: " + userApplicationDirectory.getAbsolutePath());
 				userApplicationDirectory.mkdirs();
 
-				if(!userApplicationDirectory.isDirectory())
+				if(!userApplicationDirectory.isDirectory()) {
+					getLoggerForThisMethod().log(Level.WARNING, "failed to create user application directory: " + userApplicationDirectory.getAbsolutePath());
 					throw new UserApplicationDirectoryException("directory does not exist and cannot be created");
+				}
 			}
 			
-			if(!userApplicationDirectory.canRead())
+			if(!userApplicationDirectory.canRead()) {
+				getLoggerForThisMethod().log(Level.WARNING, "user application directory exists but cannot be read from: " + userApplicationDirectory.getAbsolutePath());
 				throw new UserApplicationDirectoryException("directory exists but cannot be read from");
+			}
 			
-			if(!userApplicationDirectory.canWrite())
-				throw new UserApplicationDirectoryException("directory exists but cannot be written to");
+			if(!userApplicationDirectory.canWrite()) {
+				getLoggerForThisMethod().log(Level.WARNING, "user application directory exists but cannot be written to: " + userApplicationDirectory.getAbsolutePath());
+				throw new UserApplicationDirectoryException("directory exists but cannot be written to");	
+			}
 
 			return userApplicationDirectory;
 		} catch(final SecurityException exception) {

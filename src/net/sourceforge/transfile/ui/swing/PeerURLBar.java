@@ -168,13 +168,13 @@ class PeerURLBar extends JComboBox {
 		@SuppressWarnings("synthetic-access")
 		public PeerURLBarModel() {
 			try {
-				getLoggerForThisMethod().log(Level.FINER, "attempting to load PeerURLBar state from file: " + PeerURLBar.this.stateFile.toString());
+				getLoggerForThisMethod().log(Level.FINER, "attempting to load PeerURLBar state from file: " + PeerURLBar.this.stateFile.getAbsolutePath());
 				this.holder = ComboBoxItemsHolder.load(PeerURLBar.this.stateFile);
 				// maxRetainedItems may have changed since the last time state was saved
 				removeExcessiveItems();
-				getLoggerForThisMethod().log(Level.FINE, "successfully loaded PeerURLBar state from file: " + PeerURLBar.this.stateFile.toString());
+				getLoggerForThisMethod().log(Level.FINE, "successfully loaded PeerURLBar state from file: " + PeerURLBar.this.stateFile.getAbsolutePath());
 			} catch (Throwable e) {
-				getLoggerForThisMethod().log(Level.WARNING, "failed to load PeerURLBar state from file: " + PeerURLBar.this.stateFile.toString());
+				getLoggerForThisMethod().log(Level.WARNING, "failed to load PeerURLBar state from file: " + PeerURLBar.this.stateFile.getAbsolutePath());
 				this.holder = new ComboBoxItemsHolder(maxRetainedItems, PeerURLBar.this.stateFile);
 			}
 		}
