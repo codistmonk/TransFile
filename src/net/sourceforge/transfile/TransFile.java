@@ -26,9 +26,11 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
+import java.util.logging.ConsoleHandler;
 
 import net.sourceforge.transfile.backend.Backend;
 import net.sourceforge.transfile.settings.Settings;
+import net.sourceforge.transfile.tools.Tools;
 import net.sourceforge.transfile.ui.UserInterface;
 import net.sourceforge.transfile.ui.swing.SwingGUI;
 
@@ -50,6 +52,16 @@ public class TransFile implements Runnable {
 	 */
 	private UserInterface ui;
 	
+	/**
+	 * The default log file location is in the user-specific application directory
+	 */
+	private static final String DEFAULT_LOG_PATH = new File(Tools.getUserApplicationDirectory(), "log.txt").getAbsolutePath();
+	
+	/**
+	 * The default log level is {@value}, logging the maximum amount of information
+	 */
+	private static final String DEFAULT_LOG_LEVEL = Level.FINEST.getName();
+	
 	/*
 	 * Sets the application's title to be used in the automatically generated Mac OS X application menu
 	 * and "About" menu item
@@ -59,6 +71,7 @@ public class TransFile implements Runnable {
 	static {
 		System.setProperty("com.apple.mrj.application.apple.menu.about.name", TransFile.applicationTitle);
 	}
+	
 	
 	/**
 	 * Creates a TransFile application object. Constructor is private
@@ -119,25 +132,28 @@ public class TransFile implements Runnable {
 	 * @throws IOException if an I/O error occurred while trying to access the log file
 	 */
 	private static final void configureLogger() throws IOException {
-		// log to a file (in addition to logging to the console)
+		
+		//TODO let the user configure
+		// - whether to log to console at all
+		// - what log level to use for console logging
+		
+		// remove all default handlers
+		for(Handler handler: Logger.getLogger("").getHandlers())
+			Logger.getLogger("").removeHandler(handler);
+		
+		final Level logLevel = Level.parse(Settings.getOrCreate("log_level", DEFAULT_LOG_LEVEL));
+		
+		final Handler consoleHandler = new ConsoleHandler();
 		final Handler fileHandler = new FileHandler(Settings.getOrCreate("log_path", DEFAULT_LOG_PATH));
 		
+		consoleHandler.setLevel(logLevel);
+		fileHandler.setLevel(logLevel);
 		fileHandler.setFormatter(new SimpleFormatter());
 		
+		Logger.getLogger("net.sourceforge.transfile").addHandler(consoleHandler);
 		Logger.getLogger("net.sourceforge.transfile").addHandler(fileHandler);
 		
-		Logger.getLogger("net.sourceforge.transfile").setLevel(Level.parse(Settings.getOrCreate("log_level", DEFAULT_LOG_LEVEL)));
+		Logger.getLogger("net.sourceforge.transfile").setLevel(logLevel);
 	}
-	
-	/**
-	 * The default log file location is directly in the user home directory,
-	 * so that it is visible and easy to access.
-	 */
-	private static final String DEFAULT_LOG_PATH = new File(System.getProperty("user.home"), "transfile_log.txt").getAbsolutePath();
-	
-	/**
-	 * The default log level is {@value}, logging the maximum amount of information
-	 */
-	private static final String DEFAULT_LOG_LEVEL = Level.FINEST.getName();
 
 }
