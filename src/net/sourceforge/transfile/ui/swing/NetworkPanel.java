@@ -256,7 +256,7 @@ public class NetworkPanel extends TopLevelPanel {
 		try {
 			getLoggerForThisMethod().log(Level.FINER, "attempting to save PeerURLBar state");
 			PeerURLBar.getInstance().saveModel();
-			getLoggerForThisMethod().log(Level.INFO, "successfully saved PeerURLBar state");
+			getLoggerForThisMethod().log(Level.FINE, "successfully saved PeerURLBar state");
 		} catch(final SerializationException e) {
 			getLoggerForThisMethod().log(Level.WARNING, "failed to save PeerURLBar state", e);
 		}

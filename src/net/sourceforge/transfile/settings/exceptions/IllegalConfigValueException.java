@@ -27,46 +27,39 @@ package net.sourceforge.transfile.settings.exceptions;
  * @author Martin Riedel
  *
  */
-public class IllegalConfigValueException extends RuntimeException {
+public class IllegalConfigValueException extends SettingsException {
 
 	private static final long serialVersionUID = 451538573200525501L;
 	
-	private final String key;
-	
+	/*
+	 * The configuration value that was deemed illegal
+	 */
 	private final String value;
 	
 
 	/**
-	 * Constructs a new IllegalConfigValueException
+	 * Constructs a new instance
 	 * 
 	 * @param key the configuration key for which an illegal value was encountered
 	 * @param value the value which was deemed illegal
 	 */
 	public IllegalConfigValueException(final String key, final String value) {
-		this.key = key;
+		super(key);
+		
 		this.value = value;
 	}
 	
 	/**
-	 * Constructs a new IllegalConfigValueException
+	 * Constructs a new instance
 	 * 
 	 * @param key the configuration key for which an illegal value was encountered
 	 * @param value the value which was deemed illegal
-	 * @param cause the {@code Throwable} causing/describing the invalidity of {@code value}
+	 * @param cause the {@code Throwable} causing/describing the illegality of {@code value}
 	 */
 	public IllegalConfigValueException(final String key, final String value, final Throwable cause) {
-		super(cause);
+		super(key, cause);
 		
-		this.key = key;
 		this.value = value;
-	}
-	
-	/**
-	 * 
-	 * @return the configuration key whose value was deemed illegal
-	 */
-	public String getKey() {
-		return key;
 	}
 	
 	/**

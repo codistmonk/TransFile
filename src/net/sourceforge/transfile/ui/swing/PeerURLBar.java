@@ -19,9 +19,12 @@
 
 package net.sourceforge.transfile.ui.swing;
 
+import static net.sourceforge.transfile.tools.Tools.getLoggerForThisMethod;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.logging.Level;
 
 import javax.swing.AbstractListModel;
 import javax.swing.JComboBox;
@@ -30,6 +33,7 @@ import javax.swing.MutableComboBoxModel;
 import net.sourceforge.transfile.exceptions.SerializationException;
 import net.sourceforge.transfile.network.PeerURL;
 import net.sourceforge.transfile.settings.Settings;
+import net.sourceforge.transfile.tools.Tools;
 
 
 /**
@@ -72,8 +76,7 @@ class PeerURLBar extends JComboBox {
 	/*
 	 * The file the data model will be serialized and saved to to achieve persistence
 	 */
-	//TODO use Tools.getUserApplicationDirectory() after merge
-	private final File stateFile = new File(System.getProperty("user.home"), ".transfile/PeerURLBar.state");
+	private final File stateFile = new File(Tools.getUserApplicationDirectory(), "PeerURLBar.state");
 	
 	/*
 	 * A reference to the data model used by the PeerURLBar
@@ -155,8 +158,11 @@ class PeerURLBar extends JComboBox {
 		 */
 		public PeerURLBarModel() {
 			try {
+				getLoggerForThisMethod().log(Level.FINER, "attempting to load PeerURLBar state from file: " + stateFile.toString());
 				this.holder = ComboBoxItemsHolder.load(stateFile);
+				getLoggerForThisMethod().log(Level.FINE, "successfully loaded PeerURLBar state from file: " + stateFile.toString());
 			} catch (Throwable e) {
+				getLoggerForThisMethod().log(Level.WARNING, "failed to load PeerURLBar state from file: " + stateFile.toString());
 				this.holder = new ComboBoxItemsHolder(maxRetainedItems, stateFile);
 			}
 		}

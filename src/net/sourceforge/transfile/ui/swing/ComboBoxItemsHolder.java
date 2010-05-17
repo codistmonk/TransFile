@@ -34,11 +34,11 @@ import net.sourceforge.transfile.exceptions.SerializationFileNotFoundException;
 
 
 /**
- * Stores the items in a JComboBox' data model.
+ * <p>Stores the items in a JComboBox' data model.</p>
  * 
- * Presently only used by PeerURLBar and primarily separate from it for the sole purpose of
- * working around a bug on MacOSX that causes the serialization of JComboBoxes or their components
- * to fail when the Aqua look and feel is in use.
+ * <p>Presently only used by PeerURLBar and primarily separate from it for the sole purpose of
+ * working around a bug on Mac OS X that causes the serialization of JComboBoxes or their components
+ * to fail when the Aqua look and feel is active.</p>
  * 
  * @author Martin Riedel
  *
@@ -62,6 +62,7 @@ class ComboBoxItemsHolder implements Serializable {
 	 * The currently selected item, or null if there is no selection
 	 */
 	public Object selectedItem = null;
+	
 	
 	/**
 	 * Constructs a new ComboBoxItemsHolder WITHOUT loading state from a previously serialized instance

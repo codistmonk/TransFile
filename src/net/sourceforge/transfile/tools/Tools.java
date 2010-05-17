@@ -19,9 +19,14 @@
 
 package net.sourceforge.transfile.tools;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.util.logging.Logger;
+
+import net.sourceforge.transfile.settings.Settings;
+import net.sourceforge.transfile.settings.exceptions.MissingDefaultSettingException;
+import net.sourceforge.transfile.tools.exceptions.UserApplicationDirectoryException;
 
 /**
  * Holder for static utility methods. Should not be instantiated.
@@ -30,6 +35,46 @@ import java.util.logging.Logger;
  *
  */
 public final class Tools {
+
+	/**
+	 * Returns the user-specific application directory for the current system user. Guarantees that the directory exists
+	 * and is both read- and writable.
+	 * 
+	 * @return a {@link File} representing the user-specific application directory
+	 */
+	public static final File getUserApplicationDirectory() {
+		final String userHomeDirectoryString = System.getProperty("user.home");
+		
+		if(userHomeDirectoryString == null || "".equals(userHomeDirectoryString))
+			throw new UserApplicationDirectoryException("System did not provide a \"user.home\" property");
+		
+		final String userApplicationDirectoryString = Settings.getPreferences().get("user_application_directory", null);
+		
+		if(userApplicationDirectoryString == null)
+			throw new MissingDefaultSettingException("user_application_directory");
+		
+		final File userApplicationDirectory = new File(userHomeDirectoryString, userApplicationDirectoryString);
+		
+		try {
+
+			if(!userApplicationDirectory.isDirectory()) {
+				userApplicationDirectory.mkdirs();
+
+				if(!userApplicationDirectory.isDirectory())
+					throw new UserApplicationDirectoryException("directory does not exist and cannot be created");
+			}
+			
+			if(!userApplicationDirectory.canRead())
+				throw new UserApplicationDirectoryException("directory exists but cannot be read from");
+			
+			if(!userApplicationDirectory.canWrite())
+				throw new UserApplicationDirectoryException("directory exists but cannot be written to");
+
+			return userApplicationDirectory;
+		} catch(final SecurityException exception) {
+			throw new UserApplicationDirectoryException(exception);
+		}
+	}
 	
 	/**
 	 * TODO doc
