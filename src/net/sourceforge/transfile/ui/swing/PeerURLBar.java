@@ -21,12 +21,13 @@ package net.sourceforge.transfile.ui.swing;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Arrays;
+import java.io.File;
 
 import javax.swing.AbstractListModel;
 import javax.swing.JComboBox;
 import javax.swing.MutableComboBoxModel;
 
+import net.sourceforge.transfile.exceptions.SerializationException;
 import net.sourceforge.transfile.network.PeerURL;
 import net.sourceforge.transfile.settings.Settings;
 
@@ -66,12 +67,13 @@ class PeerURLBar extends JComboBox {
 	 * Typically, entering a (valid) PeerURL and pressing enter causes such a request to add for an item
 	 * to be added, with said item being the PeerURL entered.
 	 */
-	private static final int maxRetainedItems = Settings.getPreferences().getInt("peerurlbar_max_retained_items", 1);
+	private static final int maxRetainedItems = Settings.getPreferences().getInt("peerurlbar_max_retained_items", 5);
 	
 	/*
 	 * The file the data model will be serialized and saved to to achieve persistence
 	 */
-	private final File stateFile = new File(""/*Settings.getInstance().getCfgDir()*/, "PeerURLBar.state");
+	//TODO use Tools.getUserApplicationDirectory() after merge
+	private final File stateFile = new File(System.getProperty("user.home"), ".transfile/PeerURLBar.state");
 	
 	/*
 	 * A reference to the data model used by the PeerURLBar
@@ -144,7 +146,7 @@ class PeerURLBar extends JComboBox {
 		 * holder.items.get(0) is the youngest (most recently added) item in the list
 		 * holder.items.get(maxRetainedItems - 1) is the oldest item in the list
 		 */
-		private final ComboBoxItemsHolder holder;
+		private ComboBoxItemsHolder holder;
 		
 		/**
 		 * Constructs a new PeerURLBarModel, attempting to load a previously serialized ItemsHolder
@@ -152,9 +154,11 @@ class PeerURLBar extends JComboBox {
 		 * 
 		 */
 		public PeerURLBarModel() {
-			this.holder = new ComboBoxItemsHolder(maxRetainedItems, stateFile);
-			
-			this.holder.items.addAll(Arrays.asList(Settings.getPreferences().get("peer_url_bar.state", "").split(",")));
+			try {
+				this.holder = ComboBoxItemsHolder.load(stateFile);
+			} catch (Throwable e) {
+				this.holder = new ComboBoxItemsHolder(maxRetainedItems, stateFile);
+			}
 		}
 		
 		/**
@@ -163,9 +167,6 @@ class PeerURLBar extends JComboBox {
 		 * @throws SerializationException if serializing or saving the serialized data to disk failed
 		 */
 		public void saveHolder() throws SerializationException {
-			if (true) {
-				return;
-			}
 			holder.save();
 		}
 

@@ -50,6 +50,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import net.sourceforge.transfile.backend.ControllableBackend;
+import net.sourceforge.transfile.exceptions.SerializationException;
 import net.sourceforge.transfile.network.exceptions.LinkFailedException;
 import net.sourceforge.transfile.network.exceptions.PeerURLFormatException;
 import net.sourceforge.transfile.settings.Settings;
@@ -251,13 +252,14 @@ public class NetworkPanel extends TopLevelPanel {
 	 */
 	@Override
 	protected void saveState() {
-		final StringBuilder builder = new StringBuilder();
-		
-		for (int i = 0; i < PeerURLBar.getInstance().getItemCount(); ++i) {
-			builder.append(PeerURLBar.getInstance().getItemAt(i)).append(',');
+		// save PeerURLBar state
+		try {
+			getLoggerForThisMethod().log(Level.FINER, "attempting to save PeerURLBar state");
+			PeerURLBar.getInstance().saveModel();
+			getLoggerForThisMethod().log(Level.INFO, "successfully saved PeerURLBar state");
+		} catch(final SerializationException e) {
+			getLoggerForThisMethod().log(Level.WARNING, "failed to save PeerURLBar state", e);
 		}
-		
-		Settings.getPreferences().put("peer_url_bar.state", builder.toString());
 		
 		// save local port
 		Settings.getPreferences().put("local_port", this.localPort.getValue().toString());
