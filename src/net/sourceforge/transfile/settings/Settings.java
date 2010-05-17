@@ -149,20 +149,6 @@ public class Settings {
 	}
 	
 	/**
-	 * If {@code key} is associated with a value in the preferences, then this value is parsed to an integer,
-	 * otherwise 0 is returned.
-	 * 
-	 * @param key
-	 * <br>Should not be null
-	 * @return
-	 * <br>Range: any integer
-	 * @throws NumberFormatException if the existing preference cannot be parsed to an integer
-	 */
-	public static final int getInt(final String key) {
-		return Integer.parseInt(getPreferences().get(key, "0"));
-	}
-	
-	/**
 	 * Returns the default setting for the provided property key.
 	 * 
 	 * @param key the property key to look up

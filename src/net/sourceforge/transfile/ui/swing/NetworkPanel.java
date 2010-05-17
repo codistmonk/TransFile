@@ -257,7 +257,7 @@ public class NetworkPanel extends TopLevelPanel {
 			builder.append(PeerURLBar.getInstance().getItemAt(i)).append(',');
 		}
 		
-		Settings.getPreferences().put("peerurlbar.state", builder.toString());
+		Settings.getPreferences().put("peer_url_bar.state", builder.toString());
 		
 		// save local port
 		Settings.getPreferences().put("local_port", this.localPort.getValue().toString());

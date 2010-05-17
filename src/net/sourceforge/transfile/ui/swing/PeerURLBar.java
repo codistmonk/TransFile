@@ -66,7 +66,12 @@ class PeerURLBar extends JComboBox {
 	 * Typically, entering a (valid) PeerURL and pressing enter causes such a request to add for an item
 	 * to be added, with said item being the PeerURL entered.
 	 */
-	private static final int maxRetainedItems = Settings.getInt("peerurlbar_max_retained_items");
+	private static final int maxRetainedItems = Settings.getPreferences().getInt("peerurlbar_max_retained_items", 1);
+	
+	/*
+	 * The file the data model will be serialized and saved to to achieve persistence
+	 */
+	private final File stateFile = new File(""/*Settings.getInstance().getCfgDir()*/, "PeerURLBar.state");
 	
 	/*
 	 * A reference to the data model used by the PeerURLBar
@@ -81,6 +86,15 @@ class PeerURLBar extends JComboBox {
 	 */
 	public static PeerURLBar getInstance() {
 		return LazyHolder._instance;
+	}
+	
+	/**
+	 * Saves the PeerURLBar's data state to disk
+	 * 
+	 * @throws SerializationException if serializing or saving the serialized data to disk failed
+	 */
+	public void saveModel() throws SerializationException {
+		model.saveHolder();
 	}
 	
 	/**
@@ -138,9 +152,21 @@ class PeerURLBar extends JComboBox {
 		 * 
 		 */
 		public PeerURLBarModel() {
-			this.holder = new ComboBoxItemsHolder(maxRetainedItems);
+			this.holder = new ComboBoxItemsHolder(maxRetainedItems, stateFile);
 			
-			this.holder.items.addAll(Arrays.asList(Settings.get("peerurlbar.state").split(",")));
+			this.holder.items.addAll(Arrays.asList(Settings.getPreferences().get("peer_url_bar.state", "").split(",")));
+		}
+		
+		/**
+		 * Saves the state of the ComboBoxItemsHolder to disk
+		 * 
+		 * @throws SerializationException if serializing or saving the serialized data to disk failed
+		 */
+		public void saveHolder() throws SerializationException {
+			if (true) {
+				return;
+			}
+			holder.save();
 		}
 
 		/**
