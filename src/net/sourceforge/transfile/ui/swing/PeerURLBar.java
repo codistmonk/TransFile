@@ -57,7 +57,21 @@ class PeerURLBar extends JComboBox {
 	 *
 	 */
 	private static class LazyHolder {
-		private static final PeerURLBar _instance = new PeerURLBar();
+		
+		/*
+		 * Holds the lazy-loaded PeerURLBar instance
+		 */
+		private static final PeerURLBar INSTANCE = new PeerURLBar();
+		
+		/**
+		 * Getter for {@code INSTANCE}. Returns the lazy-loaded {@link PeerURLBar} singleton instance.
+		 * 
+		 * @return the lazy-loaded {@link PeerURLBar} singleton instance.
+		 */
+		final static PeerURLBar getInstance() {
+			return INSTANCE;
+		}
+		
 	}
 	
 	/*
@@ -89,9 +103,8 @@ class PeerURLBar extends JComboBox {
 	 * 
 	 * @return the singleton instance
 	 */
-	@SuppressWarnings("synthetic-access")
 	public static PeerURLBar getInstance() {
-		return LazyHolder._instance;
+		return LazyHolder.getInstance();
 	}
 	
 	/**

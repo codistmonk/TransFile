@@ -167,6 +167,15 @@ public class StatusList extends JList {
 		}
 		
 		/**
+		 * Called whenever the application's locale changes. All {@link StatusMessage}s have been
+		 * dynamically translated already, so this method merely refreshes the list.
+		 * 
+		 */
+		final void onLocaleChanged() {
+			fireContentsChanged(this, 0, StatusListModel.this.messages.size() - 1);
+		}
+		
+		/**
 		 * Listens for locale changes and tells the list that its contents have changed (they have been autotranslated)
 		 * when one happens. The messages themselves are dynamically translated, so there's no need to do anything 
 		 * with them here.
@@ -190,10 +199,9 @@ public class StatusList extends JList {
 			public void localeChanged(Locale oldLocale, Locale newLocale) {
 				SwingUtilities.invokeLater(new Runnable() {
 					
-					@SuppressWarnings("synthetic-access")
 					@Override
 					public void run() {
-						StatusListModel.this.fireContentsChanged(this, 0, StatusListModel.this.messages.size() - 1);
+						StatusListModel.this.onLocaleChanged();
 					}
 				});
 			}

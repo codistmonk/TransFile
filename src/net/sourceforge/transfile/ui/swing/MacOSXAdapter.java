@@ -91,6 +91,24 @@ class MacOSXAdapter {
 	}
 	
 	/**
+	 * Getter for {@code applicationEvent}
+	 * 
+	 * @return an instance of Class representing {@link com.apple.eawt.ApplicationEvent}
+	 */
+	protected final Class<?> getApplicationEvent() {
+		return this.applicationEvent;
+	}
+	
+	/**
+	 * Getter for {@code applicationEvent_setHandled}
+	 * 
+	 * @return an instance of Method representing {@link com.apple.eawt.ApplicationEvent#setHandled(boolean)}
+	 */
+	protected final Method getApplicationEvent_setHandled() {
+		return this.applicationEvent_setHandled;
+	}
+	
+	/**
 	 * Constructs a new MacOSXAdapter 
 	 * 
 	 * @param gui back-reference to the SwingGUI instance creating this object
@@ -166,7 +184,6 @@ class MacOSXAdapter {
 		/** 
 		 * {@inheritDoc}
 		 */
-		@SuppressWarnings("synthetic-access")
 		@Override
 		public Object invoke(Object obj, Method method, Object[] args) throws Throwable {
 			String methodName = method.getName();
@@ -178,7 +195,7 @@ class MacOSXAdapter {
 			Object arg = args[0];
 			
 			// make sure the provided argument is an instance of com.apple.eawt.ApplicationEvent
-			if(!(MacOSXAdapter.this.applicationEvent.isInstance(arg)))
+			if(!(MacOSXAdapter.this.getApplicationEvent().isInstance(arg)))
 				throw new MacOSXAdaptationException("method with an argument that is not an instance of com.apple.eawt.ApplicationEvent invoked on com.apple.eawt.ApplicationListener");
 			
 			// delegate to the corresponding event handler method
@@ -214,11 +231,10 @@ class MacOSXAdapter {
 		 * 
 		 * @param arg an instance of com.apple.eawt.ApplicationEvent representing the event being handled
 		 */
-		@SuppressWarnings("synthetic-access")
 		private void handleAbout(Object arg) {
 			// keep Mac OS X default About dialog from being shown
 			try {
-				MacOSXAdapter.this.applicationEvent_setHandled.invoke(arg, new Object[] { true });
+				MacOSXAdapter.this.getApplicationEvent_setHandled().invoke(arg, new Object[] { true });
 			} catch (Throwable e) {
 				throw new MacOSXAdaptationException(e);
 			} finally {

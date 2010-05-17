@@ -260,6 +260,15 @@ public class StatusPanel extends TopLevelPanel {
 	}
 	
 	/**
+	 * Getter for the {@link StatsList} instance used by this {@link StatusPanel}
+	 *
+	 * @return the {@link StatusList} instance used by this {@link StatusPanel}
+	 */
+	protected final StatusList getStatusList() {
+		return this.statusList;
+	}
+
+	/**
 	 * Listens for new {@link StatusService.StatusMessage}s and adds them to the list.
 	 *
 	 * @author Martin Riedel
@@ -278,10 +287,9 @@ public class StatusPanel extends TopLevelPanel {
 		/** 
 		 * {@inheritDoc}
 		 */
-		@SuppressWarnings("synthetic-access")
 		@Override
 		public void newStatusMessage(final StatusMessage message) {
-			StatusPanel.this.statusList.addMessage(message);
+			StatusPanel.this.getStatusList().addMessage(message);
 			// reset the scroll pane so that the new message is visible
 			StatusPanel.this.statusListScrollPane.getVerticalScrollBar().setValue(StatusPanel.this.statusListScrollPane.getVerticalScrollBar().getMinimum());
 		}
