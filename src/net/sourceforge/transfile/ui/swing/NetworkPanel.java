@@ -109,7 +109,7 @@ public class NetworkPanel extends TopLevelPanel {
 	 * have an intention of performing any action on localIPAddrBox that would otherwise be interpreted 
 	 * as the user selecting an item from the drop-down menu (or selecting an item via their keyboard).
 	 */
-	private boolean _disregardNextLocalIPChange = false;
+	private boolean disregardNextLocalIPChange = false;
 	
 	/*
 	 * GUI subpanels
@@ -215,7 +215,6 @@ public class NetworkPanel extends TopLevelPanel {
 		this.connectButton = translate(new JButton("button_connect"));
 		this.connectButton.addActionListener(new ActionListener() {
 			
-			@SuppressWarnings("synthetic-access")
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				onUserActionConnect();
@@ -233,7 +232,6 @@ public class NetworkPanel extends TopLevelPanel {
 		this.stopButton.setVisible(false);
 		this.stopButton.addActionListener(new ActionListener() {
 			
-			@SuppressWarnings("synthetic-access")
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				onUserActionInterrupt();				
@@ -287,6 +285,259 @@ public class NetworkPanel extends TopLevelPanel {
 	protected final ControllableBackend getBackend() {
 		return this.backend;
 	}
+	
+	/**
+	 * Getter for {@code localLANAddresses}
+	 *
+	 * @return the local LAN addresses
+	 */
+	final Set<String> getLocalLANAddresses() {
+		return this.localLANAddresses;
+	}
+
+	/**
+	 * Setter for {@code localLANAddresses}
+	 *
+	 * @param localLANAddresses 
+	 * <br />The local LAN addresses to set
+	 * <br />Should not be null
+	 */
+	final void setLocalLANAddresses(Set<String> localLANAddresses) {
+		this.localLANAddresses = localLANAddresses;
+	}
+	
+	/**
+	 * Getter for {@code localInternetAddrField}
+	 *
+	 * @return the local Internet address text field
+	 */
+	final JTextField getLocalInternetAddrField() {
+		return this.localInternetAddrField;
+	}
+
+	/**
+	 * Setter for {@code localInternetIPAddress}
+	 *
+	 * @param localInternetIPAddress
+	 * <br />The local internet IP address to set
+	 * <br />May be null
+	 */
+	final void setLocalInternetIPAddress(String localInternetIPAddress) {
+		this.localInternetIPAddress = localInternetIPAddress;
+	}
+
+	/**
+	 * Getter for {@code localInternetIPAddress}
+	 *
+	 * @return the local internet IP address
+	 */
+	final String getLocalInternetIPAddress() {
+		return this.localInternetIPAddress;
+	}
+
+	/**
+	 * Checks whether the next local IP address change will be disregarded in terms of updating the local
+	 * addresses combobox's selected item
+	 *
+	 * @return whether the next local IP address change will be disregarded
+	 */
+	final boolean isDisregardNextLocalIPChange() {
+		return this.disregardNextLocalIPChange;
+	}
+
+	/**
+	 * Makes sure the next local IP address change is disregarded in terms of updating the local
+	 * addresses combobox's selected item
+	 *
+	 * @param disregardNextLocalIPChange whether to disregard the next local IP address change
+	 */
+	final void setDisregardNextLocalIPChange(boolean disregardNextLocalIPChange) {
+		this.disregardNextLocalIPChange = disregardNextLocalIPChange;
+	}
+	
+	/**
+	 * Getter for {@code localPort}
+	 *
+	 * @return the local port
+	 */
+	final PortSpinner getLocalPort() {
+		return this.localPort;
+	}
+	
+	/**
+	 * Getter for {@code connectWorker}
+	 *
+	 * @return the worker thread trying to establish a connection, or null if none is active
+	 */
+	final SwingWorker<Void, Void> getConnectWorker() {
+		return this.connectWorker;
+	}
+
+	/**
+	 * Unsets the active worker thread for establishing a connection
+	 *
+	 */
+	final void unsetConnectWorker() {
+		this.connectWorker = null;
+	}
+
+	/**
+	 * Updates the ComboBox containing the local IP addresses so that it contains
+	 * exactly the elements from the provided Set<String> of addresses
+	 * 
+	 */
+	void updateLocalIPAddrBox() {
+		this.localIPAddrBox.removeAllItems();
+		
+		if(this.localInternetIPAddress != null && !("".equals(this.localInternetIPAddress)))
+			if(!(this.localLANAddresses.contains(this.localInternetIPAddress)))
+				this.localIPAddrBox.addItem(this.localInternetIPAddress);
+		
+		for(String address: this.localLANAddresses)
+			this.localIPAddrBox.addItem(address);
+		
+		onLocalIPAddrBoxUpdated();
+	}
+	
+	/**
+	 * Shows the "Connect" button, hiding the "Stop" button
+	 * 
+	 */
+	void showConnectButton() {
+		this.connectButton.setVisible(true);
+		this.stopButton.setVisible(false);
+	}
+	
+	/**
+	 * Invoked when a connection has been established successfully
+	 * 
+	 */
+	void onConnectSuccessful() {
+		//TODO cancel the SwingWorkers retrieving the local and local external IP addresses
+		// if they're still running
+		
+		// inform the main GUI class
+		getWindow().onConnectSuccessful();
+	}
+	
+	/*
+	 * BEGIN USER ACTION EVENT HANDLERS
+	 */
+
+	/**
+	 * Invoked when the user selects a local IP address from the drop-down menu
+	 * 
+	 * ACTUALLY INVOKED WHENEVER THE SELECTED LOCAL IP ADDRESS CHANGES, even if the user didn't
+	 * initiate it.
+	 * 
+	 * TODO RENAME TO onSelectedLocalAddressChanged or similar
+	 * 
+	 * @param selectedItem the IP address selected by the user
+	 */
+	void onUserActionSelectLocalAddr(final String selectedItem) {	
+		this.lastSelectedLocalAddress = this.selectedLocalAddress;
+		this.selectedLocalAddress = selectedItem;
+		
+		updateLocalURL();
+		
+		if(!this.disregardNextLocalIPChange)
+			if(!this.userHasSelectedALocalIP)
+				this.userHasSelectedALocalIP = true;
+	}
+
+	/**
+	 * Invoked when the user changes the local port
+	 * 
+	 */
+	void onUserActionChangeLocalPort() {	
+		updateLocalURL();
+	}
+	
+	/**
+	 * Invoked when the user initializes a connection attempt, i.e. by pressing the "Connect" button
+	 * 
+	 */
+	void onUserActionConnect() {
+		final String remoteURL = (String) this.remoteURLBar.getSelectedItem();
+		
+		if(remoteURL == null || "".equals(remoteURL)) {
+			getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_invalid_peerurl")));
+			return;
+		}
+		
+		showStopButton();
+		
+		getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("status_connecting")));
+		
+		this.connectWorker = new SwingWorker<Void, Void>() {
+
+			@Override
+			protected Void doInBackground() throws Exception {
+				NetworkPanel.this.getBackend().connect(remoteURL, ((Number) NetworkPanel.this.getLocalPort().getValue()).intValue());
+				return null;
+			}
+			
+			@Override
+			protected void done() {
+				try {
+					get();
+					// if the flow reaches this / no exceptions are thrown, the connection has been established.
+					onConnectSuccessful();
+				} catch(CancellationException e) {
+					getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("status_interrupted")));
+				} catch(InterruptedException e) {
+					//TODO when exactly does this happen. should be while the third thread
+					// involved with this SwingWorker gets interrupted while waiting for get to
+					// stop blocking - handle? if yes, how?
+				} catch(ExecutionException e) {
+					Throwable cause = e.getCause();
+					
+					if(cause instanceof PeerURLFormatException) {
+						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_invalid_peerurl")));
+						getLoggerForThisMethod().log(Level.INFO, "failed to connect", cause);
+					} else if(cause instanceof UnknownHostException) {
+						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_unknown_host")));
+						getLoggerForThisMethod().log(Level.INFO, "failed to connect", cause);
+					} else if(cause instanceof IllegalStateException) {
+						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_illegal_state"), cause));
+						getLoggerForThisMethod().log(Level.SEVERE, "failed to connect", cause);
+					} else if(cause instanceof LinkFailedException) {
+						// TODO...
+						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_no_link")));
+						getLoggerForThisMethod().log(Level.INFO, "failed to connect", cause);
+					} else if(cause instanceof InterruptedException) {
+						// ignore, situation handled by CancellationException
+					} else {
+						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_unknown")));
+						getLoggerForThisMethod().log(Level.SEVERE, "failed to connect (unknown error)", cause);
+					}
+				} finally {
+					// in any case, revert to default connection state
+					// (either the connection attempt failed, or it succeeded and the panel should be reset for future use)
+					NetworkPanel.this.unsetConnectWorker();
+					showConnectButton();
+				}
+			}
+			
+		};
+		
+		this.connectWorker.execute();
+	}
+
+	/**
+	 * Invoked when the user interrupts a running connection attempt
+	 * 
+	 */
+	void onUserActionInterrupt() {
+		if(this.connectWorker == null)
+			return;
+		
+		this.connectWorker.cancel(true);
+	}
+	
+	/*
+	 * END USER ACTION EVENT HANDLERS
+	 */
 	
 	/**
 	 * Sets up the "Remote PeerURL" panel
@@ -366,7 +617,6 @@ public class NetworkPanel extends TopLevelPanel {
 		this.localIPAddrBox.setEditable(false);
 		this.localIPAddrBox.addActionListener(new ActionListener() {
 
-			@SuppressWarnings("synthetic-access")
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JComboBox source = (JComboBox) e.getSource();
@@ -392,14 +642,62 @@ public class NetworkPanel extends TopLevelPanel {
 		this.localPort = new PortSpinner();
 		this.localPort.addChangeListener(new ChangeListener() {
 			
-			@SuppressWarnings("synthetic-access")
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				onUserActionChangeLocalPort();
 			}
+			
 		});
 		c.gridy = 3;
 		this.localURLPanel.add(this.localPort, c);
+	}
+	
+	/**
+	 * Retrieves the local internet/external/public IP addresses in a separate thread in order to not block GUI creation. 
+	 * Also updates the localIPAddrBox from the Swing event dispatch thread after retrieving the necessary data
+	 * 
+	 */
+	private void retrieveLocalInternetIPAddress() {
+		new SwingWorker<String, Void>() {
+
+			@Override
+			protected String doInBackground() throws Exception {
+				return NetworkPanel.this.getBackend().findExternalAddress();
+			}
+
+			@Override
+			protected void done() {
+				try {
+					NetworkPanel.this.setLocalInternetIPAddress(get());
+					NetworkPanel.this.getLocalInternetAddrField().setText(NetworkPanel.this.getLocalInternetIPAddress());
+					NetworkPanel.this.setDisregardNextLocalIPChange(true);
+					updateLocalIPAddrBox();
+				} catch(InterruptedException e) {
+					//TODO when exactly does this happen. should be while the third thread
+					// involved with this SwingWorker gets interrupted while waiting for get to
+					// stop blocking - handle? if yes, how?
+				} catch(ExecutionException e) {
+					Throwable cause = e.getCause();
+					
+					getLoggerForThisMethod().log(Level.WARNING, "failed to discover external IP address", cause);
+					
+					if(cause instanceof UnknownHostException) {
+						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_internet_unknown_host")));
+						NetworkPanel.this.getLocalInternetAddrField().setText(translate("not_available"));
+					} else if(cause instanceof MalformedURLException) {
+						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_internet_malformed_url"), cause));
+						NetworkPanel.this.getLocalInternetAddrField().setText(translate("not_available"));
+					} else if(cause instanceof IOException) {
+						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_internet_io_error")));
+						NetworkPanel.this.getLocalInternetAddrField().setText(translate("not_available"));
+					} else {
+						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_internet_unknown")));
+						NetworkPanel.this.getLocalInternetAddrField().setText(translate("N/A"));
+					}
+				}
+			}
+			
+		}.execute();	
 	}
 	
 	/**
@@ -415,12 +713,11 @@ public class NetworkPanel extends TopLevelPanel {
 				return NetworkPanel.this.getBackend().findLocalAddresses(true);
 			}
 
-			@SuppressWarnings("synthetic-access")
 			@Override
 			protected void done() {
 				try {
-					NetworkPanel.this.localLANAddresses = get();
-					NetworkPanel.this._disregardNextLocalIPChange = true;
+					NetworkPanel.this.setLocalLANAddresses(get());
+					NetworkPanel.this.setDisregardNextLocalIPChange(true);
 					updateLocalIPAddrBox();
 				} catch(InterruptedException e) {
 					//TODO when exactly does this happen. should be while the third thread
@@ -442,70 +739,12 @@ public class NetworkPanel extends TopLevelPanel {
 	}
 	
 	/**
-	 * Retrieves the local internet/external/public IP addresses in a separate thread in order to not block GUI creation. 
-	 * Also updates the localIPAddrBox from the Swing event dispatch thread after retrieving the necessary data
+	 * Shows the "Stop" button, hiding the "Connect" button
 	 * 
 	 */
-	private void retrieveLocalInternetIPAddress() {
-		new SwingWorker<String, Void>() {
-
-			@Override
-			protected String doInBackground() throws Exception {
-				return NetworkPanel.this.getBackend().findExternalAddress();
-			}
-
-			@SuppressWarnings("synthetic-access")
-			@Override
-			protected void done() {
-				try {
-					NetworkPanel.this.localInternetIPAddress = get();
-					NetworkPanel.this.localInternetAddrField.setText(NetworkPanel.this.localInternetIPAddress);
-					NetworkPanel.this._disregardNextLocalIPChange = true;
-					updateLocalIPAddrBox();
-				} catch(InterruptedException e) {
-					//TODO when exactly does this happen. should be while the third thread
-					// involved with this SwingWorker gets interrupted while waiting for get to
-					// stop blocking - handle? if yes, how?
-				} catch(ExecutionException e) {
-					Throwable cause = e.getCause();
-					
-					getLoggerForThisMethod().log(Level.WARNING, "failed to discover external IP address", cause);
-					
-					if(cause instanceof UnknownHostException) {
-						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_internet_unknown_host")));
-						NetworkPanel.this.localInternetAddrField.setText(translate("not_available"));
-					} else if(cause instanceof MalformedURLException) {
-						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_internet_malformed_url"), cause));
-						NetworkPanel.this.localInternetAddrField.setText(translate("not_available"));
-					} else if(cause instanceof IOException) {
-						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_internet_io_error")));
-						NetworkPanel.this.localInternetAddrField.setText(translate("not_available"));
-					} else {
-						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_internet_unknown")));
-						NetworkPanel.this.localInternetAddrField.setText(translate("N/A"));
-					}
-				}
-			}
-			
-		}.execute();	
-	}
-	
-	/**
-	 * Updates the ComboBox containing the local IP addresses so that it contains
-	 * exactly the elements from the provided Set<String> of addresses
-	 * 
-	 */
-	private void updateLocalIPAddrBox() {
-		this.localIPAddrBox.removeAllItems();
-		
-		if(this.localInternetIPAddress != null && !("".equals(this.localInternetIPAddress)))
-			if(!(this.localLANAddresses.contains(this.localInternetIPAddress)))
-				this.localIPAddrBox.addItem(this.localInternetIPAddress);
-		
-		for(String address: this.localLANAddresses)
-			this.localIPAddrBox.addItem(address);
-		
-		onLocalIPAddrBoxUpdated();
+	private void showStopButton() {
+		this.connectButton.setVisible(false);
+		this.stopButton.setVisible(true);
 	}
 	
 	/**
@@ -519,40 +758,6 @@ public class NetworkPanel extends TopLevelPanel {
 		}
 		
 		this.localURLField.setText(this.backend.makePeerURLString(this.selectedLocalAddress, ((Number) this.localPort.getValue()).intValue()));
-	}
-	
-	/**
-	 * Shows the "Connect" button, hiding the "Stop" button
-	 * 
-	 */
-	private void showConnectButton() {
-		this.connectButton.setVisible(true);
-		this.stopButton.setVisible(false);
-	}
-	
-	/**
-	 * Shows the "Stop" button, hiding the "Connect" button
-	 * 
-	 */
-	private void showStopButton() {
-		this.connectButton.setVisible(false);
-		this.stopButton.setVisible(true);
-	}
-	
-	/*
-	 * INTERNAL EVENT HANDLERS
-	 */
-	
-	/**
-	 * Invoked when a connection has been established successfully
-	 * 
-	 */
-	private void onConnectSuccessful() {
-		//TODO cancel the SwingWorkers retrieving the local and local external IP addresses
-		// if they're still running
-		
-		// inform the main GUI class
-		getWindow().onConnectSuccessful();
 	}
 	
 	/**
@@ -577,125 +782,8 @@ public class NetworkPanel extends TopLevelPanel {
 				this.localIPAddrBox.setSelectedItem(ipToSelect);	
 		
 		// selection events not to be processed by the 
-		if(this._disregardNextLocalIPChange)
-			this._disregardNextLocalIPChange = false;
-	}
-	
-	/*
-	 * USER ACTION EVENT HANDLERS
-	 */
-
-	/**
-	 * Invoked when the user selects a local IP address from the drop-down menu
-	 * 
-	 * ACTUALLY INVOKED WHENEVER THE SELECTED LOCAL IP ADDRESS CHANGES, even if the user didn't
-	 * initiate it.
-	 * 
-	 * TODO RENAME TO onSelectedLocalAddressChanged or similar
-	 * 
-	 * @param selectedItem the IP address selected by the user
-	 */
-	private void onUserActionSelectLocalAddr(final String selectedItem) {	
-		this.lastSelectedLocalAddress = this.selectedLocalAddress;
-		this.selectedLocalAddress = selectedItem;
-		
-		updateLocalURL();
-		
-		if(!this._disregardNextLocalIPChange)
-			if(!this.userHasSelectedALocalIP)
-				this.userHasSelectedALocalIP = true;
-	}
-
-	/**
-	 * Invoked when the user changes the local port
-	 * 
-	 */
-	private void onUserActionChangeLocalPort() {	
-		updateLocalURL();
-	}
-	
-	/**
-	 * Invoked when the user initializes a connection attempt, i.e. by pressing the "Connect" button
-	 * 
-	 */
-	private void onUserActionConnect() {
-		final String remoteURL = (String) this.remoteURLBar.getSelectedItem();
-		
-		if(remoteURL == null || "".equals(remoteURL)) {
-			getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_invalid_peerurl")));
-			return;
-		}
-		
-		showStopButton();
-		
-		getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("status_connecting")));
-		
-		this.connectWorker = new SwingWorker<Void, Void>() {
-
-			@SuppressWarnings("synthetic-access")
-			@Override
-			protected Void doInBackground() throws Exception {
-				NetworkPanel.this.getBackend().connect(remoteURL, ((Number) NetworkPanel.this.localPort.getValue()).intValue());
-				return null;
-			}
-			
-			@SuppressWarnings("synthetic-access")
-			@Override
-			protected void done() {
-				try {
-					get();
-					// if the flow reaches this / no exceptions are thrown, the connection has been established.
-					onConnectSuccessful();
-				} catch(CancellationException e) {
-					getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("status_interrupted")));
-				} catch(InterruptedException e) {
-					//TODO when exactly does this happen. should be while the third thread
-					// involved with this SwingWorker gets interrupted while waiting for get to
-					// stop blocking - handle? if yes, how?
-				} catch(ExecutionException e) {
-					Throwable cause = e.getCause();
-					
-					if(cause instanceof PeerURLFormatException) {
-						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_invalid_peerurl")));
-						getLoggerForThisMethod().log(Level.INFO, "failed to connect", cause);
-					} else if(cause instanceof UnknownHostException) {
-						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_unknown_host")));
-						getLoggerForThisMethod().log(Level.INFO, "failed to connect", cause);
-					} else if(cause instanceof IllegalStateException) {
-						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_illegal_state"), cause));
-						getLoggerForThisMethod().log(Level.SEVERE, "failed to connect", cause);
-					} else if(cause instanceof LinkFailedException) {
-						// TODO...
-						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_no_link")));
-						getLoggerForThisMethod().log(Level.INFO, "failed to connect", cause);
-					} else if(cause instanceof InterruptedException) {
-						// ignore, situation handled by CancellationException
-					} else {
-						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_unknown")));
-						getLoggerForThisMethod().log(Level.SEVERE, "failed to connect (unknown error)", cause);
-					}
-				} finally {
-					// in any case, revert to default connection state
-					// (either the connection attempt failed, or it succeeded and the panel should be reset for future use)
-					NetworkPanel.this.connectWorker = null;
-					showConnectButton();
-				}
-			}
-			
-		};
-		
-		this.connectWorker.execute();
-	}
-	
-	/**
-	 * Invoked when the user interrupts a running connection attempt
-	 * 
-	 */
-	private void onUserActionInterrupt() {
-		if(this.connectWorker == null)
-			return;
-		
-		this.connectWorker.cancel(true);
+		if(this.disregardNextLocalIPChange)
+			this.disregardNextLocalIPChange = false;
 	}
 
 }

@@ -46,6 +46,19 @@ import net.sourceforge.transfile.tools.Tools;
  *
  */
 class PeerURLBar extends JComboBox {
+	
+	/*
+	 * The maximum number of items in the drop-down menu. Requesting to add another item
+	 * when the PeerURLBar already has maxRetainedItems items will cause the oldest present
+	 * item to be deleted. Then, the remaining 4 present items will be shifted one slot towards
+	 * the "older" end of the list, so that the previously second oldest item is now the oldest one.
+	 * Finally, the item whose addition was requested is inserted into the now free spot at the
+	 * "youngest" end of the list.
+	 * 
+	 * Typically, entering a (valid) PeerURL and pressing enter causes such a request to add for an item
+	 * to be added, with said item being the PeerURL entered.
+	 */
+	public static final int maxRetainedItems = Settings.getPreferences().getInt("peerurlbar_max_retained_items", 5);
 
 	private static final long serialVersionUID = -8782347394069390311L;
 	
@@ -57,7 +70,7 @@ class PeerURLBar extends JComboBox {
 	 *
 	 */
 	private static class LazyHolder {
-		
+			
 		/*
 		 * Holds the lazy-loaded PeerURLBar instance
 		 */
@@ -73,19 +86,6 @@ class PeerURLBar extends JComboBox {
 		}
 		
 	}
-	
-	/*
-	 * The maximum number of items in the drop-down menu. Requesting to add another item
-	 * when the PeerURLBar already has maxRetainedItems items will cause the oldest present
-	 * item to be deleted. Then, the remaining 4 present items will be shifted one slot towards
-	 * the "older" end of the list, so that the previously second oldest item is now the oldest one.
-	 * Finally, the item whose addition was requested is inserted into the now free spot at the
-	 * "youngest" end of the list.
-	 * 
-	 * Typically, entering a (valid) PeerURL and pressing enter causes such a request to add for an item
-	 * to be added, with said item being the PeerURL entered.
-	 */
-	private static final int maxRetainedItems = Settings.getPreferences().getInt("peerurlbar_max_retained_items", 5);
 	
 	/*
 	 * The file the data model will be serialized and saved to to achieve persistence
@@ -126,6 +126,15 @@ class PeerURLBar extends JComboBox {
 		addActionListener(new PeerURLBarListener());
 		this.model = new PeerURLBarModel();
 		setModel(this.model);
+	}
+	
+	/**
+	 * Getter for {@code stateFile}
+	 * 
+	 * @return the file serialized versions of PeerURLBar's state are written to
+	 */
+	protected final File getStateFile() {
+		return this.stateFile;
 	}
 
 	/**
@@ -178,17 +187,16 @@ class PeerURLBar extends JComboBox {
 		 * instance from disk, or, failing that, creating a new ItemsHolder object.
 		 * 
 		 */
-		@SuppressWarnings("synthetic-access")
 		public PeerURLBarModel() {
 			try {
-				getLoggerForThisMethod().log(Level.FINER, "attempting to load PeerURLBar state from file: " + PeerURLBar.this.stateFile.getAbsolutePath());
-				this.holder = ComboBoxItemsHolder.load(PeerURLBar.this.stateFile);
+				getLoggerForThisMethod().log(Level.FINER, "attempting to load PeerURLBar state from file: " + PeerURLBar.this.getStateFile().getAbsolutePath());
+				this.holder = ComboBoxItemsHolder.load(PeerURLBar.this.getStateFile());
 				// maxRetainedItems may have changed since the last time state was saved
 				removeExcessiveItems();
-				getLoggerForThisMethod().log(Level.FINE, "successfully loaded PeerURLBar state from file: " + PeerURLBar.this.stateFile.getAbsolutePath());
+				getLoggerForThisMethod().log(Level.FINE, "successfully loaded PeerURLBar state from file: " + PeerURLBar.this.getStateFile().getAbsolutePath());
 			} catch (Throwable e) {
-				getLoggerForThisMethod().log(Level.WARNING, "failed to load PeerURLBar state from file: " + PeerURLBar.this.stateFile.getAbsolutePath());
-				this.holder = new ComboBoxItemsHolder(maxRetainedItems, PeerURLBar.this.stateFile);
+				getLoggerForThisMethod().log(Level.WARNING, "failed to load PeerURLBar state from file: " + PeerURLBar.this.getStateFile().getAbsolutePath());
+				this.holder = new ComboBoxItemsHolder(maxRetainedItems, PeerURLBar.this.getStateFile());
 			}
 		}
 		
@@ -307,7 +315,6 @@ class PeerURLBar extends JComboBox {
 		 * Removes excessive items until the model is holding at most {@code maxRetainedItems} items
 		 * 
 		 */
-		@SuppressWarnings("synthetic-access")
 		private void removeExcessiveItems() {
 			while(this.holder.items.size() > maxRetainedItems)
 				this.holder.items.remove(this.holder.items.size() - 1);			

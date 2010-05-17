@@ -113,6 +113,15 @@ class PortSpinner extends JSpinner {
 	}
 	
 	/**
+	 * Getter for {@code defaultForeground}
+	 *
+	 * @return PortSpinner's default foreground color
+	 */
+	protected final Color getDefaultForeground() {
+		return this.defaultForeground;
+	}
+
+	/**
 	 * A modified JSpinner.NumberEditor that gracefully handles changes in the SpinnerModel without
 	 * resetting the cursor position.
 	 *
@@ -189,7 +198,6 @@ class PortSpinner extends JSpinner {
 		 * Invoked when a valid number was inserted/selected (be it by the user or by the application)
 		 * 
 		 */
-		@SuppressWarnings("synthetic-access")
 		protected void onValidEdit() {
 			// check if the edit is actually invalid by checking for non-digits in the text field
 			// this is a hacky but convenient solution to the problem that it is hard to combine
@@ -209,7 +217,7 @@ class PortSpinner extends JSpinner {
 				}
 			}
 			
-			this.textField.setForeground(PortSpinner.this.defaultForeground);
+			this.textField.setForeground(PortSpinner.this.getDefaultForeground());
 		}
 		
 		/**

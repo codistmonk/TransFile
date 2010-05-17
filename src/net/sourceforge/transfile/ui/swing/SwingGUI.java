@@ -131,10 +131,12 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	public void start() {
 		SwingUtilities.invokeLater(new Runnable() {
 
+			// suppressing the synthetic access warning for SwingGUI._start() in order
+			// to not have to (visibly) expose the method to the entire package
 			@SuppressWarnings("synthetic-access")
 			@Override
 			public void run() {
-				_start();
+				SwingGUI.this._start();
 			}
 			
 		});
