@@ -32,7 +32,8 @@ import net.sourceforge.transfile.tools.exceptions.UserApplicationDirectoryExcept
 /**
  * Holder for static utility methods. Should not be instantiated.
  *
- * @author codistmonk, Martin Riedel 
+ * @author codistmonk
+ * @author Martin Riedel 
  *
  */
 public final class Tools {
