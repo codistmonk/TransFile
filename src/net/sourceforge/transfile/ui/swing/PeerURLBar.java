@@ -160,6 +160,8 @@ class PeerURLBar extends JComboBox {
 			try {
 				getLoggerForThisMethod().log(Level.FINER, "attempting to load PeerURLBar state from file: " + stateFile.toString());
 				this.holder = ComboBoxItemsHolder.load(stateFile);
+				// maxRetainedItems may have changed since the last time state was saved
+				removeExcessiveItems();
 				getLoggerForThisMethod().log(Level.FINE, "successfully loaded PeerURLBar state from file: " + stateFile.toString());
 			} catch (Throwable e) {
 				getLoggerForThisMethod().log(Level.WARNING, "failed to load PeerURLBar state from file: " + stateFile.toString());
@@ -185,8 +187,9 @@ class PeerURLBar extends JComboBox {
 				return;
 			
 			holder.items.add(0, e);
-			while(holder.items.size() > maxRetainedItems)
-				holder.items.remove(holder.items.size() - 1);
+			
+			removeExcessiveItems();
+			
 			fireContentsChanged(PeerURLBar.this, 0, holder.items.size() - 1);
 		}
 		
@@ -199,8 +202,9 @@ class PeerURLBar extends JComboBox {
 				return;
 			
 			holder.items.add(ePosition, e);
-			while(holder.items.size() > maxRetainedItems)
-				holder.items.remove(holder.items.size() - 1);
+		
+			removeExcessiveItems();
+			
 			fireContentsChanged(PeerURLBar.this, ePosition, holder.items.size() - 1);
 		}
 
@@ -274,6 +278,15 @@ class PeerURLBar extends JComboBox {
 		@Override
 		public int getSize() {
 			return holder.items.size();
+		}
+		
+		/**
+		 * Removes excessive items until the model is holding at most {@code maxRetainedItems} items
+		 * 
+		 */
+		private void removeExcessiveItems() {
+			while(holder.items.size() > maxRetainedItems)
+				holder.items.remove(holder.items.size() - 1);			
 		}
 		
 	}
