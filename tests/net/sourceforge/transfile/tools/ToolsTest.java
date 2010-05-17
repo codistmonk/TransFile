@@ -36,52 +36,44 @@ import org.junit.*;
 public class ToolsTest {
 	
 	@Test
-	@SuppressWarnings("cast")
 	public void cast() {
+		assertNull(Tools.cast(A.class, null));
 		
-		assertEquals(Tools.cast(A.class, null), null);
+		A a = new A();
+		assertSame(a, Tools.cast(A.class, a));
 		
-		assertTrue(Tools.cast(A.class, new B()) instanceof A);
+		B b = new B();
+		assertSame(b, Tools.cast(A.class, b));
 		
-		assertFalse(Tools.cast(B.class, new A()) instanceof B);
-		assertEquals(Tools.cast(B.class, new A()), null);
+		assertNull(Tools.cast(B.class, new A()));
 		
-		assertTrue(Tools.cast(A.class, new C()) instanceof A);
+		C c = new C();
+		assertSame(c, Tools.cast(A.class, c));
 		
-		assertFalse(Tools.cast(C.class, new D()) instanceof C);
-		assertEquals(Tools.cast(C.class, new D()), null);
-	}
-	
-	@Test(expected=NullPointerException.class)
-	public void cast_to_null() {
-		Tools.cast(null, new B());
-	}
-	
-	public void cast_null_to_null() {
-		assertEquals(Tools.cast(null, null), null);
+		assertNull(Tools.cast(A.class, new D()));
 	}
 
 	@Test
 	public void toUpperCamelCase() {
-		assertTrue(Tools.toUpperCamelCase("hello, world!").equals("Hello, world!"));
-		assertTrue(Tools.toUpperCamelCase("Hello, world!").equals("Hello, world!"));
-		assertTrue(Tools.toUpperCamelCase("helloworld").equals("Helloworld"));
-		assertTrue(Tools.toUpperCamelCase("helloWorld").equals("HelloWorld"));
-		assertTrue(Tools.toUpperCamelCase("HelloWorld").equals("HelloWorld"));
+		assertEquals("Hello, world!", Tools.toUpperCamelCase("hello, world!"));
+		assertEquals("Hello, world!", Tools.toUpperCamelCase("Hello, world!"));
+		assertEquals("Helloworld", Tools.toUpperCamelCase("helloworld"));
+		assertEquals("HelloWorld", Tools.toUpperCamelCase("helloWorld"));
+		assertEquals("HelloWorld", Tools.toUpperCamelCase("HelloWorld"));
 	}
 
 	@Test
 	public void emptyIfNull() {
-		assertTrue("".equals(Tools.emptyIfNull(null)));
-		assertTrue("".equals(Tools.emptyIfNull("")));
-		assertFalse("".equals(Tools.emptyIfNull("Hello, world!")));
+		assertEquals("", Tools.emptyIfNull(null));
+		assertEquals("", Tools.emptyIfNull(""));
+		assertEquals("Hello, world!", Tools.emptyIfNull("Hello, world!"));
 	}
 
 	@Test
 	public void array() {
-		assertArrayEquals(Tools.array(5, 3, 10), new Integer[] { 5, 3, 10 });
-		assertArrayEquals(Tools.array("hello", " ", "world", "!"), new String[] { "hello", " ", "world", "!"} );
-		assertArrayEquals(Tools.array(), new Object[] { });
+		assertArrayEquals(new Integer[] { 5, 3, 10 }, Tools.array(5, 3, 10));
+		assertArrayEquals(new String[] { "hello", " ", "world", "!"}, Tools.array("hello", " ", "world", "!") );
+		assertArrayEquals(new Object[] { }, Tools.array());
 
 		// perform a randomized test 
 
@@ -103,40 +95,37 @@ public class ToolsTest {
 				arrays[0], arrays[1], arrays[2], arrays[3], arrays[4], 
 				arrays[5], arrays[6], arrays[7], arrays[8], arrays[9]), arrays));	
 	}
-
-	@Test(expected=IllegalStateException.class)
-	public void throwRuntimeException_runtimeException() throws Throwable {
+	
+	@Test
+	public void throwRuntimeException() throws Throwable {
+		Throwable originalThrowable = new RuntimeException();
 		try {
-			Tools.throwRuntimeException(new IllegalStateException("the answer is 42"));
-		} catch(Throwable e) {
-			assertTrue(e instanceof IllegalStateException);
-			assertTrue(e.getMessage().equals("the answer is 42"));
-			throw e;
+			Tools.throwRuntimeException(originalThrowable);
+		} catch(final RuntimeException caughtThrowable) {
+			assertSame(originalThrowable, caughtThrowable);
 		}
 
-	}
-
-	@Test(expected=RuntimeException.class)
-	public void throwRuntimeException_checkedException() throws Throwable {
+		originalThrowable = new Exception();
 		try {
-			Tools.throwRuntimeException(new TestException("the answer is 42"));
-		} catch(Throwable e) {
-			assertTrue(e instanceof RuntimeException);
-			assertTrue(e.getCause() != null);
-			assertTrue(e.getCause() instanceof TestException);
-			assertTrue(e.getCause().getMessage().equals("the answer is 42"));
-			throw e;
+			Tools.throwRuntimeException(originalThrowable);
+		} catch(final RuntimeException caughtThrowable) {
+			assertNotNull(caughtThrowable.getCause());
+			assertSame(originalThrowable, caughtThrowable.getCause());
 		}
-	}
-
-	private static class TestException extends Exception {
-
-		private static final long serialVersionUID = -8569090437805695602L;
-
-		public TestException(String message) {
-			super(message);
+		
+		originalThrowable = new Error();
+		try {
+			Tools.throwRuntimeException(originalThrowable);
+		} catch(final Error caughtThrowable) {
+			assertSame(originalThrowable, caughtThrowable);
 		}
-
+		
+		originalThrowable = new Throwable();
+		try {
+			Tools.throwRuntimeException(originalThrowable);
+		} catch(final Throwable caughtThrowable) {
+			assertSame(originalThrowable, caughtThrowable.getCause());
+		}
 	}
 
 	private static class A { 
@@ -151,7 +140,7 @@ public class ToolsTest {
 		C() { /* dummy class constructor */ } 
 	}
 	
-	private static class D extends B { 
+	private static class D { 
 		D() { /* dummy class constructor */ } 
 	}
 
