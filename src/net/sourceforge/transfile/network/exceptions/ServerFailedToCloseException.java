@@ -30,7 +30,7 @@ public class ServerFailedToCloseException extends ServerException {
 	private static final long serialVersionUID = 6465342933555592877L;
 
 	public ServerFailedToCloseException() {
-		
+		// exception default constructor, do nothing
 	}
 
 	public ServerFailedToCloseException(Throwable arg0) {

@@ -83,7 +83,7 @@ abstract class Connection {
 	 * TODO doc
 	 */
 	public final PeerURL getPeerURL() {
-		return peer;
+		return this.peer;
 	}
 	
 	/**
@@ -91,7 +91,7 @@ abstract class Connection {
 	 * TODO doc
 	 */
 	public final boolean isConnected() {
-		return connected;
+		return this.connected;
 	}
 	
 	/**

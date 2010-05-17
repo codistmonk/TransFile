@@ -67,7 +67,7 @@ public class SettingsException extends RuntimeException {
 	 * @return the configuration key whose value was deemed illegal
 	 */
 	public String getKey() {
-		return key;
+		return this.key;
 	}
 
 }

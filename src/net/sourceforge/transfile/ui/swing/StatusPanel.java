@@ -31,6 +31,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 
 /**
  * <p>A small panel whose sole purpose is to display textual status messages upon request.</p>
@@ -94,12 +95,12 @@ public class StatusPanel extends TopLevelPanel {
 		setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		
-		statusList = new StatusList(maxMessages);
-		statusList.setLayoutOrientation(JList.VERTICAL);
-		statusList.setVisibleRowCount(maxMessages);
-		statusListScrollPane = new JScrollPane(statusList,
-												 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-												 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		this.statusList = new StatusList(maxMessages);
+		this.statusList.setLayoutOrientation(JList.VERTICAL);
+		this.statusList.setVisibleRowCount(maxMessages);
+		this.statusListScrollPane = new JScrollPane(this.statusList,
+												 ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+												 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		
 		c.gridx = 0;
 		c.gridy = 0;
@@ -109,13 +110,13 @@ public class StatusPanel extends TopLevelPanel {
 		c.anchor = GridBagConstraints.FIRST_LINE_START;
 		c.insets = new Insets(0, 5, 2, 5);
 		
-		add(statusListScrollPane, c);
+		add(this.statusListScrollPane, c);
 		
-		expandButton = new JButton("\u2193");
-		unexpandButton = new JButton("\u2191");
-		unexpandButton.setVisible(false);
+		this.expandButton = new JButton("\u2193");
+		this.unexpandButton = new JButton("\u2191");
+		this.unexpandButton.setVisible(false);
 		
-		expandButton.addActionListener(new ActionListener() {
+		this.expandButton.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -123,7 +124,7 @@ public class StatusPanel extends TopLevelPanel {
 			}
 		});
 		
-		unexpandButton.addActionListener(new ActionListener() {
+		this.unexpandButton.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -132,16 +133,16 @@ public class StatusPanel extends TopLevelPanel {
 		});
 		
 		// make the two buttons the same size
-		Dimension expandButtonSize = expandButton.getPreferredSize();
-		Dimension unexpandButtonSize = unexpandButton.getPreferredSize();
+		Dimension expandButtonSize = this.expandButton.getPreferredSize();
+		Dimension unexpandButtonSize = this.unexpandButton.getPreferredSize();
 		Dimension newSize = new Dimension(expandButtonSize.width > unexpandButtonSize.width ? expandButtonSize.width : unexpandButtonSize.width,
 										  expandButtonSize.height > unexpandButtonSize.height ? expandButtonSize.height : unexpandButtonSize.height);
-		expandButton.setPreferredSize(newSize);
-		expandButton.setMinimumSize(newSize);
-		expandButton.setMaximumSize(newSize);
-		unexpandButton.setPreferredSize(newSize);
-		unexpandButton.setMinimumSize(newSize);
-		unexpandButton.setMaximumSize(newSize);
+		this.expandButton.setPreferredSize(newSize);
+		this.expandButton.setMinimumSize(newSize);
+		this.expandButton.setMaximumSize(newSize);
+		this.unexpandButton.setPreferredSize(newSize);
+		this.unexpandButton.setMinimumSize(newSize);
+		this.unexpandButton.setMaximumSize(newSize);
 		
 		c.gridx = 1;
 		c.gridy = 0;
@@ -151,8 +152,8 @@ public class StatusPanel extends TopLevelPanel {
 		c.anchor = GridBagConstraints.LAST_LINE_END;
 		c.insets = new Insets(0, 0, 2, 5);
 
-		add(expandButton, c);
-		add(unexpandButton, c);
+		add(this.expandButton, c);
+		add(this.unexpandButton, c);
 	}
 
 	/**
@@ -214,14 +215,14 @@ public class StatusPanel extends TopLevelPanel {
 	 * 
 	 * @see #unexpand()
 	 */
-	private void expand() {
-		if(isExpanded)
+	protected final void expand() {
+		if(this.isExpanded)
 			throw new IllegalStateException("already expanded");
 		
-		statusList.setVisibleRowCount(maxMessages);
+		this.statusList.setVisibleRowCount(maxMessages);
 		
-		expandButton.setVisible(false);
-		unexpandButton.setVisible(true);
+		this.expandButton.setVisible(false);
+		this.unexpandButton.setVisible(true);
 		
 		Dimension panelDimensions = getPreferredSize();
 		panelDimensions.height += expandBy;
@@ -230,7 +231,7 @@ public class StatusPanel extends TopLevelPanel {
 		// tell the main window to update (StatusPanel is now bigger)
 		getWindow().pack();
 		
-		isExpanded = true;
+		this.isExpanded = true;
 	}
 	
 	/**
@@ -239,14 +240,14 @@ public class StatusPanel extends TopLevelPanel {
 	 * 
 	 * @see #expand()
 	 */
-	private void unexpand() {
-		if(!isExpanded)
+	protected final void unexpand() {
+		if(!this.isExpanded)
 			throw new IllegalStateException("not expanded");
 		
-		statusList.setVisibleRowCount(1);
+		this.statusList.setVisibleRowCount(1);
 		
-		expandButton.setVisible(true);
-		unexpandButton.setVisible(false);
+		this.expandButton.setVisible(true);
+		this.unexpandButton.setVisible(false);
 		
 		Dimension panelDimensions = getPreferredSize();
 		panelDimensions.height -= expandBy;
@@ -255,7 +256,7 @@ public class StatusPanel extends TopLevelPanel {
 		// tell the main window to update (StatusPanel is now smaller)
 		getWindow().pack();
 		
-		isExpanded = false;
+		this.isExpanded = false;
 	}
 	
 	/**
@@ -266,14 +267,23 @@ public class StatusPanel extends TopLevelPanel {
 	 */
 	private class StatusChangeListener implements StatusService.StatusChangeListener {
 
+		/**
+		 * Constructs a new instance
+		 * 
+		 */
+		public StatusChangeListener() {
+			// do nothing, just allow instantiation
+		}
+		
 		/** 
 		 * {@inheritDoc}
 		 */
+		@SuppressWarnings("synthetic-access")
 		@Override
 		public void newStatusMessage(final StatusMessage message) {
-			statusList.addMessage(message);
+			StatusPanel.this.statusList.addMessage(message);
 			// reset the scroll pane so that the new message is visible
-			statusListScrollPane.getVerticalScrollBar().setValue(statusListScrollPane.getVerticalScrollBar().getMinimum());
+			StatusPanel.this.statusListScrollPane.getVerticalScrollBar().setValue(StatusPanel.this.statusListScrollPane.getVerticalScrollBar().getMinimum());
 		}
 		
 	}

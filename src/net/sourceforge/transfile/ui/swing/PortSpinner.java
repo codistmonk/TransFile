@@ -26,8 +26,8 @@ import java.text.ParseException;
 
 import javax.swing.JFormattedTextField;
 import javax.swing.JSpinner;
-import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.DocumentEvent;
@@ -106,10 +106,10 @@ class PortSpinner extends JSpinner {
 		if(!(getEditor() instanceof NumberEditor))
 			throw new LogicError("PortSpinner Editor is not a NumberEditor");
 		
-		editor = new PortSpinnerEditor(); 
-		setEditor(editor);
+		this.editor = new PortSpinnerEditor(); 
+		setEditor(this.editor);
 		
-		defaultForeground = editor.textField.getForeground();
+		this.defaultForeground = this.editor.textField.getForeground();
 	}
 	
 	/**
@@ -144,20 +144,20 @@ class PortSpinner extends JSpinner {
 			// 0 represents an integer value with no grouping
 			super(PortSpinner.this, "0");
 					
-			textField = getTextField();
+			this.textField = getTextField();
 			
-			if(!(textField.getDocument() instanceof AbstractDocument))
+			if(!(this.textField.getDocument() instanceof AbstractDocument))
 				throw new LogicError("PortSpinner JFormattedTextField Document is not an AbstractDocument");
 			
-			document = (AbstractDocument) textField.getDocument();
+			this.document = (AbstractDocument) this.textField.getDocument();
 			
-			textField.setHorizontalAlignment(JTextField.LEFT);
+			this.textField.setHorizontalAlignment(SwingConstants.LEFT);
 			
 			// limit the text editor to a maximum of 5 columns
 			//textField.setColumns(maxDigits);			
 			
 			// when focus is gained through a mouse click, set the cursor to where the click occurred
-			textField.addMouseListener(new MouseAdapter() {
+			this.textField.addMouseListener(new MouseAdapter() {
 				
 				@Override
 				public void mousePressed(final MouseEvent e) {
@@ -165,7 +165,7 @@ class PortSpinner extends JSpinner {
 			        SwingUtilities.invokeLater(new Runnable() {
 			        	
 			            public void run() {
-			                textField.setCaretPosition(textField.viewToModel(e.getPoint()));
+			                PortSpinnerEditor.this.textField.setCaretPosition(PortSpinnerEditor.this.textField.viewToModel(e.getPoint()));
 			            }
 			            
 			        });
@@ -173,7 +173,7 @@ class PortSpinner extends JSpinner {
 			});
 			
 			// add the DocumentListener that will commit any changes to the SpinnerModel immediately
-			document.addDocumentListener(new PortSpinnerDocumentListener());
+			this.document.addDocumentListener(new PortSpinnerDocumentListener());
 		}
 		
 		/**
@@ -182,14 +182,15 @@ class PortSpinner extends JSpinner {
 		@Override
 		public void stateChanged(final ChangeEvent e) {
 			// update the text field accordingly
-			textField.setText(getModel().getValue().toString());			
+			this.textField.setText(getModel().getValue().toString());			
 		}
 		
 		/**
 		 * Invoked when a valid number was inserted/selected (be it by the user or by the application)
 		 * 
 		 */
-		private void onValidEdit() {
+		@SuppressWarnings("synthetic-access")
+		protected void onValidEdit() {
 			// check if the edit is actually invalid by checking for non-digits in the text field
 			// this is a hacky but convenient solution to the problem that it is hard to combine
 			// the following three aspects of the desired spinner behaviour:
@@ -201,22 +202,22 @@ class PortSpinner extends JSpinner {
 			// get invoked) and for another, similarly mystical and undocumented reason, a NumberEditor formatted with a
 			// DecimalFormat doesn't raise a ParseException when it encounters letters instead of digits, this seems like the 
 			// easiest solution.
-			for(char c: textField.getText().toCharArray()) {
+			for(char c: this.textField.getText().toCharArray()) {
 				if(!(Character.isDigit(c))) {
 					onInvalidEdit();
 					return;
 				}
 			}
 			
-			textField.setForeground(defaultForeground);
+			this.textField.setForeground(PortSpinner.this.defaultForeground);
 		}
 		
 		/**
 		 * Invoked when an invalid number was inserted/selected (be it by the user or by the application)
 		 * 
 		 */
-		private void onInvalidEdit() {
-			textField.setForeground(new Color(255, 0, 0, 255));
+		protected void onInvalidEdit() {
+			this.textField.setForeground(new Color(255, 0, 0, 255));
 		}
 		
 		/**
@@ -229,6 +230,14 @@ class PortSpinner extends JSpinner {
 		 */
 		private class PortSpinnerDocumentListener implements DocumentListener {
 
+			/**
+			 * Constructs a new instance
+			 * 
+			 */
+			public PortSpinnerDocumentListener() {
+				// do nothing, just allow instantiation
+			}
+			
 			/**
 			 * {@inheritDoc}
 			 */

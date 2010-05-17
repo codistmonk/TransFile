@@ -72,10 +72,10 @@ public class Link {
 	 */
 	public Link(final String peerURL, final int localPort) 
 			throws PeerURLFormatException, UnknownHostException, InterruptedException, LinkFailedException {
-		peer = new PeerURL(peerURL);
+		this.peer = new PeerURL(peerURL);
 		
-		connectionToPeer = new ConnectionToPeer(peer);
-		connectionFromPeer = new ConnectionFromPeer(peer, localPort);
+		this.connectionToPeer = new ConnectionToPeer(this.peer);
+		this.connectionFromPeer = new ConnectionFromPeer(this.peer, localPort);
 		
 		establishLink();
 	}
@@ -126,35 +126,35 @@ public class Link {
 	 * @throws LinkFailedException if the link could not be established
 	 */
 	private void establishLink() throws InterruptedException, LinkFailedException  {		
-		connectionFromPeer.establishInBackground();
+		this.connectionFromPeer.establishInBackground();
 		
 		// make these members and define getters as well as other Link state
 		Exception connectionToPeerError = null;
 		Exception connectionFromPeerError = null;
 		
 		try {
-			connectionToPeer.establish();
+			this.connectionToPeer.establish();
 		} catch(InterruptedException e) {
 			// if establishing a Link to the peer has been interrupted, make sure to interrupt
 			// both connection attempts (both outgoing and incoming) by interrupting connectionFromPeer
-			connectionFromPeer.interruptBackgroundTask();
+			this.connectionFromPeer.interruptBackgroundTask();
 			throw e;
 		} catch(Exception e) {
 			connectionToPeerError = e;
 		}
 		
 		try {
-			connectionFromPeer.establish();
+			this.connectionFromPeer.establish();
 		} catch(CancellationException e) {
 			throw new InterruptedException();
 		} catch(Exception e) {
 			connectionFromPeerError = e;
 		}
 
-		System.out.println("Connection to peer: " + (connectionToPeer.isConnected() == true ? "established" : "failed"));
-		System.out.println("Connection from peer: " + (connectionFromPeer.isConnected() == true ? "established" : "failed"));
+		System.out.println("Connection to peer: " + (this.connectionToPeer.isConnected() == true ? "established" : "failed"));
+		System.out.println("Connection from peer: " + (this.connectionFromPeer.isConnected() == true ? "established" : "failed"));
 		
-		if(!(connectionToPeer.isConnected() || connectionFromPeer.isConnected()))
+		if(!(this.connectionToPeer.isConnected() || this.connectionFromPeer.isConnected()))
 			throw new LinkFailedException(connectionToPeerError, connectionFromPeerError);
 		
 	}

@@ -60,9 +60,9 @@ class ConnectionToPeer extends Connection {
 			// attempt to connect for a maximum of connectMaxIntervals times
 			for(int i = 0; ; i++) {
 				try {
-					socket = new Socket();
+					this.socket = new Socket();
 					// attempt to connect, timing out after connectIntervalTimeout milliseconds to check for thread interruption
-					socket.connect(peerAddr, connectIntervalTimeout);
+					this.socket.connect(peerAddr, connectIntervalTimeout);
 				} catch(SocketTimeoutException e) {
 					if(Thread.interrupted())
 						throw new InterruptedException();
@@ -75,7 +75,7 @@ class ConnectionToPeer extends Connection {
 				} 
 				
 				// check if a connection has been established
-				if(socket.isConnected())
+				if(this.socket.isConnected())
 					break;
 
 				// check if the maximum number of connection attempts is reached and time out the entire operation if so
@@ -86,9 +86,9 @@ class ConnectionToPeer extends Connection {
 		} finally {
 			// unless the connection was successfully established, close the socket if it exists
 			if(!isConnected()) {
-				if(socket != null) {
+				if(this.socket != null) {
 					try {
-						socket.close();
+						this.socket.close();
 					} catch(IOException e) {
 						throw new ConnectSocketFailedToCloseException(e);
 					}

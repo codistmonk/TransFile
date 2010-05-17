@@ -30,7 +30,7 @@ public class NativeLookAndFeelException extends Exception {
 	private static final long serialVersionUID = -3859466063138628932L;
 
 	public NativeLookAndFeelException() {
-
+		// exception default constructor, do nothing
 	}
 
 	public NativeLookAndFeelException(String message) {

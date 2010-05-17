@@ -61,7 +61,7 @@ public class LinkFailedException extends Exception {
 	 * @return the reason why the attempt to establish a connection to the remote host failed
 	 */
 	public Throwable getCauseConnectionToPeer() {
-		return causeConnectionToPeer;
+		return this.causeConnectionToPeer;
 	}
 	
 	/**
@@ -70,7 +70,7 @@ public class LinkFailedException extends Exception {
 	 * @return the reason why the attempt to accept a connection from the remote host failed
 	 */
 	public Throwable getCauseConnectionFromPeer() {
-		return causeConnectionFromPeer;
+		return this.causeConnectionFromPeer;
 	}
 
 }

@@ -65,7 +65,7 @@ class ConnectionFromPeer extends Connection {
 		if(localPort <= 0 || localPort > 65535)
 			throw new LogicError("invalid local server port number");
 		
-		peerConnectionAcceptor = new FutureTask<Socket>(new ServerTask(localPort, peer));
+		this.peerConnectionAcceptor = new FutureTask<Socket>(new ServerTask(localPort, peer));
 	}
 
 	/**
@@ -73,7 +73,7 @@ class ConnectionFromPeer extends Connection {
 	 * TODO doc
 	 */
 	public void establishInBackground() {
-		(new Thread(peerConnectionAcceptor)).start();	
+		(new Thread(this.peerConnectionAcceptor)).start();	
 	}
 
 	/**
@@ -81,7 +81,7 @@ class ConnectionFromPeer extends Connection {
 	 * TODO doc
 	 */
 	public void interruptBackgroundTask() {
-		peerConnectionAcceptor.cancel(true);
+		this.peerConnectionAcceptor.cancel(true);
 	}
 	
 	/**
@@ -92,7 +92,7 @@ class ConnectionFromPeer extends Connection {
 			ConnectSocketFailedToCloseException, ServerFailedToCloseException, ServerFailedToBindException, 
 			ConnectSecurityException, ConnectFailedToSetTimeoutException {
 		try {
-			socket = peerConnectionAcceptor.get();
+			this.socket = this.peerConnectionAcceptor.get();
 		} catch(ExecutionException e) {
 			// listening for an incoming connection from the peer failed
 			Throwable cause = e.getCause();
@@ -169,17 +169,17 @@ class ConnectionFromPeer extends Connection {
 			try {
 				// start listening
 				//TODO bind to the specific address selected via the GUI, not just any/all
-				serverSocket = new ServerSocket(port);
+				this.serverSocket = new ServerSocket(this.port);
 				
 				// set the timeout in milliseconds after which serverSocket.accept() will stop blocking
 				// so that we can check for thread interruption
-				serverSocket.setSoTimeout(connectIntervalTimeout);
+				this.serverSocket.setSoTimeout(connectIntervalTimeout);
 				
 				// attempt to receive a connection for a maximum of connectMaxIntervals times
 				for(int i = 0; ; i++) {
 
 					try {
-						clientSocket = serverSocket.accept();
+						this.clientSocket = this.serverSocket.accept();
 					} catch(SocketTimeoutException e) {
 						// accept timed out as requested - check for thread interruption and abort if present, otherwise retry
 						if(Thread.interrupted())
@@ -193,16 +193,15 @@ class ConnectionFromPeer extends Connection {
 					}
 
 					// check if a connection has been established
-					if(clientSocket != null) {
-						if(clientSocket.isConnected()) {
+					if(this.clientSocket != null) {
+						if(this.clientSocket.isConnected()) {
 							// check if the connection originates from the expected peer
-							if(clientSocket.getInetAddress().equals(peer.getInetAddress()))
+							if(this.clientSocket.getInetAddress().equals(this.peer.getInetAddress()))
 								// if so, break the loop -> connection established
 								break;
-							else
-								// if not, discard the connection and keep going
-								getLoggerForThisMethod().log(Level.WARNING, "dropped connection from remote host " + clientSocket.getInetAddress().toString() + ": host is not the expected peer");
-								clientSocket = null;
+							// if not, discard the connection and keep going
+							getLoggerForThisMethod().log(Level.WARNING, "dropped connection from remote host " + this.clientSocket.getInetAddress().toString() + ": host is not the expected peer");
+							this.clientSocket = null;
 						}
 					}
 
@@ -213,27 +212,27 @@ class ConnectionFromPeer extends Connection {
 				
 				// if the flow reaches this point, a connection from the correct peer has been accepted
 				setConnected(true);
-				return clientSocket;
+				return this.clientSocket;
 			} catch(SocketException e) {
 				throw new ConnectFailedToSetTimeoutException(e);
 			} catch(IOException e) {
-				throw new ServerFailedToBindException(port, e);
+				throw new ServerFailedToBindException(this.port, e);
 			} catch(SecurityException e) {
-				throw new ServerFailedToBindException(port, e);
+				throw new ServerFailedToBindException(this.port, e);
 			} finally {
 				// whatever happened, close the server socket if it exists
-				if(serverSocket != null) {
+				if(this.serverSocket != null) {
 					try {
-						serverSocket.close();
+						this.serverSocket.close();
 					} catch(IOException e) {
 						throw new ServerFailedToCloseException(e);
 					}
 				}
 				// unless the connection has been established successfully, close the client socket if it exists
 				if(!isConnected()) {
-					if(clientSocket != null) {
+					if(this.clientSocket != null) {
 						try {
-							clientSocket.close();
+							this.clientSocket.close();
 						} catch(IOException e) {
 							throw new ConnectSocketFailedToCloseException(e);
 						}

@@ -24,7 +24,7 @@ public class SerializationException extends Exception {
 	private static final long serialVersionUID = -3804404675263854741L;
 
 	public SerializationException() {
-
+		// exception default constructor, do nothing
 	}
 
 	public SerializationException(String arg0) {

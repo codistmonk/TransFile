@@ -75,9 +75,9 @@ public class PeerURL {
 			throw new PeerURLFormatException("Malformatted PeerURL: " + peerURLString);
 		
 		try {
-			inetAddrString = m.group(1);
-			inetAddr = InetAddress.getByName(inetAddrString);
-			port = Integer.parseInt(m.group(2));		
+			this.inetAddrString = m.group(1);
+			this.inetAddr = InetAddress.getByName(this.inetAddrString);
+			this.port = Integer.parseInt(m.group(2));		
 		} catch(NumberFormatException e) {
 			throw new PeerURLFormatException(e);
 		}			
@@ -88,7 +88,7 @@ public class PeerURL {
 	 * @return the peer's port and address in the form of an InetSocketAddress
 	 */
 	public InetSocketAddress toInetSocketAddress() {
-		return new InetSocketAddress(inetAddr, port);
+		return new InetSocketAddress(this.inetAddr, this.port);
 	}
 	
 	/**
@@ -96,7 +96,7 @@ public class PeerURL {
 	 * @return the InetAddress of the peer this PeerURL represents
 	 */
 	public InetAddress getInetAddress() {
-		return inetAddr;
+		return this.inetAddr;
 	}
 	
 	/**
@@ -104,7 +104,7 @@ public class PeerURL {
 	 * @return the textual representation of the IP address or the hostname particle of the PeerURL string this PeerURL was created from
 	 */
 	public String getInetAddressString() {
-		return inetAddrString;
+		return this.inetAddrString;
 	}
 	
 	/**
@@ -112,7 +112,7 @@ public class PeerURL {
 	 * @return the port of the peer this PeerURL represents
 	 */
 	public int getPort() {
-		return port;
+		return this.port;
 	}
 	
 	/**
@@ -120,8 +120,9 @@ public class PeerURL {
 	 * 
 	 * @return this PeerURL's string representation
 	 */
+	@Override
 	public String toString() {
-		return makePeerURLString(inetAddrString, port);
+		return makePeerURLString(this.inetAddrString, this.port);
 	}
 	
 	/**

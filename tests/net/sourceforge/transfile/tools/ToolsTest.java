@@ -35,6 +35,7 @@ import org.junit.*;
  */
 public class ToolsTest {
 	
+	@SuppressWarnings("synthetic-access")
 	@Test
 	public void cast() {
 		
@@ -51,6 +52,7 @@ public class ToolsTest {
 		assertEquals(Tools.cast(C.class, new D()), null);
 	}
 	
+	@SuppressWarnings("synthetic-access")
 	@Test(expected=NullPointerException.class)
 	public void cast_to_null() {
 		Tools.cast(null, new B());
@@ -138,12 +140,15 @@ public class ToolsTest {
 
 	}
 
-	private static class A { }
+	private static class A { /* dummy class */ }
 
-	private static class B extends A { }
+	@SuppressWarnings("synthetic-access")
+	private static class B extends A { /* dummy class */ }
 	
-	private static class C extends B { }
+	@SuppressWarnings("synthetic-access")
+	private static class C extends B { /* dummy class */ }
 	
-	private static class D extends B { }
+	@SuppressWarnings("synthetic-access")
+	private static class D extends B { /* dummy class */ }
 
 }

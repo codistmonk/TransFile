@@ -78,7 +78,7 @@ abstract class TopLevelPanel extends JPanel {
 	 * @return true if the panel has been initialized
 	 */
 	public final boolean isInitialized() {
-		return isInit;
+		return this.isInit;
 	}
 	
 	/**
@@ -86,7 +86,7 @@ abstract class TopLevelPanel extends JPanel {
 	 * @return true if the panel is currently being shown
 	 */
 	public final boolean isShown() {
-		return isShown;
+		return this.isShown;
 	}
 	
 	/**
@@ -94,7 +94,7 @@ abstract class TopLevelPanel extends JPanel {
 	 * 
 	 */
 	final void initPanel() {
-		if(isInit)
+		if(this.isInit)
 			throw new DoubleInitializationException("TopLevelPanel was asked to initialize a second time: " + getClass().getSimpleName());
 		
 		onInit();
@@ -106,10 +106,10 @@ abstract class TopLevelPanel extends JPanel {
 	 * 
 	 */
 	final void showPanel() {
-		if(isShown)
+		if(this.isShown)
 			return;
 		
-		if(!isInit)
+		if(!this.isInit)
 			initPanel();
 		
 		loadState();
@@ -122,7 +122,7 @@ abstract class TopLevelPanel extends JPanel {
 	 * 
 	 */
 	final void hidePanel() {
-		if(!isShown)
+		if(!this.isShown)
 			return;
 		
 		setVisible(false);
@@ -144,7 +144,7 @@ abstract class TopLevelPanel extends JPanel {
 	 * @return a reference to the Swing window this TopLevelPanel belongs to
 	 */
 	final protected SwingGUI getWindow() {
-		return window;
+		return this.window;
 	}
 	
 	/**

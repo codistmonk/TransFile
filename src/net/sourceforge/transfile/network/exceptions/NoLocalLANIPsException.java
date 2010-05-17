@@ -30,7 +30,7 @@ public class NoLocalLANIPsException extends Exception {
 	private static final long serialVersionUID = 7065637047940088958L;
 
 	public NoLocalLANIPsException() {
-
+		// exception default constructor, do nothing
 	}
 
 	public NoLocalLANIPsException(String message) {

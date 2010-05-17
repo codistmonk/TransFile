@@ -30,7 +30,7 @@ public class UserApplicationDirectoryException extends RuntimeException {
 	private static final long serialVersionUID = 1898551857420297033L;
 
 	public UserApplicationDirectoryException() {
-
+		// exception default constructor, do nothing
 	}
 
 	public UserApplicationDirectoryException(String message) {

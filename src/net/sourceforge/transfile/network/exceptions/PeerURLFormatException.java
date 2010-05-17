@@ -30,7 +30,7 @@ public class PeerURLFormatException extends Exception {
 	private static final long serialVersionUID = 2646737369506421047L;
 
 	public PeerURLFormatException() {
-		
+		// exception default constructor, do nothing
 	}
 
 	public PeerURLFormatException(String arg0) {

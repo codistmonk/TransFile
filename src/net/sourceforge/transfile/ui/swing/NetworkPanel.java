@@ -154,13 +154,15 @@ public class NetworkPanel extends TopLevelPanel {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void onShow() {
 		// do nothing
 	}
 	
 	/**
 	 * {@inheritDoc}
-	 */	
+	 */
+	@Override
 	protected void onHide() {
 		// do nothing
 	}
@@ -168,6 +170,7 @@ public class NetworkPanel extends TopLevelPanel {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void onInit() {
 		retrieveLocalInternetIPAddress();
 		retrieveLocalLANAddresses();	
@@ -176,6 +179,7 @@ public class NetworkPanel extends TopLevelPanel {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void onQuit() {
 		// do nothing
 	}
@@ -188,51 +192,55 @@ public class NetworkPanel extends TopLevelPanel {
 		setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		
-		remoteURLPanel = new JPanel();
-		remoteURLPanel.setBorder(translate(BorderFactory.createTitledBorder("section_remote_peerurl")));
+		this.remoteURLPanel = new JPanel();
+		this.remoteURLPanel.setBorder(translate(BorderFactory.createTitledBorder("section_remote_peerurl")));
 		c.gridx = 0;
 		c.gridy = 0;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
 		c.insets = new Insets(5, 5, 5, 5);
-		add(remoteURLPanel, c);
+		add(this.remoteURLPanel, c);
 		setupRemoteURLPanel();
 		
-		localURLPanel = new JPanel();
-		localURLPanel.setBorder(translate(BorderFactory.createTitledBorder("section_local_peerurl")));
+		this.localURLPanel = new JPanel();
+		this.localURLPanel.setBorder(translate(BorderFactory.createTitledBorder("section_local_peerurl")));
 		c.gridx = 0;
 		c.gridy = 1;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
 		c.insets = new Insets(5, 5, 5, 5);
-		add(localURLPanel, c);
+		add(this.localURLPanel, c);
 		setupLocalURLPanel();
 		
-		connectButton = translate(new JButton("button_connect"));
-		connectButton.addActionListener(new ActionListener() {
+		this.connectButton = translate(new JButton("button_connect"));
+		this.connectButton.addActionListener(new ActionListener() {
 			
+			@SuppressWarnings("synthetic-access")
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				onUserActionConnect();
 			}
+			
 		});
 		c.gridx = 0;
 		c.gridy = 2;
 		c.insets = new Insets(5, 5, 5, 5);
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
-		add(connectButton, c);
+		add(this.connectButton, c);
 		
-		stopButton = translate(new JButton("button_interrupt_connect"));
-		stopButton.setVisible(false);
-		stopButton.addActionListener(new ActionListener() {
+		this.stopButton = translate(new JButton("button_interrupt_connect"));
+		this.stopButton.setVisible(false);
+		this.stopButton.addActionListener(new ActionListener() {
 			
+			@SuppressWarnings("synthetic-access")
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				onUserActionInterrupt();				
 			}
+			
 		});
-		add(stopButton, c);
+		add(this.stopButton, c);
 		
 //		SwingTranslator.getDefaultTranslator().autotranslate(this);
 	}
@@ -240,9 +248,10 @@ public class NetworkPanel extends TopLevelPanel {
 	/**
 	 * {@inheritDoc}
 	 */
+	@Override
 	protected void loadState() {
 		// load last entered local port (property always exists because there is a default)
-		localPort.setValue(Settings.getPreferences().getInt("local_port", 0));
+		this.localPort.setValue(Settings.getPreferences().getInt("local_port", 0));
 		
 		// selected local IP address is loaded in onLANAddressesDiscovered() (if applicable)
 	}
@@ -271,11 +280,20 @@ public class NetworkPanel extends TopLevelPanel {
 	}
 	
 	/**
+	 * Getter for {@code backend}
+	 * 
+	 * @return the backend reference this NetworkPanel uses
+	 */
+	protected final ControllableBackend getBackend() {
+		return this.backend;
+	}
+	
+	/**
 	 * Sets up the "Remote PeerURL" panel
 	 * 
 	 */
 	private void setupRemoteURLPanel() {
-		remoteURLPanel.setLayout(new GridBagLayout());
+		this.remoteURLPanel.setLayout(new GridBagLayout());
 		final GridBagConstraints c = new GridBagConstraints();
 		
 		c.fill = GridBagConstraints.HORIZONTAL;
@@ -285,8 +303,8 @@ public class NetworkPanel extends TopLevelPanel {
 		
 		c.gridx = 0;
 		c.gridy = 0;
-		remoteURLBar = PeerURLBar.getInstance();
-		remoteURLPanel.add(remoteURLBar, c);		
+		this.remoteURLBar = PeerURLBar.getInstance();
+		this.remoteURLPanel.add(this.remoteURLBar, c);		
 	}
 	
 	/**
@@ -294,7 +312,7 @@ public class NetworkPanel extends TopLevelPanel {
 	 * 
 	 */
 	private void setupLocalURLPanel() {
-		localURLPanel.setLayout(new GridBagLayout());
+		this.localURLPanel.setLayout(new GridBagLayout());
 		final GridBagConstraints c = new GridBagConstraints();
 		
 		/*
@@ -312,9 +330,9 @@ public class NetworkPanel extends TopLevelPanel {
 		c.weightx = 1;
 		c.anchor = GridBagConstraints.CENTER;
 		
-		localURLField = new JTextField();
-		localURLField.setEditable(false);
-		localURLPanel.add(localURLField, c);
+		this.localURLField = new JTextField();
+		this.localURLField.setEditable(false);
+		this.localURLPanel.add(this.localURLField, c);
 		
 		/*
 		 * LEFT COLUMN
@@ -325,17 +343,17 @@ public class NetworkPanel extends TopLevelPanel {
 		c.weightx = 0;
 		c.anchor = GridBagConstraints.LINE_START;
 		
-		localLANAddrLabel = translate(new JLabel("label_local_lan_addresses"));
+		this.localLANAddrLabel = translate(new JLabel("label_local_lan_addresses"));
 		c.gridy = 1;
-		localURLPanel.add(localLANAddrLabel, c);
+		this.localURLPanel.add(this.localLANAddrLabel, c);
 		
-		localInternetAddrLabel = translate(new JLabel("label_local_internet_address"));
+		this.localInternetAddrLabel = translate(new JLabel("label_local_internet_address"));
 		c.gridy = 2;
-		localURLPanel.add(localInternetAddrLabel, c);
+		this.localURLPanel.add(this.localInternetAddrLabel, c);
 		
 		JLabel localPortLabel = translate(new JLabel("label_local_port"));
 		c.gridy = 3;
-		localURLPanel.add(localPortLabel, c);
+		this.localURLPanel.add(localPortLabel, c);
 		
 		/*
 		 *  RIGHT COLUMN
@@ -344,10 +362,11 @@ public class NetworkPanel extends TopLevelPanel {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
 		
-		localIPAddrBox = new JComboBox();
-		localIPAddrBox.setEditable(false);
-		localIPAddrBox.addActionListener(new ActionListener() {
+		this.localIPAddrBox = new JComboBox();
+		this.localIPAddrBox.setEditable(false);
+		this.localIPAddrBox.addActionListener(new ActionListener() {
 
+			@SuppressWarnings("synthetic-access")
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				JComboBox source = (JComboBox) e.getSource();
@@ -359,26 +378,28 @@ public class NetworkPanel extends TopLevelPanel {
 					}
 				}
 			}
+			
 		});
 		c.gridy = 1;
-		localURLPanel.add(localIPAddrBox, c);
+		this.localURLPanel.add(this.localIPAddrBox, c);
 		
-		localInternetAddrField = new JTextField();
-		localInternetAddrField.setEditable(false);
+		this.localInternetAddrField = new JTextField();
+		this.localInternetAddrField.setEditable(false);
 		
 		c.gridy = 2;
-		localURLPanel.add(localInternetAddrField, c);
+		this.localURLPanel.add(this.localInternetAddrField, c);
 		
-		localPort = new PortSpinner();
-		localPort.addChangeListener(new ChangeListener() {
+		this.localPort = new PortSpinner();
+		this.localPort.addChangeListener(new ChangeListener() {
 			
+			@SuppressWarnings("synthetic-access")
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				onUserActionChangeLocalPort();
 			}
 		});
 		c.gridy = 3;
-		localURLPanel.add(localPort, c);
+		this.localURLPanel.add(this.localPort, c);
 	}
 	
 	/**
@@ -391,14 +412,15 @@ public class NetworkPanel extends TopLevelPanel {
 
 			@Override
 			protected Set<String> doInBackground() throws Exception {
-				return backend.findLocalAddresses(true);
+				return NetworkPanel.this.getBackend().findLocalAddresses(true);
 			}
 
+			@SuppressWarnings("synthetic-access")
 			@Override
 			protected void done() {
 				try {
-					localLANAddresses = get();
-					_disregardNextLocalIPChange = true;
+					NetworkPanel.this.localLANAddresses = get();
+					NetworkPanel.this._disregardNextLocalIPChange = true;
 					updateLocalIPAddrBox();
 				} catch(InterruptedException e) {
 					//TODO when exactly does this happen. should be while the third thread
@@ -429,15 +451,16 @@ public class NetworkPanel extends TopLevelPanel {
 
 			@Override
 			protected String doInBackground() throws Exception {
-				return backend.findExternalAddress();
+				return NetworkPanel.this.getBackend().findExternalAddress();
 			}
 
+			@SuppressWarnings("synthetic-access")
 			@Override
 			protected void done() {
 				try {
-					localInternetIPAddress = get();
-					localInternetAddrField.setText(localInternetIPAddress);
-					_disregardNextLocalIPChange = true;
+					NetworkPanel.this.localInternetIPAddress = get();
+					NetworkPanel.this.localInternetAddrField.setText(NetworkPanel.this.localInternetIPAddress);
+					NetworkPanel.this._disregardNextLocalIPChange = true;
 					updateLocalIPAddrBox();
 				} catch(InterruptedException e) {
 					//TODO when exactly does this happen. should be while the third thread
@@ -450,16 +473,16 @@ public class NetworkPanel extends TopLevelPanel {
 					
 					if(cause instanceof UnknownHostException) {
 						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_internet_unknown_host")));
-						localInternetAddrField.setText(translate("not_available"));
+						NetworkPanel.this.localInternetAddrField.setText(translate("not_available"));
 					} else if(cause instanceof MalformedURLException) {
 						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_internet_malformed_url"), cause));
-						localInternetAddrField.setText(translate("not_available"));
+						NetworkPanel.this.localInternetAddrField.setText(translate("not_available"));
 					} else if(cause instanceof IOException) {
 						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_internet_io_error")));
-						localInternetAddrField.setText(translate("not_available"));
+						NetworkPanel.this.localInternetAddrField.setText(translate("not_available"));
 					} else {
 						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_internet_unknown")));
-						localInternetAddrField.setText(translate("N/A"));
+						NetworkPanel.this.localInternetAddrField.setText(translate("N/A"));
 					}
 				}
 			}
@@ -473,14 +496,14 @@ public class NetworkPanel extends TopLevelPanel {
 	 * 
 	 */
 	private void updateLocalIPAddrBox() {
-		localIPAddrBox.removeAllItems();
+		this.localIPAddrBox.removeAllItems();
 		
-		if(localInternetIPAddress != null && !("".equals(localInternetIPAddress)))
-			if(!(localLANAddresses.contains(localInternetIPAddress)))
-				localIPAddrBox.addItem(localInternetIPAddress);
+		if(this.localInternetIPAddress != null && !("".equals(this.localInternetIPAddress)))
+			if(!(this.localLANAddresses.contains(this.localInternetIPAddress)))
+				this.localIPAddrBox.addItem(this.localInternetIPAddress);
 		
-		for(String address: localLANAddresses)
-			localIPAddrBox.addItem(address);
+		for(String address: this.localLANAddresses)
+			this.localIPAddrBox.addItem(address);
 		
 		onLocalIPAddrBoxUpdated();
 	}
@@ -490,12 +513,12 @@ public class NetworkPanel extends TopLevelPanel {
 	 * 
 	 */
 	private void updateLocalURL() {
-		if(selectedLocalAddress == null || "".equals(selectedLocalAddress)) {
-			localURLField.setText("N/A");
+		if(this.selectedLocalAddress == null || "".equals(this.selectedLocalAddress)) {
+			this.localURLField.setText("N/A");
 			return;
 		}
 		
-		localURLField.setText(backend.makePeerURLString(selectedLocalAddress, ((Number) localPort.getValue()).intValue()));
+		this.localURLField.setText(this.backend.makePeerURLString(this.selectedLocalAddress, ((Number) this.localPort.getValue()).intValue()));
 	}
 	
 	/**
@@ -503,8 +526,8 @@ public class NetworkPanel extends TopLevelPanel {
 	 * 
 	 */
 	private void showConnectButton() {
-		connectButton.setVisible(true);
-		stopButton.setVisible(false);
+		this.connectButton.setVisible(true);
+		this.stopButton.setVisible(false);
 	}
 	
 	/**
@@ -512,8 +535,8 @@ public class NetworkPanel extends TopLevelPanel {
 	 * 
 	 */
 	private void showStopButton() {
-		connectButton.setVisible(false);
-		stopButton.setVisible(true);
+		this.connectButton.setVisible(false);
+		this.stopButton.setVisible(true);
 	}
 	
 	/*
@@ -540,22 +563,22 @@ public class NetworkPanel extends TopLevelPanel {
 		// if the user has selected an IP before during this execution of the application,
 		// re-select that one (if still present). if not, use the one stored in Settings if there is one and the
 		// IP is still present.
-		String ipToSelect = userHasSelectedALocalIP ?
-							lastSelectedLocalAddress :
+		String ipToSelect = this.userHasSelectedALocalIP ?
+							this.lastSelectedLocalAddress :
 							Settings.getPreferences().get("selected_local_ip", "");
 
 		if(ipToSelect == null || "".equals(ipToSelect))
 			return;
 
-		if(localLANAddresses.contains(ipToSelect))
-			localIPAddrBox.setSelectedItem(ipToSelect);
+		if(this.localLANAddresses.contains(ipToSelect))
+			this.localIPAddrBox.setSelectedItem(ipToSelect);
 		else
-			if(ipToSelect.equals(localInternetIPAddress))
-				localIPAddrBox.setSelectedItem(ipToSelect);	
+			if(ipToSelect.equals(this.localInternetIPAddress))
+				this.localIPAddrBox.setSelectedItem(ipToSelect);	
 		
 		// selection events not to be processed by the 
-		if(_disregardNextLocalIPChange)
-			_disregardNextLocalIPChange = false;
+		if(this._disregardNextLocalIPChange)
+			this._disregardNextLocalIPChange = false;
 	}
 	
 	/*
@@ -573,14 +596,14 @@ public class NetworkPanel extends TopLevelPanel {
 	 * @param selectedItem the IP address selected by the user
 	 */
 	private void onUserActionSelectLocalAddr(final String selectedItem) {	
-		lastSelectedLocalAddress = selectedLocalAddress;
-		selectedLocalAddress = selectedItem;
+		this.lastSelectedLocalAddress = this.selectedLocalAddress;
+		this.selectedLocalAddress = selectedItem;
 		
 		updateLocalURL();
 		
-		if(!_disregardNextLocalIPChange)
-			if(!userHasSelectedALocalIP)
-				userHasSelectedALocalIP = true;
+		if(!this._disregardNextLocalIPChange)
+			if(!this.userHasSelectedALocalIP)
+				this.userHasSelectedALocalIP = true;
 	}
 
 	/**
@@ -596,7 +619,7 @@ public class NetworkPanel extends TopLevelPanel {
 	 * 
 	 */
 	private void onUserActionConnect() {
-		final String remoteURL = (String) remoteURLBar.getSelectedItem();
+		final String remoteURL = (String) this.remoteURLBar.getSelectedItem();
 		
 		if(remoteURL == null || "".equals(remoteURL)) {
 			getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_invalid_peerurl")));
@@ -607,14 +630,16 @@ public class NetworkPanel extends TopLevelPanel {
 		
 		getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("status_connecting")));
 		
-		connectWorker = new SwingWorker<Void, Void>() {
+		this.connectWorker = new SwingWorker<Void, Void>() {
 
+			@SuppressWarnings("synthetic-access")
 			@Override
 			protected Void doInBackground() throws Exception {
-				backend.connect(remoteURL, ((Number) localPort.getValue()).intValue());
+				NetworkPanel.this.getBackend().connect(remoteURL, ((Number) NetworkPanel.this.localPort.getValue()).intValue());
 				return null;
 			}
 			
+			@SuppressWarnings("synthetic-access")
 			@Override
 			protected void done() {
 				try {
@@ -652,14 +677,14 @@ public class NetworkPanel extends TopLevelPanel {
 				} finally {
 					// in any case, revert to default connection state
 					// (either the connection attempt failed, or it succeeded and the panel should be reset for future use)
-					connectWorker = null;
+					NetworkPanel.this.connectWorker = null;
 					showConnectButton();
 				}
 			}
 			
 		};
 		
-		connectWorker.execute();
+		this.connectWorker.execute();
 	}
 	
 	/**
@@ -667,10 +692,10 @@ public class NetworkPanel extends TopLevelPanel {
 	 * 
 	 */
 	private void onUserActionInterrupt() {
-		if(connectWorker == null)
+		if(this.connectWorker == null)
 			return;
 		
-		connectWorker.cancel(true);
+		this.connectWorker.cancel(true);
 	}
 
 }

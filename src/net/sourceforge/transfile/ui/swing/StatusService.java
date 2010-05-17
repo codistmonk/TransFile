@@ -119,6 +119,7 @@ interface StatusService extends Iterable<StatusService.StatusMessage> {
 		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public String toString() {
 			return this.getText();
 		}

@@ -72,7 +72,7 @@ class ComboBoxItemsHolder implements Serializable {
 	 */
 	public ComboBoxItemsHolder(final int maxRetainedItems, final File stateFile) {
 		this.stateFile = stateFile;
-		items = new ArrayList<Object>(maxRetainedItems);
+		this.items = new ArrayList<Object>(maxRetainedItems);
 	}
 
 	/**
@@ -101,7 +101,7 @@ class ComboBoxItemsHolder implements Serializable {
 					ois.close();
 				} catch(IOException e) {
 					throw new SerializationException(e);
-				};
+				}
 			}
 			if(fis != null) {
 				try {
@@ -123,7 +123,7 @@ class ComboBoxItemsHolder implements Serializable {
 		ObjectOutputStream oos = null;
 
 		try {
-			fos = new FileOutputStream(stateFile);
+			fos = new FileOutputStream(this.stateFile);
 			oos = new ObjectOutputStream(fos);
 			oos.writeObject(this);
 		} catch (FileNotFoundException e) {

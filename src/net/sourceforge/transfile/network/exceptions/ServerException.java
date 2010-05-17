@@ -30,7 +30,7 @@ public class ServerException extends ConnectException {
 	private static final long serialVersionUID = -7520879227367201375L;
 
 	public ServerException() {
-		
+		// exception default constructor, do nothing
 	}
 
 	public ServerException(String arg0) {

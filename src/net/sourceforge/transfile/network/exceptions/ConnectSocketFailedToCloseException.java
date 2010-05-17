@@ -30,7 +30,7 @@ public class ConnectSocketFailedToCloseException extends ConnectException {
 	private static final long serialVersionUID = 2610571531384220520L;
 
 	public ConnectSocketFailedToCloseException() {
-
+		// exception default constructor, do nothing
 	}
 
 	public ConnectSocketFailedToCloseException(Throwable cause) {

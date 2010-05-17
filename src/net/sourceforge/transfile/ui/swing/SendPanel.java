@@ -114,7 +114,7 @@ public class SendPanel extends TopLevelPanel {
 	
 	private void setFile(final File file) {
 		try {
-			fileText.setText(file.getCanonicalFile().toString());
+			this.fileText.setText(file.getCanonicalFile().toString());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

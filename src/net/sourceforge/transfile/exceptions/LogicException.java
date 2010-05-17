@@ -31,7 +31,7 @@ public class LogicException extends RuntimeException {
 	private static final long serialVersionUID = -1985777108233507024L;
 
 	public LogicException() {
-
+		// exception default constructor, do nothing
 	}
 
 	public LogicException(String message) {

@@ -24,7 +24,7 @@ public class SerializationFileNotFoundException extends SerializationException {
 	private static final long serialVersionUID = 8165059832840873632L;
 
 	public SerializationFileNotFoundException() {
-
+		// exception default constructor, do nothing
 	}
 
 	public SerializationFileNotFoundException(String arg0) {

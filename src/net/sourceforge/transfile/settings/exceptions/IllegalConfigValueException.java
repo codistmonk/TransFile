@@ -67,7 +67,7 @@ public class IllegalConfigValueException extends SettingsException {
 	 * @return the configuration value that was deemed illegal
 	 */
 	public String getValue() {
-		return value;
+		return this.value;
 	}
 
 }

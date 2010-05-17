@@ -56,7 +56,7 @@ public class ServerFailedToBindException extends ServerException {
 	 * @return the port that the server failed to bind to
 	 */
 	public final int getPort() {
-		return port;
+		return this.port;
 	}
 
 }

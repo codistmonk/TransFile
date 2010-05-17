@@ -30,7 +30,7 @@ public class MacOSXAdaptationException extends RuntimeException {
 	private static final long serialVersionUID = -8183084416601255968L;
 
 	public MacOSXAdaptationException() {
-
+		// exception default constructor, do nothing
 	}
 
 	public MacOSXAdaptationException(String message) {

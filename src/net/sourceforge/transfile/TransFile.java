@@ -66,7 +66,9 @@ public class TransFile implements Runnable {
 	 * call it.
 	 * 
 	 */
-	private TransFile() {}
+	private TransFile() { 
+		// do nothing, just prevent instantiation
+	}
 	
 	/**
 	 * Creates the TransFile application using the Swing GUI
@@ -90,7 +92,7 @@ public class TransFile implements Runnable {
 	 */
 	@Override
 	public void run() {
-		ui.start();
+		this.ui.start();
 	}
 	
 	/**

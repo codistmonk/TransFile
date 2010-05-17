@@ -113,7 +113,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		this.statusService = new StatusServiceProvider();
 		
 		// check whether the application is running on Mac OS X and store the result
-		onMacOSX = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
+		this.onMacOSX = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
 		
 		setStartupLocale();
 	}
@@ -131,6 +131,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	public void start() {
 		SwingUtilities.invokeLater(new Runnable() {
 
+			@SuppressWarnings("synthetic-access")
 			@Override
 			public void run() {
 				_start();
@@ -194,11 +195,11 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	 */
 	void quit() {
 		// inform all TopLevelPanels about the impending shutdown
-		for(TopLevelPanel panel: panels)
+		for(TopLevelPanel panel: this.panels)
 			panel.informQuit();
 
 		// tell the Backend to quit
-		backend.quit();
+		this.backend.quit();
 	}
 	
 	/**
@@ -218,7 +219,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		
 		this.showConnectScreen();
 		
-		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(statusService));
+		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(this.statusService));
 		
 		this.statusService.postStatusMessage(translate(new StatusMessage("status_ready")));
 		
@@ -298,31 +299,31 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		
 		// "Network" panel
 		
-		networkPanel = new NetworkPanel(this, backend);
-		networkPanel.setPreferredSize(new Dimension(340, 285));
-		panels.add(networkPanel);
-		pane.add(networkPanel);
+		this.networkPanel = new NetworkPanel(this, this.backend);
+		this.networkPanel.setPreferredSize(new Dimension(340, 285));
+		this.panels.add(this.networkPanel);
+		pane.add(this.networkPanel);
 		
 		// "Send Files" panel
 		
-		sendPanel = new SendPanel(this);
-		sendPanel.setPreferredSize(new Dimension(340, 150));
-		panels.add(sendPanel);
-		pane.add(sendPanel);
+		this.sendPanel = new SendPanel(this);
+		this.sendPanel.setPreferredSize(new Dimension(340, 150));
+		this.panels.add(this.sendPanel);
+		pane.add(this.sendPanel);
 		
 		// "Receive Files" panel
 		
-		receivePanel = new ReceivePanel(this);
-		receivePanel.setPreferredSize(new Dimension(340, 150));
-		panels.add(receivePanel);
-		pane.add(receivePanel);
+		this.receivePanel = new ReceivePanel(this);
+		this.receivePanel.setPreferredSize(new Dimension(340, 150));
+		this.panels.add(this.receivePanel);
+		pane.add(this.receivePanel);
 		
 		// "Status" panel
 		
-		statusPanel = new StatusPanel(this);
-		statusPanel.setPreferredSize(new Dimension(360, 28));
-		panels.add(statusPanel);
-		pane.add(statusPanel);
+		this.statusPanel = new StatusPanel(this);
+		this.statusPanel.setPreferredSize(new Dimension(360, 28));
+		this.panels.add(this.statusPanel);
+		pane.add(this.statusPanel);
 	}
 	
 	/**
@@ -389,7 +390,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		}
 		
 		// Mac-specific adaptations
-		if(onMacOSX)
+		if(this.onMacOSX)
 			MacOSXAdapter.adapt(this);
 	}
 	
@@ -423,8 +424,8 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	private void showConnectScreen() {
 		Set<TopLevelPanel> visiblePanels = new HashSet<TopLevelPanel>(2);
 		
-		visiblePanels.add(networkPanel);
-		visiblePanels.add(statusPanel);
+		visiblePanels.add(this.networkPanel);
+		visiblePanels.add(this.statusPanel);
 		
 		setVisiblePanels(visiblePanels);
 	}
@@ -437,9 +438,9 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	private void showTransferScreen() {
 		Set<TopLevelPanel> visiblePanels = new HashSet<TopLevelPanel>(3);
 		
-		visiblePanels.add(sendPanel);
-		visiblePanels.add(receivePanel);
-		visiblePanels.add(statusPanel);
+		visiblePanels.add(this.sendPanel);
+		visiblePanels.add(this.receivePanel);
+		visiblePanels.add(this.statusPanel);
 		
 		setVisiblePanels(visiblePanels);
 	}
@@ -450,7 +451,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	 * @param visiblePanels the panels to show
 	 */
 	private void setVisiblePanels(Set<TopLevelPanel> visiblePanels) {
-		for(TopLevelPanel panel: panels) {
+		for(TopLevelPanel panel: this.panels) {
 			if(visiblePanels.contains(panel))
 				panel.showPanel();
 			else
@@ -488,8 +489,17 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	private class MainWindowListener extends WindowAdapter {
 		
 		/**
+		 * Constructs a new instance
+		 *
+		 */
+		public MainWindowListener() {
+			// do nothing, just allow instantiation
+		}
+		
+		/**
 		 * {@inheritDoc}
 		 */
+		@Override
 		public void windowClosing(WindowEvent e) {
 			quit();
 		}

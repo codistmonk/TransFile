@@ -82,6 +82,15 @@ class MacOSXAdapter {
 	}
 	
 	/**
+	 * Getter for {@code gui}
+	 * 
+	 * @return the GUI this MacOSXAdapater adapts to Mac OS X
+	 */
+	protected final SwingGUI getGUI() {
+		return this.gui;
+	}
+	
+	/**
 	 * Constructs a new MacOSXAdapter 
 	 * 
 	 * @param gui back-reference to the SwingGUI instance creating this object
@@ -99,7 +108,7 @@ class MacOSXAdapter {
 			// get Class instances for com.apple.eawt.Application, com.apple.eawt.ApplicationListener and com.apple.eawt.ApplicationEvent
 			Class<?> application = Class.forName("com.apple.eawt.Application");
 			Class<?> applicationListener = Class.forName("com.apple.eawt.ApplicationListener");
-			applicationEvent = Class.forName("com.apple.eawt.ApplicationEvent");
+			this.applicationEvent = Class.forName("com.apple.eawt.ApplicationEvent");
 
 			// get Method instances for the required methods of com.apple.eawt.Application
 			Method application_getApplication = application.getMethod("getApplication", new Class<?>[] { });
@@ -108,7 +117,7 @@ class MacOSXAdapter {
 			Method application_setEnabledPreferencesMenu = application.getMethod("setEnabledPreferencesMenu", new Class<?>[] { boolean.class });
 			
 			// get and store a Method object for the com.apple.eawt.ApplicationEvent.setHandled(boolean) method
-			applicationEvent_setHandled = applicationEvent.getMethod("setHandled", new Class<?>[] { boolean.class });
+			this.applicationEvent_setHandled = this.applicationEvent.getMethod("setHandled", new Class<?>[] { boolean.class });
 
 			// retrieve the com.apple.eawt.Application instance for this application
 			Object applicationInstance = application_getApplication.invoke(null, new Object[] { });
@@ -147,9 +156,17 @@ class MacOSXAdapter {
 	 */
 	private class ApplicationListenerProxyInvocationHandler implements InvocationHandler  {
 
+		/**
+		 * Constructs a new instance
+		 */
+		public ApplicationListenerProxyInvocationHandler() {
+			// do nothing, just allow instantiation
+		}
+		
 		/** 
 		 * {@inheritDoc}
 		 */
+		@SuppressWarnings("synthetic-access")
 		@Override
 		public Object invoke(Object obj, Method method, Object[] args) throws Throwable {
 			String methodName = method.getName();
@@ -161,7 +178,7 @@ class MacOSXAdapter {
 			Object arg = args[0];
 			
 			// make sure the provided argument is an instance of com.apple.eawt.ApplicationEvent
-			if(!(applicationEvent.isInstance(arg)))
+			if(!(MacOSXAdapter.this.applicationEvent.isInstance(arg)))
 				throw new MacOSXAdaptationException("method with an argument that is not an instance of com.apple.eawt.ApplicationEvent invoked on com.apple.eawt.ApplicationListener");
 			
 			// delegate to the corresponding event handler method
@@ -197,14 +214,15 @@ class MacOSXAdapter {
 		 * 
 		 * @param arg an instance of com.apple.eawt.ApplicationEvent representing the event being handled
 		 */
+		@SuppressWarnings("synthetic-access")
 		private void handleAbout(Object arg) {
 			// keep Mac OS X default About dialog from being shown
 			try {
-				applicationEvent_setHandled.invoke(arg, new Object[] { true });
+				MacOSXAdapter.this.applicationEvent_setHandled.invoke(arg, new Object[] { true });
 			} catch (Throwable e) {
 				throw new MacOSXAdaptationException(e);
 			} finally {
-				gui.showAboutDialog();
+				MacOSXAdapter.this.getGUI().showAboutDialog();
 			}
 		}
 		
@@ -241,7 +259,7 @@ class MacOSXAdapter {
 		 * @param arg an instance of com.apple.eawt.ApplicationEvent representing the event being handled
 		 */
 		private void handlePreferences(Object arg) {
-			gui.showPreferences();
+			MacOSXAdapter.this.getGUI().showPreferences();
 		}
 		
 		/**
@@ -250,7 +268,7 @@ class MacOSXAdapter {
 		 * @param arg an instance of com.apple.eawt.ApplicationEvent representing the event being handled
 		 */
 		private void handleQuit(Object arg) {
-			gui.quit();
+			MacOSXAdapter.this.getGUI().quit();
 		}
 
 		/**

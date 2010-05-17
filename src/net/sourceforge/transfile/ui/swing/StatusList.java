@@ -66,8 +66,8 @@ public class StatusList extends JList {
 		if(minRows <1)
 			throw new LogicError("can't initialise with a minimum of less than 1 rows");
 		
-		model = new StatusListModel(minRows);
-		setModel(model);
+		this.model = new StatusListModel(minRows);
+		setModel(this.model);
 		
 		// make list items unselectable
 		setSelectionModel(new StatusListSelectionModel());
@@ -82,7 +82,7 @@ public class StatusList extends JList {
 	 * <br />Should not be null.
 	 */
 	public void addMessage(final StatusMessage message) {
-		model.addMessage(message);
+		this.model.addMessage(message);
 	}
 	
 	/**
@@ -124,7 +124,7 @@ public class StatusList extends JList {
 			getDefaultTranslator().addTranslatorListener(new TranslatorListener());
 			
 			for(int i = 0; i < minRows; i++)
-				messages.add(new StatusDummy());
+				this.messages.add(new StatusDummy());
 		}
 		
 		/**
@@ -136,16 +136,16 @@ public class StatusList extends JList {
 		 */
 		public void addMessage(final StatusMessage message) {
 			// add new message to the beginning of the list
-			messages.add(0, message);
+			this.messages.add(0, message);
 			
 			// if the list is holding more than the specified minimum number of messages/rows,
 			// remove the oldest (rightmost) object if it is a StatusDummy
-			if(messages.size() > minRows)
-				if(messages.get(messages.size() - 1) instanceof StatusDummy)
-					messages.remove(messages.size() - 1);
+			if(this.messages.size() > this.minRows)
+				if(this.messages.get(this.messages.size() - 1) instanceof StatusDummy)
+					this.messages.remove(this.messages.size() - 1);
 	
 			// list has changed, fire event
-			fireContentsChanged(this, 0, messages.size() - 1);
+			fireContentsChanged(this, 0, this.messages.size() - 1);
 			
 			//TODO fireIntervalAdded?
 		}
@@ -155,7 +155,7 @@ public class StatusList extends JList {
 		 */
 		@Override
 		public Object getElementAt(int pos) {
-			return messages.get(pos);
+			return this.messages.get(pos);
 		}
 
 		/** 
@@ -163,7 +163,7 @@ public class StatusList extends JList {
 		 */
 		@Override
 		public int getSize() {
-			return messages.size();
+			return this.messages.size();
 		}
 		
 		/**
@@ -177,12 +177,20 @@ public class StatusList extends JList {
 		private class TranslatorListener implements Translator.Listener {
 
 			/**
+			 * Constructs a new instance
+			 */
+			public TranslatorListener() {
+				// do nothing, just allow instantiation
+			}
+			
+			/**
 			 * {@inheritDoc}
 			 */
 			@Override
 			public void localeChanged(Locale oldLocale, Locale newLocale) {
 				SwingUtilities.invokeLater(new Runnable() {
 					
+					@SuppressWarnings("synthetic-access")
 					@Override
 					public void run() {
 						StatusListModel.this.fireContentsChanged(this, 0, StatusListModel.this.messages.size() - 1);
@@ -203,6 +211,14 @@ public class StatusList extends JList {
 	private static class StatusListSelectionModel extends DefaultListSelectionModel {
 
 		private static final long serialVersionUID = 2726424284954401907L;
+		
+		/**
+		 * Constructs a new instance
+		 *
+		 */
+		StatusListSelectionModel() {
+			// do nothing, just allow instantiation
+		}
 
 		/**
 		 * {@inheritDoc}

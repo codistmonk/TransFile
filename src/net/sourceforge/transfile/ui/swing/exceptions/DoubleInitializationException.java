@@ -32,7 +32,7 @@ public class DoubleInitializationException extends LogicException {
 	private static final long serialVersionUID = -4743626600273550138L;
 
 	public DoubleInitializationException() {
-		
+		// exception default constructor, do nothing
 	}
 
 	public DoubleInitializationException(String message) {

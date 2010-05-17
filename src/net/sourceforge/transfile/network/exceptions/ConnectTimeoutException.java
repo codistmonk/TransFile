@@ -30,7 +30,7 @@ public class ConnectTimeoutException extends ConnectException {
 	private static final long serialVersionUID = -5125327854063658691L;
 
 	public ConnectTimeoutException() {
-		
+		// exception default constructor, do nothing	
 	}
 
 	public ConnectTimeoutException(String arg0) {

@@ -68,7 +68,7 @@ public class MissingResourceException extends RuntimeException {
 	 * <br />Never null
 	 */
 	public String getResourcePath() {
-		return resourcePath;
+		return this.resourcePath;
 	}
 
 }

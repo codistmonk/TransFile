@@ -32,7 +32,7 @@ public class LogicError extends Error {
 	private static final long serialVersionUID = 2590986221484853599L;
 
 	public LogicError() {
-
+		// exception default constructor, do nothing
 	}
 
 	public LogicError(String arg0) {

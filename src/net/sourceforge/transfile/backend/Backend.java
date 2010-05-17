@@ -111,14 +111,14 @@ public class Backend implements ControllableBackend {
 	@Override
 	public void connect(final String remoteURL, final int localPort) 
 			throws PeerURLFormatException, UnknownHostException, InterruptedException, LinkFailedException {
-		if(connection != null)
+		if(this.connection != null)
 			throw new IllegalStateException("already connected to a peer");
 		
 		try {
-			connection = new Link(remoteURL, localPort);
+			this.connection = new Link(remoteURL, localPort);
 		} finally {
 			// if something went wrong reset connection to null
-			connection = null;
+			this.connection = null;
 		}
 	}
 

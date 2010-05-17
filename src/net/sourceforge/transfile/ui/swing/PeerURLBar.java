@@ -89,6 +89,7 @@ class PeerURLBar extends JComboBox {
 	 * 
 	 * @return the singleton instance
 	 */
+	@SuppressWarnings("synthetic-access")
 	public static PeerURLBar getInstance() {
 		return LazyHolder._instance;
 	}
@@ -99,7 +100,7 @@ class PeerURLBar extends JComboBox {
 	 * @throws SerializationException if serializing or saving the serialized data to disk failed
 	 */
 	public void saveModel() throws SerializationException {
-		model.saveHolder();
+		this.model.saveHolder();
 	}
 	
 	/**
@@ -107,11 +108,11 @@ class PeerURLBar extends JComboBox {
 	 * one PeerURLBar instance at most at any given time.
 	 * 
 	 */
-	private PeerURLBar() {
+	protected PeerURLBar() {
 		setEditable(true);
 		addActionListener(new PeerURLBarListener());
-		model = new PeerURLBarModel();
-		setModel(model);
+		this.model = new PeerURLBarModel();
+		setModel(this.model);
 	}
 
 	/**
@@ -121,6 +122,14 @@ class PeerURLBar extends JComboBox {
 	 *
 	 */
 	private class PeerURLBarListener implements ActionListener {
+		
+		/**
+		 * Constructs a new instance
+		 * 
+		 */
+		public PeerURLBarListener() {
+			// do nothing, just allow instantiation
+		}
 		
 		/**
 		 * {@inheritDoc}
@@ -156,16 +165,17 @@ class PeerURLBar extends JComboBox {
 		 * instance from disk, or, failing that, creating a new ItemsHolder object.
 		 * 
 		 */
+		@SuppressWarnings("synthetic-access")
 		public PeerURLBarModel() {
 			try {
-				getLoggerForThisMethod().log(Level.FINER, "attempting to load PeerURLBar state from file: " + stateFile.toString());
-				this.holder = ComboBoxItemsHolder.load(stateFile);
+				getLoggerForThisMethod().log(Level.FINER, "attempting to load PeerURLBar state from file: " + PeerURLBar.this.stateFile.toString());
+				this.holder = ComboBoxItemsHolder.load(PeerURLBar.this.stateFile);
 				// maxRetainedItems may have changed since the last time state was saved
 				removeExcessiveItems();
-				getLoggerForThisMethod().log(Level.FINE, "successfully loaded PeerURLBar state from file: " + stateFile.toString());
+				getLoggerForThisMethod().log(Level.FINE, "successfully loaded PeerURLBar state from file: " + PeerURLBar.this.stateFile.toString());
 			} catch (Throwable e) {
-				getLoggerForThisMethod().log(Level.WARNING, "failed to load PeerURLBar state from file: " + stateFile.toString());
-				this.holder = new ComboBoxItemsHolder(maxRetainedItems, stateFile);
+				getLoggerForThisMethod().log(Level.WARNING, "failed to load PeerURLBar state from file: " + PeerURLBar.this.stateFile.toString());
+				this.holder = new ComboBoxItemsHolder(maxRetainedItems, PeerURLBar.this.stateFile);
 			}
 		}
 		
@@ -175,7 +185,7 @@ class PeerURLBar extends JComboBox {
 		 * @throws SerializationException if serializing or saving the serialized data to disk failed
 		 */
 		public void saveHolder() throws SerializationException {
-			holder.save();
+			this.holder.save();
 		}
 
 		/**
@@ -183,14 +193,14 @@ class PeerURLBar extends JComboBox {
 		 */
 		@Override
 		public void addElement(Object e) {
-			if(holder.items.contains(e))
+			if(this.holder.items.contains(e))
 				return;
 			
-			holder.items.add(0, e);
+			this.holder.items.add(0, e);
 			
 			removeExcessiveItems();
 			
-			fireContentsChanged(PeerURLBar.this, 0, holder.items.size() - 1);
+			fireContentsChanged(PeerURLBar.this, 0, this.holder.items.size() - 1);
 		}
 		
 		/**
@@ -198,14 +208,14 @@ class PeerURLBar extends JComboBox {
 		 */
 		@Override
 		public void insertElementAt(Object e, int ePosition) {
-			if(holder.items.contains(e))
+			if(this.holder.items.contains(e))
 				return;
 			
-			holder.items.add(ePosition, e);
+			this.holder.items.add(ePosition, e);
 		
 			removeExcessiveItems();
 			
-			fireContentsChanged(PeerURLBar.this, ePosition, holder.items.size() - 1);
+			fireContentsChanged(PeerURLBar.this, ePosition, this.holder.items.size() - 1);
 		}
 
 		/**
@@ -213,7 +223,7 @@ class PeerURLBar extends JComboBox {
 		 */
 		@Override
 		public void removeElement(Object e) {
-			removeElementAt(holder.items.indexOf(e));
+			removeElementAt(this.holder.items.indexOf(e));
 		}
 
 		/**
@@ -221,11 +231,11 @@ class PeerURLBar extends JComboBox {
 		 */
 		@Override
 		public void removeElementAt(int ePosition) {
-			holder.items.remove(ePosition);
-			if(ePosition == holder.items.size())
+			this.holder.items.remove(ePosition);
+			if(ePosition == this.holder.items.size())
 				fireIntervalRemoved(PeerURLBar.this, ePosition, ePosition);
 			else
-				fireContentsChanged(PeerURLBar.this, ePosition, holder.items.size() - 1);
+				fireContentsChanged(PeerURLBar.this, ePosition, this.holder.items.size() - 1);
 		}
 
 		/**
@@ -233,7 +243,7 @@ class PeerURLBar extends JComboBox {
 		 */
 		@Override
 		public Object getSelectedItem() {
-			return holder.selectedItem;
+			return this.holder.selectedItem;
 		}
 
 		/**
@@ -241,27 +251,27 @@ class PeerURLBar extends JComboBox {
 		 */
 		@Override
 		public void setSelectedItem(Object itemToSelect) {
-			holder.selectedItem = itemToSelect;
-			int i = holder.items.indexOf(itemToSelect);
+			this.holder.selectedItem = itemToSelect;
+			int i = this.holder.items.indexOf(itemToSelect);
 			// if the selected item already exists (user picked it from the drop-down list or re-entered it)
 			if(i >= 0) {
 				// make the selected item the "youngest" item (move it to the first position in the list)
-				holder.items.remove(i);
-				holder.items.add(0, itemToSelect);
+				this.holder.items.remove(i);
+				this.holder.items.add(0, itemToSelect);
 			// if it's a new item
 			} else {
-				if(holder.selectedItem instanceof String) {
-					String selectedString = (String) holder.selectedItem;
+				if(this.holder.selectedItem instanceof String) {
+					String selectedString = (String) this.holder.selectedItem;
 					// if the selected item is a string and doesn't start with the correct protocol prefix
 					if(!selectedString.startsWith(PeerURL.protocolPrefix)) {
 						// prepend the protocol prefix
 						//TODO be smarter, recognize at least incomplete or maybe even mistyped prefixes and correct them
 						selectedString = PeerURL.protocolPrefix + selectedString;
-						holder.selectedItem = selectedString;
+						this.holder.selectedItem = selectedString;
 					}
 				}
 			}
-			fireContentsChanged(PeerURLBar.this, 0, holder.items.size() - 1);
+			fireContentsChanged(PeerURLBar.this, 0, this.holder.items.size() - 1);
 		}
 
 		/**
@@ -269,7 +279,7 @@ class PeerURLBar extends JComboBox {
 		 */
 		@Override
 		public Object getElementAt(int index) {			
-			return holder.items.get(index);
+			return this.holder.items.get(index);
 		}
 
 		/**
@@ -277,16 +287,17 @@ class PeerURLBar extends JComboBox {
 		 */
 		@Override
 		public int getSize() {
-			return holder.items.size();
+			return this.holder.items.size();
 		}
 		
 		/**
 		 * Removes excessive items until the model is holding at most {@code maxRetainedItems} items
 		 * 
 		 */
+		@SuppressWarnings("synthetic-access")
 		private void removeExcessiveItems() {
-			while(holder.items.size() > maxRetainedItems)
-				holder.items.remove(holder.items.size() - 1);			
+			while(this.holder.items.size() > maxRetainedItems)
+				this.holder.items.remove(this.holder.items.size() - 1);			
 		}
 		
 	}
