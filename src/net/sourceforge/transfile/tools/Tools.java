@@ -276,6 +276,8 @@ public final class Tools {
 	public static final <T> T throwRuntimeException(final Throwable cause) {
 		if (cause instanceof RuntimeException) {
 			throw (RuntimeException) cause;
+		} else if (cause instanceof Error) {
+			throw (Error) cause;
 		}
 		
 		throw new RuntimeException(cause);
