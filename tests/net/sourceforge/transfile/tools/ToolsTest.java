@@ -35,7 +35,7 @@ import org.junit.*;
  */
 public class ToolsTest {
 	
-	@SuppressWarnings("synthetic-access")
+	@SuppressWarnings({ "synthetic-access", "cast" })
 	@Test
 	public void cast() {
 		
