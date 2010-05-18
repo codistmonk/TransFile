@@ -19,34 +19,104 @@
 
 package net.sourceforge.transfile.settings;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Properties;
+import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
+import java.util.logging.Level;
 import java.util.prefs.Preferences;
 
-import net.sourceforge.transfile.exceptions.MissingResourceException;
+import net.sourceforge.transfile.settings.exceptions.ConstantReflectionException;
 import net.sourceforge.transfile.tools.Tools;
 
 /**
  * <p>Provides simple key-value pair persistence. Default values are in transfile.settings.defaults.properties,
  * per-user configuration files are saved to user preferences (Java mechanism).</p>
  * 
+ * <p>Also includes project-wide constants, a lot of which can effectively be overwritten by user preferences
+ * and are thus considered defaults.</p>
+ * 
  * <p>Singleton class.</p>
+ * 
+ * <p>A list of the names of all constants defined by this class as well their respective values by name
+ * are accessible through the reflective methods {@link #getConstantFieldNames} and {@link #getConstantAsString}.
+ * However, these methods should only be used when absolutely necessary, i.e. to dynamically list all of them.</p>
  * 
  * @author Martin Riedel
  * @author codistmonk (modifications since 2010-05-10)
  *
  */
-public class Settings {
+public final class Settings {
 	
 	private static final long serialVersionUID = 312178159322230641L;
 	
-	private static Properties defaults;
+	/*
+	 * README: 
+	 * 
+	 * The public constants below this line are accessed reflectively by PreferencesFrame. Do not rename them
+	 * unless you know what you're doing.
+	 * 
+	 * Do not add any additional public constants (below or above this line) to this class without
+	 * a) adding an exception for them in getConstantFieldNames if they are not supposed to be user-configurable or
+	 * b) ensuring that their name is congruent with the respective settings in the user Preferences (except for case)
+	 * 
+	 */
+	
+	/*
+	 * Default local port
+	 */
+	public static final int LOCAL_PORT = 42000;
+	/*
+	 * Local port range extrema
+	 */
+	public static final int LOCAL_PORT_MIN = 1024;
+	public static final int LOCAL_PORT_MAX = 65535;
+	
+	/*
+	 * URL to web service used to determine the local Internet IP address
+	 */
+	public static final String EXTERNAL_IP_SITE = "http://www.whatismyip.org/";
+	
+	/*
+	 * The length of the time intervals between checks for thread interruption
+	 * in threads establishing TransFile connections
+	 */
+	public static final int CONNECT_INTERVAL_TIME = 100;
+	/*
+	 * The number of such intervals to go through before the connection attempt is considered timed out
+	 */
+	public static final int CONNECT_INTERVALS = 100;
+	
+	/*
+	 * The number of recent PeerURLs the PeerURLBar remembers
+	 */
+	public static final int PEERURLBAR_MAX_RETAINED_ITEMS = 5;
+	
+	/*
+	 * The minimum log level to log
+	 */
+	public static final Level LOG_LEVEL = Level.FINEST;
+	
+	/*
+	 * The name of the application's per-user directory
+	 */
+	public static final File USER_APPLICATION_SUBDIRECTORY = new File(".transfile");
+	
+	/*
+	 * The default log directory and file
+	 */
+	public static final File LOG_PATH = new File(Tools.getUserApplicationDirectory(), "log.txt");
+	
+	/*
+	 * The defauls locale. Should only be used if there is neither a user preference nor a usable host default
+	 */
+	public static final Locale LOCALE = Locale.ENGLISH;
 	
 	
 	/**
 	 * Returns the user preferences for this package.
-	 * <br>The preferences are initialized with default values if needed. 
 	 * 
 	 * @return {@code null} if the user preferences for this package could not be created or retrieved
 	 * <br>A non-null value
@@ -54,121 +124,77 @@ public class Settings {
 	 * @see Preferences#userNodeForPackage(Class)
 	 * @throws SecurityException if the preferences cannot be loaded
 	 */
-	public static final Preferences getPreferences() {
-		getDefaults();
-		
+	public static final Preferences getPreferences() {	
 		return Preferences.userNodeForPackage(Settings.class);
 	}
 	
 	/**
-	 * If {@code key} is associated with a non-null and non-empty value in the preferences,
-	 * then this value is returned, otherwise {@code defaultValue} is associated with {@code key} and returned.
+	 * <p>Reflectively finds and returns the constant value (in most cases a default settings value)
+	 * for the specified field name / settings key.</p>
 	 * 
-	 * @param key
-	 * <br>Should not be null
-	 * <br>Possibly shared parameter
-	 * @param defaultValue
-	 * <br>Should not be null
-	 * <br>Possibly shared parameter
+	 * <p>NEVER USE THIS METHOD UNLESS YOU CANNOT ACCESS THE CONSTANTS DIRECTLY!</p>
+	 * 
+	 * @param fieldName
+	 * <br />The name of the constant field or the default settings value to be looked up
+	 * <br />Should not be null
 	 * @return
-	 * <br>A non-null value
-	 * <br>A possibly shared value
+	 * <br />The string representation of the requested constant / default settings value
+	 * <br />Never null
 	 */
-	public static final String getOrCreate(final String key, final String defaultValue) {
-		final String value = getPreferences().get(key, null);
-		
-		if (value != null && value.length() > 0) {
-			return value;
-		}
-		
-		getPreferences().put(key, defaultValue);
-		
-		return defaultValue;
-	}
-	
-	/**
-	 * If {@code key} is associated with a non-null value in the preferences, then this value is returned, otherwise
-	 * an empty string is returned.
-	 * 
-	 * @param key
-	 * <br>Should not be null
-	 * @return
-	 * <br>A non-null value
-	 */
-	public static final String get(final String key) {
-		return Tools.emptyIfNull(getPreferences().get(key, ""));
-	}
-	
-	/**
-	 * Returns the default setting for the provided property key.
-	 * 
-	 * @param key the property key to look up
-	 * @return the default for the specified property key, or null if the key could no be found
-	 */
-	public static final String getDefault(final String key) {
-		return getDefaults().getProperty(key);
-	}
+	public static final String getConstantAsString(final String fieldName) {
+		try {
+			final Class<Settings> settingsClass = Settings.class;
+			final Field valueField = settingsClass.getDeclaredField(fieldName.toUpperCase());
 
+			final Object value = valueField.get(null);
+
+			if(valueField.getType().isAssignableFrom(String.class))
+				return (String) value;
+
+			return value.toString();
+		} catch(IllegalAccessException e) {
+			throw new ConstantReflectionException(fieldName, e);
+		} catch(NoSuchFieldException e) {
+			throw new ConstantReflectionException(fieldName, e);
+		}
+	}
+	
 	/**
-	 * Returns the default setting for the specified property key as an integer
+	 * <p>Reflectively finds and returns a Set of the names of all public constant (both static and final) fields
+	 * in Settings.</p>
 	 * 
-	 * @param key the property key to look up
-	 * @return the default for the specified property key as an integer, or null if the key could not be found
+	 * <p>This method returns all constants defined by this class (except {@code serialVersionUID}). It does not
+	 * make any qualitative guarantees about these constants. In particular, they are not guaranteed to be
+	 * congruent with the per-user settings available via Preferences, although a best effort to achieve such 
+	 * a congruency is made.</p>
+	 * 
+	 * @return 
+	 * <br />The names of all constants in Settings
+	 * <br />Never null
 	 */
-	public static final int getDefaultInt(final String key) {
-		final Object value = getDefaults().get(key);
+	public static final Set<String> getConstantFieldNames() {
+		final Set<String> fieldNames = new HashSet<String>();
+		final Class<Settings> settingsClass = Settings.class;
 		
-		return value == null ? null : Integer.valueOf(value.toString());
+		int modifiers = 0x0;
+		modifiers |= Modifier.PUBLIC;
+		modifiers |= Modifier.STATIC;
+		modifiers |= Modifier.FINAL;
+
+		for(Field field: settingsClass.getDeclaredFields()) {
+			String fieldName = field.getName();
+			if(!fieldName.equals("serialVersionUID") && field.getModifiers() == modifiers)
+				fieldNames.add(fieldName);
+		}
+
+		return fieldNames;
 	}
 	
 	/**
 	 * Private constructor to prevent this class from being instantiated.
 	 */
 	private Settings() {
-		// Do nothing
-	}
-	
-	/**
-	 * Loads the default preferences values from the resource "defaults.properties".
-	 * 
-	 * @return
-	 * <br>A non-null value
-	 * <br>A shared value
-	 * <br>A possibly new value
-	 */
-	private static final synchronized Properties getDefaults() {
-		if (defaults == null) {
-			defaults = new Properties();
-			
-			try {
-				// TODO check if this works with WebStart
-				// When run by WebStart, class.getResourceAsStream() uses the default class loader
-				// in a way that may prevent it from finding the resources in the jar
-				// As it is now, class.getClassLoader().getResourceAsStream() (the correct way, I think)
-				// cannot be used because getDefaults() is called during other classes static initialization while
-				// this class  hasn't been loaded yet
-				// If it turns out there is no problem, then remove all these comments
-				// Otherwise, a possible fix could be to use C.class.getClassLoader().getResourceAsStream() where C
-				// is a class that doesn't depend directly or indirectly on this class.
-				InputStream defaultProperties = Settings.class.getResourceAsStream("/defaults.properties");
-				
-				if(defaultProperties == null)
-					throw new MissingResourceException("defaults.properties");
-					
-				
-				defaults.load(defaultProperties);
-			} catch (final IOException exception) {
-				exception.printStackTrace();
-			}
-			
-			for (final java.util.Map.Entry<Object, Object> entry : defaults.entrySet()) {
-				if (getPreferences().get(entry.getKey().toString(), null) == null) {
-					getPreferences().put(entry.getKey().toString(), entry.getValue().toString());
-				}
-			}
-		}
-		
-		return defaults;
+		// Do nothing, just prevent instantiation
 	}
 	
 }

@@ -56,13 +56,13 @@ abstract class Connection {
 	 * and attempts to accept a connection from the remote peer to the local host block in between checking
 	 * whether their respective threads have been interrupted
 	 */
-	protected static final int connectIntervalTimeout = Settings.getPreferences().getInt("connect_interval_time", 0);
+	protected static final int connectIntervalTimeout = Settings.getPreferences().getInt("connect_interval_time", Settings.CONNECT_INTERVAL_TIME);
 	
 	/*
 	 * The number of times those connection attempts (see above) check for thread interruption
 	 * before considering themselves timed out
 	 */
-	protected static final int connectMaxIntervals = Settings.getPreferences().getInt("connect_intervals", 0);
+	protected static final int connectMaxIntervals = Settings.getPreferences().getInt("connect_intervals", Settings.CONNECT_INTERVALS);
 	
 	/*
 	 * The Socket that connects to the remote peer

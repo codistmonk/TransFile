@@ -85,7 +85,7 @@ public class Link {
 	 * TODO doc
 	 */
 	public static String findExternalAddress() throws MalformedURLException, IOException {
-		URL siteURL = new URL(Settings.getPreferences().get("external_ip_site", ""));  
+		URL siteURL = new URL(Settings.getPreferences().get("external_ip_site", Settings.EXTERNAL_IP_SITE));  
 		   
 		HttpURLConnection siteConnection = (HttpURLConnection) siteURL.openConnection();  
 		BufferedReader bufferedSiteReader = new BufferedReader(new InputStreamReader(siteConnection.getInputStream()));  

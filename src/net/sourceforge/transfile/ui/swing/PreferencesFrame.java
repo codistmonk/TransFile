@@ -23,12 +23,10 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EventObject;
-import java.util.PropertyResourceBundle;
 import java.util.Vector;
 
 import javax.swing.AbstractAction;
@@ -72,7 +70,7 @@ public class PreferencesFrame extends JDialog {
 		// I decided to use a table to edit the properties because I thought it was easier
 		// for both the developers and the user; but that can be changed if necessary
 		// TODO add specific editors and data validation for each property
-		this.tableModel = createTableModel(loadDefaultProperties());
+		this.tableModel = createTableModel();
 		
 		this.setLayout(new BorderLayout());
 		
@@ -261,25 +259,8 @@ public class PreferencesFrame extends JDialog {
 		
 	}
 	
-	private static final String DEFAULT_PROPERTIES = "net/sourceforge/transfile/settings/defaults.properties";
-	
 	private static final long serialVersionUID = 4747810436442554432L;
-	
-	/**
-	 * 
-	 * @return
-	 * <br>A non-null value
-	 * <br>A new value
-	 * @throws RuntimeException if the properties file could not be loaded
-	 */
-	private static final PropertyResourceBundle loadDefaultProperties() {
-		try {
-			return new PropertyResourceBundle(getResourceAsStream(DEFAULT_PROPERTIES));
-		} catch (final IOException exception) {
-			throw new RuntimeException(exception);
-		}
-	}
-	
+		
 	/**
 	 * Creates a new table model with 2 columns "key" and "value", initialized with data from the {@link Settings}
 	 * if they are defined.
@@ -292,7 +273,7 @@ public class PreferencesFrame extends JDialog {
 	 * <br>A non-null value
 	 */
 	@SuppressWarnings("unchecked")
-	private static final DefaultTableModel createTableModel(final PropertyResourceBundle defaultProperties) {
+	private static final DefaultTableModel createTableModel() {
 		final DefaultTableModel result = new DefaultTableModel(new Object[] { "key", "value" }, 0) {
 			
 			@Override
@@ -304,10 +285,9 @@ public class PreferencesFrame extends JDialog {
 			
 		};
 		
-		for (final String key : defaultProperties.keySet()) {
-			final String defaultValue = defaultProperties.getObject(key).toString();
-
-			result.addRow(new Object[] { key, Settings.getPreferences().get(key, defaultValue) });
+		for (final String fieldName : Settings.getConstantFieldNames()) {
+			final String key = fieldName.toLowerCase();
+			result.addRow(new Object[] { key, Settings.getPreferences().get(key, Settings.getConstantAsString(fieldName)) });
 		}
 		
 		Collections.sort(result.getDataVector(), new Comparator<Vector<String>>() {

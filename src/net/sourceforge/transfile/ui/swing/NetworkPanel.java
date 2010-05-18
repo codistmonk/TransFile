@@ -249,7 +249,7 @@ public class NetworkPanel extends TopLevelPanel {
 	@Override
 	protected void loadState() {
 		// load last entered local port (property always exists because there is a default)
-		this.localPort.setValue(Settings.getPreferences().getInt("local_port", 0));
+		this.localPort.setValue(Settings.getPreferences().getInt("local_port", Settings.LOCAL_PORT));
 		
 		// selected local IP address is loaded in onLANAddressesDiscovered() (if applicable)
 	}

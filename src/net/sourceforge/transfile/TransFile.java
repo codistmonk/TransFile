@@ -19,7 +19,6 @@
 
 package net.sourceforge.transfile;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
@@ -30,7 +29,6 @@ import java.util.logging.ConsoleHandler;
 
 import net.sourceforge.transfile.backend.Backend;
 import net.sourceforge.transfile.settings.Settings;
-import net.sourceforge.transfile.tools.Tools;
 import net.sourceforge.transfile.ui.UserInterface;
 import net.sourceforge.transfile.ui.swing.SwingGUI;
 
@@ -51,16 +49,6 @@ public class TransFile implements Runnable {
 	 * Reference to the UserInterface used to asynchronously inform the user / user interface about state changes in the backend
 	 */
 	private UserInterface ui;
-	
-	/**
-	 * The default log file location is in the user-specific application directory
-	 */
-	private static final String DEFAULT_LOG_PATH = new File(Tools.getUserApplicationDirectory(), "log.txt").getAbsolutePath();
-	
-	/**
-	 * The default log level is {@value}, logging the maximum amount of information
-	 */
-	private static final String DEFAULT_LOG_LEVEL = Level.FINEST.getName();
 	
 	/*
 	 * Sets the application's title to be used in the automatically generated Mac OS X application menu
@@ -141,10 +129,10 @@ public class TransFile implements Runnable {
 		for(Handler handler: Logger.getLogger("").getHandlers())
 			Logger.getLogger("").removeHandler(handler);
 		
-		final Level logLevel = Level.parse(Settings.getOrCreate("log_level", DEFAULT_LOG_LEVEL));
+		final Level logLevel = Level.parse(Settings.getPreferences().get("log_level", Settings.LOG_LEVEL.getName()));
 		
 		final Handler consoleHandler = new ConsoleHandler();
-		final Handler fileHandler = new FileHandler(Settings.getOrCreate("log_path", DEFAULT_LOG_PATH));
+		final Handler fileHandler = new FileHandler(Settings.getPreferences().get("log_path", Settings.LOG_PATH.getAbsolutePath()));
 		
 		consoleHandler.setLevel(logLevel);
 		fileHandler.setLevel(logLevel);

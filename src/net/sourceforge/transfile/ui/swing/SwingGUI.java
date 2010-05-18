@@ -267,7 +267,8 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	 * @throws IllegalConfigValueException if the "locale" setting is present but invalid
 	 */
 	private static final Locale loadLocale() {
-		final String userLocaleSetting = Settings.getOrCreate("locale", "en");
+		//TODO userLocaleSetting can never be null. Hence, the host default locale is never used.
+		final String userLocaleSetting = Settings.getPreferences().get("locale", Settings.LOCALE.toString());
 		
 		if(userLocaleSetting == null || "".equals(userLocaleSetting)) {
 			return null;

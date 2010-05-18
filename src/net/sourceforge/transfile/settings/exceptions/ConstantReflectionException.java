@@ -20,43 +20,39 @@
 package net.sourceforge.transfile.settings.exceptions;
 
 /**
- * <p>Thrown when a configuration key for which a default should exist in defaults.properties
- * could not be found.</p>
- * 
- * <p>Thrown by code using Settings on a case-by-case basis. There is no mechanism inside the settings package
- * enforcing default value completeness.</p>
+ * Thrown when {@link net.sourceforge.transfile.settings.Settings#getConstantAsString} 
+ * fails to reflective find and/or access the requested constant.
  *
  * @author Martin Riedel
  *
  */
-public class MissingDefaultSettingException extends SettingsException {
+public class ConstantReflectionException extends SettingsException {
 
-	private static final long serialVersionUID = -4482437296266276194L;
-
+	private static final long serialVersionUID = 7935531235975326494L;
 
 	/**
 	 * Constructs a new instance
-	 * 
-	 * @param key 
-	 * <br />The key for which a default setting was expected but not found
-	 * <br />Should not be null
+	 *
+	 * @param fieldName
+	 * <br />The name of the constant that could not be found or accesses reflectively
+	 * <br />Should not be null 
 	 */
-	public MissingDefaultSettingException(final String key) {
-		super(key);
+	public ConstantReflectionException(String fieldName) {
+		super(fieldName);
 	}
 
 	/**
 	 * Constructs a new instance
 	 * 
-	 * @param key 
-	 * <br />The key for which a default setting was expected but not found
+	 * @param fieldName
+	 * <br />The name of the constant that could not be found or accesses reflectively
 	 * <br />Should not be null
 	 * @param cause
-	 * <br />The that caused this exception to be thrown
+	 * <br />The exception that describes the error that caused this exception
 	 * <br />Should not be null
 	 */
-	public MissingDefaultSettingException(final String key, final Throwable cause) {
-		super(key, cause);
+	public ConstantReflectionException(String fieldName, Throwable cause) {
+		super(fieldName, cause);
 	}
 
 }

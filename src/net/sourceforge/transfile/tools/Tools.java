@@ -26,7 +26,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import net.sourceforge.transfile.settings.Settings;
-import net.sourceforge.transfile.settings.exceptions.MissingDefaultSettingException;
 import net.sourceforge.transfile.tools.exceptions.UserApplicationDirectoryException;
 
 /**
@@ -52,12 +51,7 @@ public final class Tools {
 		if(userHomeDirectoryString == null || "".equals(userHomeDirectoryString))
 			throw new UserApplicationDirectoryException("System did not provide a \"user.home\" property");
 		
-		final String userApplicationDirectoryString = Settings.getPreferences().get("user_application_directory", null);
-		
-		if(userApplicationDirectoryString == null)
-			throw new MissingDefaultSettingException("user_application_directory");
-		
-		final File userApplicationDirectory = new File(userHomeDirectoryString, userApplicationDirectoryString);
+		final File userApplicationDirectory = new File(userHomeDirectoryString, Settings.getPreferences().get("user_application_directory", Settings.USER_APPLICATION_SUBDIRECTORY.getPath()));
 		
 		try {
 

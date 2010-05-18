@@ -58,7 +58,7 @@ class PeerURLBar extends JComboBox {
 	 * Typically, entering a (valid) PeerURL and pressing enter causes such a request to add for an item
 	 * to be added, with said item being the PeerURL entered.
 	 */
-	public static final int maxRetainedItems = Settings.getPreferences().getInt("peerurlbar_max_retained_items", 5);
+	public static final int maxRetainedItems = Settings.getPreferences().getInt("peerurlbar_max_retained_items", Settings.PEERURLBAR_MAX_RETAINED_ITEMS);
 
 	private static final long serialVersionUID = -8782347394069390311L;
 	
