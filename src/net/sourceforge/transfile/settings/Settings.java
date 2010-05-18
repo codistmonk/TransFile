@@ -58,7 +58,7 @@ public final class Settings {
 	 * The public constants below this line are accessed reflectively by PreferencesFrame. Do not rename them
 	 * unless you know what you're doing.
 	 * 
-	 * Do not add any additional public constants (below or above this line) to this class without
+	 * Do not add any additional public constants to this class (neither below nor above this line) without
 	 * a) adding an exception for them in getConstantFieldNames if they are not supposed to be user-configurable or
 	 * b) ensuring that their name is congruent with the respective settings in the user Preferences (except for case)
 	 * 
