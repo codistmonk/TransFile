@@ -48,9 +48,8 @@ import net.sourceforge.transfile.settings.Settings;
 
 /**
  * Preferences frame that allows the user to configure the application variables.
- * <br>These variables can be found in net.sourceforge.transfile.settings.defaults.properties.
- * <br>When the user clicks "Ok", the changes are committed to the Settings singleton instance
- * and Settings.save() is invoked.
+ * <br>These variables can be found in {@link net.sourceforge.transfile.settings.Settings}.
+ * <br>When the user clicks "Ok", the changes are committed to the Preferences API via {@link Settings#getPreferences}
  *
  * @author codistmonk (creation 2010-05-09)
  *
