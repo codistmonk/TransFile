@@ -33,14 +33,16 @@ import net.sourceforge.transfile.tools.Tools;
 
 /**
  * <p>Provides simple key-value pair persistence through the Java Preferences mechanism ({@link #getPreferences}). 
- * Among others, the default values for these preferences constants (both final and static field) in this class.</p>
+ * Among others, the default values for these preferences are constants (both final and static field) in this class.</p>
  * 
- * <p>Also includes project-wide constants, a lot of which can effectively be overwritten by user preferences
+ * <p>Includes project-wide constants, a lot of which can effectively be overwritten by user preferences
  * and are thus considered defaults.</p>
  *  
  * <p>A list of the names of all constants defined by this class as well their respective values by name
  * are accessible through the reflective methods {@link #getConstantFieldNames} and {@link #getConstantAsString}.
  * However, these methods should only be used when absolutely necessary, i.e. to dynamically list all of them.</p>
+ * 
+ * <p>Non-instantiable class.</p>
  * 
  * @author Martin Riedel
  * @author codistmonk (modifications since 2010-05-10)
