@@ -32,14 +32,12 @@ import net.sourceforge.transfile.settings.exceptions.ConstantReflectionException
 import net.sourceforge.transfile.tools.Tools;
 
 /**
- * <p>Provides simple key-value pair persistence. Default values are in transfile.settings.defaults.properties,
- * per-user configuration files are saved to user preferences (Java mechanism).</p>
+ * <p>Provides simple key-value pair persistence through the Java Preferences mechanism ({@link #getPreferences}). 
+ * Among others, the default values for these preferences constants (both final and static field) in this class.</p>
  * 
  * <p>Also includes project-wide constants, a lot of which can effectively be overwritten by user preferences
  * and are thus considered defaults.</p>
- * 
- * <p>Singleton class.</p>
- * 
+ *  
  * <p>A list of the names of all constants defined by this class as well their respective values by name
  * are accessible through the reflective methods {@link #getConstantFieldNames} and {@link #getConstantAsString}.
  * However, these methods should only be used when absolutely necessary, i.e. to dynamically list all of them.</p>
@@ -116,7 +114,7 @@ public final class Settings {
 	
 	
 	/**
-	 * Returns the user preferences for this package.
+	 * Returns the user preferences for the application
 	 * 
 	 * @return {@code null} if the user preferences for this package could not be created or retrieved
 	 * <br>A non-null value
