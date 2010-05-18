@@ -42,7 +42,9 @@ public final class Tools {
 	 * Returns the user-specific application directory for the current system user. Guarantees that the directory exists
 	 * and is both read- and writable.
 	 * 
-	 * @return a {@link File} representing the user-specific application directory
+	 * @return 
+	 * <br />A {@link File} representing the user-specific application directory
+	 * <br />A non-null value
 	 */
 	public static final File getUserApplicationDirectory() {
 		final String userHomeDirectoryString = System.getProperty("user.home");
