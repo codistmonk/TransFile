@@ -28,10 +28,10 @@ import net.sourceforge.transfile.exceptions.MissingResourceException;
 import net.sourceforge.transfile.tools.Tools;
 
 /**
- * Provides simple key-value pair persistence. Default values are in transfile.settings.defaults.properties,
- * per-user configuration files are saved to user preferences (Java mechanism).
+ * <p>Provides simple key-value pair persistence. Default values are in transfile.settings.defaults.properties,
+ * per-user configuration files are saved to user preferences (Java mechanism).</p>
  * 
- * <br>Singleton class.
+ * <p>Singleton class.</p>
  * 
  * @author Martin Riedel
  * @author codistmonk (modifications since 2010-05-10)
@@ -39,59 +39,10 @@ import net.sourceforge.transfile.tools.Tools;
  */
 public class Settings {
 	
-	/**
-	 * Private constructor to prevent this class from being instantiated.
-	 */
-	private Settings() {
-		// Do nothing
-	}
-	
 	private static final long serialVersionUID = 312178159322230641L;
 	
 	private static Properties defaults;
 	
-	/**
-	 * Loads the default preferences values from the resource "defaults.properties".
-	 * 
-	 * @return
-	 * <br>A non-null value
-	 * <br>A shared value
-	 * <br>A possibly new value
-	 */
-	private static final synchronized Properties getDefaults() {
-		if (defaults == null) {
-			defaults = new Properties();
-			
-			try {
-				// TODO check if this works with WebStart
-				// When run by WebStart, class.getResourceAsStream() uses the default class loader
-				// in a way that may prevent it from finding the resources in the jar
-				// As it is now, class.getClassLoader().getResourceAsStream() (the correct way, I think)
-				// cannot be used because getDefaults() is called during other classes static initialization while
-				// this class  hasn't been loaded yet
-				// If it turns out there is no problem, then remove all these comments
-				// Otherwise, a possible fix could be to use C.class.getClassLoader().getResourceAsStream() where C
-				// is a class that doesn't depend directly or indirectly on this class.
-				InputStream defaultProperties = Settings.class.getResourceAsStream("/defaults.properties");
-				
-				if(defaultProperties == null)
-					throw new MissingResourceException("defaults.properties");
-					
-				
-				defaults.load(defaultProperties);
-			} catch (final IOException exception) {
-				exception.printStackTrace();
-			}
-			
-			for (final java.util.Map.Entry<Object, Object> entry : defaults.entrySet()) {
-				if (getPreferences().get(entry.getKey().toString(), null) == null) {
-					getPreferences().put(entry.getKey().toString(), entry.getValue().toString());
-				}
-			}
-		}
-		
-		return defaults;
-	}
 	
 	/**
 	 * Returns the user preferences for this package.
@@ -168,6 +119,56 @@ public class Settings {
 		final Object value = getDefaults().get(key);
 		
 		return value == null ? null : Integer.valueOf(value.toString());
+	}
+	
+	/**
+	 * Private constructor to prevent this class from being instantiated.
+	 */
+	private Settings() {
+		// Do nothing
+	}
+	
+	/**
+	 * Loads the default preferences values from the resource "defaults.properties".
+	 * 
+	 * @return
+	 * <br>A non-null value
+	 * <br>A shared value
+	 * <br>A possibly new value
+	 */
+	private static final synchronized Properties getDefaults() {
+		if (defaults == null) {
+			defaults = new Properties();
+			
+			try {
+				// TODO check if this works with WebStart
+				// When run by WebStart, class.getResourceAsStream() uses the default class loader
+				// in a way that may prevent it from finding the resources in the jar
+				// As it is now, class.getClassLoader().getResourceAsStream() (the correct way, I think)
+				// cannot be used because getDefaults() is called during other classes static initialization while
+				// this class  hasn't been loaded yet
+				// If it turns out there is no problem, then remove all these comments
+				// Otherwise, a possible fix could be to use C.class.getClassLoader().getResourceAsStream() where C
+				// is a class that doesn't depend directly or indirectly on this class.
+				InputStream defaultProperties = Settings.class.getResourceAsStream("/defaults.properties");
+				
+				if(defaultProperties == null)
+					throw new MissingResourceException("defaults.properties");
+					
+				
+				defaults.load(defaultProperties);
+			} catch (final IOException exception) {
+				exception.printStackTrace();
+			}
+			
+			for (final java.util.Map.Entry<Object, Object> entry : defaults.entrySet()) {
+				if (getPreferences().get(entry.getKey().toString(), null) == null) {
+					getPreferences().put(entry.getKey().toString(), entry.getValue().toString());
+				}
+			}
+		}
+		
+		return defaults;
 	}
 	
 }
