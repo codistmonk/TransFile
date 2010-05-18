@@ -43,7 +43,7 @@ class MacOSXAdapter {
 	/*
 	 * Static instance holder
 	 */
-	private static MacOSXAdapter _instance = null;
+	private static MacOSXAdapter INSTANCE = null;
 	
 	/*
 	 * Back-reference to the SwingGUI instance
@@ -67,18 +67,18 @@ class MacOSXAdapter {
 	 * @param gui back-reference to the SwingGUI instance creating this object
 	 */
 	public static void adapt(final SwingGUI gui) {
-		if(_instance != null)
+		if(INSTANCE != null)
 			throw new IllegalStateException("adaptation already performed");
 		
 		// since the application title to be used in the mac os x application menu bar and for the 
 		// "About" menu item has to be set early, so this is done in SwingGUI's static initializer
 		
-		_instance = new MacOSXAdapter(gui);
+		INSTANCE = new MacOSXAdapter(gui);
 		
 		// use system menu bar on Mac OS X
 		System.setProperty("apple.laf.useScreenMenuBar", "true");
 		
-		_instance.makeApplicationListener();
+		INSTANCE.makeApplicationListener();
 	}
 	
 	/**
