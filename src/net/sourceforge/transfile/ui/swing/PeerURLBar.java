@@ -132,6 +132,15 @@ class PeerURLBar extends JComboBox {
 	}
 	
 	/**
+	 * Checks whether this PeerURLBar instance is persistent (saves state to file upon request)
+	 * 
+	 * @return true iff this PeerURLBar instance is persistent (saves state to file upon request) 
+	 */
+	public boolean isPersistent() {
+		return this.persistent;
+	}
+	
+	/**
 	 * Getter for {@code stateFile}
 	 * 
 	 * @return the file serialized versions of PeerURLBar's state are written to
@@ -200,7 +209,7 @@ class PeerURLBar extends JComboBox {
 		 * 
 		 */
 		public PeerURLBarModel() {
-			if(PeerURLBar.this.persistent) {
+			if(PeerURLBar.this.isPersistent()) {
 				try {
 					getLoggerForThisMethod().log(Level.FINER, "attempting to load PeerURLBar state from file: " + PeerURLBar.this.getStateFile().getAbsolutePath());
 					this.holder = ComboBoxItemsHolder.load(PeerURLBar.this.getStateFile());
