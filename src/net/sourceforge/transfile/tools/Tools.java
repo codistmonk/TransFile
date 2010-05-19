@@ -22,6 +22,7 @@ package net.sourceforge.transfile.tools;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -44,6 +45,12 @@ public final class Tools {
 	 * @return 
 	 * <br />A {@link File} representing the user-specific application directory
 	 * <br />A non-null value
+	 * @throws UserApplicationDirectoryException if<ul>
+	 * <li>the system does not provide a valid "user.home" property;
+	 * <li>the application directory does not exist or cannot be created;
+	 * <li>the application directory exists but cannot be read from;
+	 * <li>the application directory exists but cannot be written to;
+	 * <li>a security violation occurs.
 	 */
 	public static final File getUserApplicationDirectory() {
 		final String userHomeDirectoryString = System.getProperty("user.home");
@@ -119,9 +126,8 @@ public final class Tools {
 	}
 	
 	/**
-	 * TODO doc
-	 * 
-	 * Warning: this method can only be used directly.
+	 * Calls {@link Logger#getLogger(String)} using the fully qualified name of the calling method.
+	 * <br>Warning: this method can only be used directly.
 	 * <br>If you want to refactor your code, you can re-implement the functionality using {@code Thread.currentThread().getStackTrace()}.
 	 * 
 	 * @return
@@ -133,7 +139,15 @@ public final class Tools {
 	}
 	
 	/**
-	 * TODO doc
+	 * This method reinterprets strings read from property files using UTF-8.
+	 * <br>{@link ResourceBundle} interprets the contents of .properties files as if they used ISO-8859-1 encoding.
+	 * <br>If UTF-8 is used to encode these files, the retrieved messages will present bad characters.
+	 * <br>For instance, the character 'Ω' is encoded as {@code 0xCEA9} in UTF-8 but cannot be directly encoded in ISO-8859-1.
+	 * <br>Instead, the code \u03A9 would have to be used so that {@link ResourceBundle} retrieves the character 'Ω'.
+	 * <br>If a file contains 'Ω' in UTF-8, {@link ResourceBundle} will interpret it using ISO-8859-1 as "Î©".
+	 * because {@code 0xCE} is 'Î' and {@code 0xA9} is '©' in this encoding.
+	 * <br>If {@code s = "Î©"} is the string retrieved from a file containing 'Ω' in UTF-8,
+	 * then {@code !s.equals("Ω")} but {@code iso88591ToUTF8(s).equals("Ω")}.
 	 * 
 	 * @param translatedMessage
 	 * <br>Should not be null
@@ -146,13 +160,14 @@ public final class Tools {
 		try {
 			return new String(translatedMessage.getBytes("ISO-8859-1"), "UTF-8");
 		} catch (final UnsupportedEncodingException exception) {
-			exception.printStackTrace();
+			getLoggerForThisMethod().log(Level.WARNING, "", exception);
+			
 			return translatedMessage;
 		}
 	}
 	
 	/**
-	 * TODO doc
+	 * Does the same thing as {@link Class#cast(Object)}, but returns {@code null} instead of throwing an exception if the cast cannot be performed.
 	 * 
 	 * @param <T> the type into which {@code object} is tentatively being cast
 	 * @param cls
@@ -163,8 +178,9 @@ public final class Tools {
 	 * <br>A possibly null value
 	 */
 	public static final <T> T cast(final Class<T> cls, final Object object) {
-		if (object == null || !cls.isAssignableFrom(object.getClass()))
+		if (object == null || !cls.isAssignableFrom(object.getClass())) {
 			return null;
+		}
 		
 		return cls.cast(object);
 	}
@@ -187,7 +203,7 @@ public final class Tools {
 		try {
 			return object.getClass().getMethod("set" + toUpperCamelCase(propertyName), propertyClass);
 		} catch (final Exception exception) {
-			return throwRuntimeException(exception);
+			return throwUnchecked(exception);
 		}
 	}
 	
@@ -270,7 +286,7 @@ public final class Tools {
 	 * <br>Does not return
 	 * @throws RuntimeException with {@code cause} as cause if it is a checked exception, otherwise {@code cause} is re-thrown
 	 */
-	public static final <T> T throwRuntimeException(final Throwable cause) {
+	public static final <T> T throwUnchecked(final Throwable cause) {
 		if (cause instanceof RuntimeException) {
 			throw (RuntimeException) cause;
 		} else if (cause instanceof Error) {
