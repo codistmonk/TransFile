@@ -200,15 +200,20 @@ class PeerURLBar extends JComboBox {
 		 * 
 		 */
 		public PeerURLBarModel() {
-			try {
-				getLoggerForThisMethod().log(Level.FINER, "attempting to load PeerURLBar state from file: " + PeerURLBar.this.getStateFile().getAbsolutePath());
-				this.holder = ComboBoxItemsHolder.load(PeerURLBar.this.getStateFile());
-				// maxRetainedItems may have changed since the last time state was saved
-				removeExcessiveItems();
-				getLoggerForThisMethod().log(Level.FINE, "successfully loaded PeerURLBar state from file: " + PeerURLBar.this.getStateFile().getAbsolutePath());
-			} catch (Throwable e) {
-				getLoggerForThisMethod().log(Level.WARNING, "failed to load PeerURLBar state from file: " + PeerURLBar.this.getStateFile().getAbsolutePath());
-				this.holder = new ComboBoxItemsHolder(maxRetainedItems, PeerURLBar.this.getStateFile());
+			if(persistent) {
+				try {
+					getLoggerForThisMethod().log(Level.FINER, "attempting to load PeerURLBar state from file: " + PeerURLBar.this.getStateFile().getAbsolutePath());
+					this.holder = ComboBoxItemsHolder.load(PeerURLBar.this.getStateFile());
+					// maxRetainedItems may have changed since the last time state was saved
+					removeExcessiveItems();
+					getLoggerForThisMethod().log(Level.FINE, "successfully loaded PeerURLBar state from file: " + PeerURLBar.this.getStateFile().getAbsolutePath());
+				} catch (Throwable e) {
+					getLoggerForThisMethod().log(Level.WARNING, "failed to load PeerURLBar state from file: " + PeerURLBar.this.getStateFile().getAbsolutePath());
+					this.holder = new ComboBoxItemsHolder(maxRetainedItems, PeerURLBar.this.getStateFile());
+				}
+			} else {
+				getLoggerForThisMethod().log(Level.FINE, "not loading PeerURLBar state from file, initializing empty model");
+				this.holder = new ComboBoxItemsHolder(maxRetainedItems, null);
 			}
 		}
 		
