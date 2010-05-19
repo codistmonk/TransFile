@@ -200,7 +200,7 @@ class PeerURLBar extends JComboBox {
 		 * 
 		 */
 		public PeerURLBarModel() {
-			if(persistent) {
+			if(PeerURLBar.this.persistent) {
 				try {
 					getLoggerForThisMethod().log(Level.FINER, "attempting to load PeerURLBar state from file: " + PeerURLBar.this.getStateFile().getAbsolutePath());
 					this.holder = ComboBoxItemsHolder.load(PeerURLBar.this.getStateFile());
