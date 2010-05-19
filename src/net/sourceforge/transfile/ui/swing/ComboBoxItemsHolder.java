@@ -90,7 +90,7 @@ class ComboBoxItemsHolder implements Serializable {
 			ois = new ObjectInputStream(fis);
 			return (ComboBoxItemsHolder) ois.readObject();
 		} catch (FileNotFoundException e) {
-			throw new SerializationFileNotFoundException(e);
+			throw new SerializationFileNotFoundException(stateFile, e);
 		} catch (IOException e) {
 			throw new SerializationException(e);
 		} catch (ClassNotFoundException e) {

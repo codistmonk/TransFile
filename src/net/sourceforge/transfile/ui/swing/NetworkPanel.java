@@ -51,6 +51,7 @@ import javax.swing.event.ChangeListener;
 
 import net.sourceforge.transfile.backend.ControllableBackend;
 import net.sourceforge.transfile.exceptions.SerializationException;
+import net.sourceforge.transfile.exceptions.SerializationFileInUseException;
 import net.sourceforge.transfile.network.exceptions.LinkFailedException;
 import net.sourceforge.transfile.network.exceptions.PeerURLFormatException;
 import net.sourceforge.transfile.settings.Settings;
@@ -262,7 +263,7 @@ public class NetworkPanel extends TopLevelPanel {
 		// save PeerURLBar state
 		try {
 			getLoggerForThisMethod().log(Level.FINER, "attempting to save PeerURLBar state");
-			PeerURLBar.getInstance().saveModel();
+			this.remoteURLBar.saveModel();
 			getLoggerForThisMethod().log(Level.FINE, "successfully saved PeerURLBar state");
 		} catch(final SerializationException e) {
 			getLoggerForThisMethod().log(Level.WARNING, "failed to save PeerURLBar state", e);
@@ -554,7 +555,14 @@ public class NetworkPanel extends TopLevelPanel {
 		
 		c.gridx = 0;
 		c.gridy = 0;
-		this.remoteURLBar = PeerURLBar.getInstance();
+		
+		try {
+			this.remoteURLBar = new PeerURLBar(Settings.REMOTE_PEERURLBAR_STATE_FILE_NAME);
+		} catch(SerializationFileInUseException e) {
+			getLoggerForThisMethod().log(Level.WARNING, "remote PeerURLBar state file already in use, falling back to a non-persistent PeerURLBar", e);
+			this.remoteURLBar = new PeerURLBar();
+		}
+		
 		this.remoteURLPanel.add(this.remoteURLBar, c);		
 	}
 	

@@ -114,6 +114,11 @@ public final class Settings {
 	 */
 	public static final Locale LOCALE = Locale.ENGLISH;
 	
+	/*
+	 * The name of the file to serialize the remote PeerURLBar's state to and to deserialise it from
+	 */
+	public static final String REMOTE_PEERURLBAR_STATE_FILE_NAME = "peerurlbar_remote.state";
+	
 	
 	/**
 	 * Returns the user preferences for the application

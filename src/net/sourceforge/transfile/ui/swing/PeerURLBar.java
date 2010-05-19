@@ -24,6 +24,8 @@ import static net.sourceforge.transfile.tools.Tools.getLoggerForThisMethod;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 
 import javax.swing.AbstractListModel;
@@ -31,6 +33,7 @@ import javax.swing.JComboBox;
 import javax.swing.MutableComboBoxModel;
 
 import net.sourceforge.transfile.exceptions.SerializationException;
+import net.sourceforge.transfile.exceptions.SerializationFileInUseException;
 import net.sourceforge.transfile.network.PeerURL;
 import net.sourceforge.transfile.settings.Settings;
 import net.sourceforge.transfile.tools.Tools;
@@ -59,73 +62,73 @@ class PeerURLBar extends JComboBox {
 	 * to be added, with said item being the PeerURL entered.
 	 */
 	public static final int maxRetainedItems = Settings.getPreferences().getInt("peerurlbar_max_retained_items", Settings.PEERURLBAR_MAX_RETAINED_ITEMS);
-
+	
 	private static final long serialVersionUID = -8782347394069390311L;
-	
-	/**
-	 * Initialization on Demand Holder idiom.
-	 * See http://en.wikipedia.org/wiki/Initialization_on_demand_holder_idiom.
-	 * 
-	 * @author Martin Riedel
-	 *
-	 */
-	private static class LazyHolder {
-			
-		/*
-		 * Holds the lazy-loaded PeerURLBar instance
-		 */
-		private static final PeerURLBar INSTANCE = new PeerURLBar();
 		
-		/**
-		 * Getter for {@code INSTANCE}. Returns the lazy-loaded {@link PeerURLBar} singleton instance.
-		 * 
-		 * @return the lazy-loaded {@link PeerURLBar} singleton instance.
-		 */
-		final static PeerURLBar getInstance() {
-			return INSTANCE;
-		}
-		
-	}
-	
 	/*
 	 * The file the data model will be serialized and saved to to achieve persistence
 	 */
-	private final File stateFile = new File(Tools.getUserApplicationDirectory(), "PeerURLBar.state");
+	private final File stateFile;
 	
 	/*
 	 * A reference to the data model used by the PeerURLBar
 	 */
-	private final PeerURLBarModel model;
+	private PeerURLBarModel model;
+	
+	/*
+	 * A Set of all state files already in use by instances of this class
+	 */
+	private static final Set<File> usedStateFiles = new HashSet<File>();
+	
+	/*
+	 * True iff state should be saved to disk when #saveModel is called
+	 */
+	private final boolean persistent;
 
 	
 	/**
-	 * Returns the singleton instance
+	 * Constructs a new instance, loading state from the specified file. State will be saved upon
+	 * request ({@link #saveModel}).
 	 * 
-	 * @return the singleton instance
+	 * @param
+	 * <br />File name (not path) of the file load state from and to save state to
+	 * <br />Should not be null
+	 * @throws SerializationFileInUseException if the specified file name is already in use 
+	 * 
 	 */
-	public static PeerURLBar getInstance() {
-		return LazyHolder.getInstance();
+	public PeerURLBar(final String stateFileName) throws SerializationFileInUseException {
+		this.stateFile = new File(Tools.getUserApplicationDirectory(), stateFileName);
+		
+		if(usedStateFiles.contains(this.stateFile))
+			throw new SerializationFileInUseException(this.stateFile);
+		
+		this.persistent = true;
+			
+		usedStateFiles.add(this.stateFile);
+		
+		setup();
 	}
 	
 	/**
-	 * Saves the PeerURLBar's data state to disk
+	 * Constructs a new instance without loading state. State will NOT be saved to,
+	 * even if {@link #saveModel} is called.
+	 * 
+	 */
+	public PeerURLBar() {
+		this.stateFile = null;
+		this.persistent = false;
+		setup();
+	}
+
+	/**
+	 * Saves the PeerURLBar's data state to disk. Does nothing if this PeerURLBar instance has been
+	 * created without setting a state file.
 	 * 
 	 * @throws SerializationException if serializing or saving the serialized data to disk failed
 	 */
 	public void saveModel() throws SerializationException {
-		this.model.saveHolder();
-	}
-	
-	/**
-	 * Constructs the PeerURLBar instance. Private since there may only be
-	 * one PeerURLBar instance at most at any given time.
-	 * 
-	 */
-	protected PeerURLBar() {
-		setEditable(true);
-		addActionListener(new PeerURLBarListener());
-		this.model = new PeerURLBarModel();
-		setModel(this.model);
+		if(this.persistent)
+			this.model.saveHolder();
 	}
 	
 	/**
@@ -135,6 +138,15 @@ class PeerURLBar extends JComboBox {
 	 */
 	protected final File getStateFile() {
 		return this.stateFile;
+	}
+	
+	private void setup() {
+		setEditable(true);
+
+		addActionListener(new PeerURLBarListener());
+
+		this.model = new PeerURLBarModel();
+		setModel(this.model);
 	}
 
 	/**

@@ -22,15 +22,16 @@ package net.sourceforge.transfile.exceptions;
 import java.io.File;
 
 /**
- * 
- * Thrown when a (de)serialization process fails due to the target (source) file being absent
+ * Base class for all serialization exceptions caused by file access errors
  *
  * @author Martin Riedel
  *
  */
-public class SerializationFileNotFoundException extends SerializationFileException {
+public class SerializationFileException extends SerializationException {
 
-	private static final long serialVersionUID = 8165059832840873632L;
+	private static final long serialVersionUID = -8305852593523482880L;
+
+	private final File serializationFile;
 
 	/**
 	 * Constructs a new instance
@@ -39,8 +40,9 @@ public class SerializationFileNotFoundException extends SerializationFileExcepti
 	 * <br />The file the serializable object(s) was/were meant to be stored in or read from
 	 * <br />Should not be null
 	 */
-	public SerializationFileNotFoundException(final File serializationFile) {
-		super(serializationFile);
+	public SerializationFileException(final File serializationFile) {
+		super();
+		this.serializationFile = serializationFile;
 	}
 
 	/**
@@ -53,8 +55,20 @@ public class SerializationFileNotFoundException extends SerializationFileExcepti
 	 * <br />The {@code Throwable} that caused this exception to be thrown
 	 * <br />Should not be null
 	 */
-	public SerializationFileNotFoundException(final File serializationFile, Throwable cause) {
-		super(serializationFile, cause);
+	public SerializationFileException(final File serializationFile, Throwable cause) {
+		super(cause);
+		this.serializationFile = serializationFile;
+	}
+	
+	/**
+	 * Returns the {@link File} that the serializable object(s)  was/were meant to be stored in or read from
+	 * 
+	 * @return 
+	 * <br />The {@link File} that the serializable object(s) was/were meant top be stored in or read from
+	 * <br />Never null
+	 */
+	public File getSerializationFile() {
+		return this.serializationFile;
 	}
 
 }

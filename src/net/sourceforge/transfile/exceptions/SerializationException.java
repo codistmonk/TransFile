@@ -19,6 +19,13 @@
 
 package net.sourceforge.transfile.exceptions;
 
+/**
+ * 
+ * Base class for all exceptions caused by errors in a serialization process
+ *
+ * @author Martin Riedel
+ *
+ */
 public class SerializationException extends Exception {
 
 	private static final long serialVersionUID = -3804404675263854741L;

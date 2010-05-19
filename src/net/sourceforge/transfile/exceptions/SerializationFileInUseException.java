@@ -22,15 +22,15 @@ package net.sourceforge.transfile.exceptions;
 import java.io.File;
 
 /**
- * 
- * Thrown when a (de)serialization process fails due to the target (source) file being absent
+ * Thrown when a serialization process fails due to the target file being in use or having been used by
+ * another serialization process
  *
  * @author Martin Riedel
  *
  */
-public class SerializationFileNotFoundException extends SerializationFileException {
+public class SerializationFileInUseException extends SerializationFileException {
 
-	private static final long serialVersionUID = 8165059832840873632L;
+	private static final long serialVersionUID = 4432961035647028993L;
 
 	/**
 	 * Constructs a new instance
@@ -39,7 +39,7 @@ public class SerializationFileNotFoundException extends SerializationFileExcepti
 	 * <br />The file the serializable object(s) was/were meant to be stored in or read from
 	 * <br />Should not be null
 	 */
-	public SerializationFileNotFoundException(final File serializationFile) {
+	public SerializationFileInUseException(final File serializationFile) {
 		super(serializationFile);
 	}
 
@@ -53,7 +53,7 @@ public class SerializationFileNotFoundException extends SerializationFileExcepti
 	 * <br />The {@code Throwable} that caused this exception to be thrown
 	 * <br />Should not be null
 	 */
-	public SerializationFileNotFoundException(final File serializationFile, Throwable cause) {
+	public SerializationFileInUseException(final File serializationFile, Throwable cause) {
 		super(serializationFile, cause);
 	}
 
