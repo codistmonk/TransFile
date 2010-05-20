@@ -38,7 +38,7 @@ import org.junit.Test;
 /**
  * Automated tests using JUnit 4 for {@link Tools}.
  * {@link Tools#debug(int, Object...)} and {@link Tools#debugPrint(Object...)} are not tested
- * because their output depends on the file location of the caller.
+ * because their outputs depend on the source location of the caller.
  * 
  * @author Martin Riedel
  * @author codistmonk (modifications since 2010-05-19) 
