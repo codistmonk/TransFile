@@ -23,7 +23,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
-import java.io.InputStream;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EventObject;
@@ -85,10 +84,6 @@ public class PreferencesFrame extends JDialog {
 	}
 	
 	final void saveSettings() {
-		this.putTableDataIntoSettings();
-	}
-	
-	private final void putTableDataIntoSettings() {
 		for (int i = 0; i < this.tableModel.getRowCount(); ++i) {
 			final Object key = this.tableModel.getValueAt(i, 0);
 			final Object value = this.tableModel.getValueAt(i, 1);
@@ -265,8 +260,6 @@ public class PreferencesFrame extends JDialog {
 	 * if they are defined.
 	 * <br>Otherwise, data from {@code defaultProperties} are used.
 	 * <br>The keys are extracted from {@code defaultProperties}.
-	 * @param defaultProperties
-	 * <br>Should not be null
 	 * @return
 	 * <br>A new value
 	 * <br>A non-null value
@@ -324,17 +317,5 @@ public class PreferencesFrame extends JDialog {
 
         return result;
     }
-    
-    /**
-     * Creates an input stream from a resource on the project path.
-     * @param resourcePath the path to the resource, relative to the classes or jar root.
-     * <br>Should not be null
-     * @return {@code null} if the resource could not be found
-     * <br>A new value
-     * <br>A possibly null value
-     */
-	public static final InputStream getResourceAsStream(final String resourcePath) {
-		return PreferencesFrame.class.getClassLoader().getResourceAsStream(resourcePath);
-	}
     
 }
