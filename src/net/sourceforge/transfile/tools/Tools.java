@@ -30,68 +30,77 @@ import net.sourceforge.transfile.settings.Settings;
 import net.sourceforge.transfile.tools.exceptions.UserApplicationDirectoryException;
 
 /**
- * Holder for static utility methods. Should not be instantiated.
+ * Holder for static utility methods.
+ * Should not be instantiated.
  *
- * @author codistmonk
- * @author Martin Riedel 
+ * @author Martin Riedel (creation 2010-05-15)
+ * @author codistmonk (modifications since 2010-05-19)
  *
  */
 public final class Tools {
-
+	
 	/**
-	 * Returns the user-specific application directory for the current system user. Guarantees that the directory exists
-	 * and is both read- and writable.
+	 * Private constructor to prevent instantiation.
+	 */
+	private Tools() {
+		// Do nothing
+	}
+	
+	/**
+	 * Returns the user-specific application directory for the current system user.
+	 * Guarantees that the directory exists and is both read- and writable.
 	 * 
 	 * @return 
 	 * <br />A {@link File} representing the user-specific application directory
 	 * <br />A non-null value
-	 * @throws UserApplicationDirectoryException if<ul>
-	 * <li>the system does not provide a valid "user.home" property;
-	 * <li>the application directory does not exist or cannot be created;
-	 * <li>the application directory exists but cannot be read from;
-	 * <li>the application directory exists but cannot be written to;
-	 * <li>a security violation occurs.
+	 * @throws UserApplicationDirectoryException if
+	 * <ul>
+	 *  <li>the system does not provide a valid "user.home" property;
+	 *  <li>the application directory does not exist or cannot be created;
+	 *  <li>the application directory exists but cannot be read from;
+	 *  <li>the application directory exists but cannot be written to;
+	 *  <li>a security violation occurs.
+	 * </ul>
 	 */
 	public static final File getUserApplicationDirectory() {
 		final String userHomeDirectoryString = System.getProperty("user.home");
 		
-		if(userHomeDirectoryString == null || "".equals(userHomeDirectoryString))
+		if (userHomeDirectoryString == null || "".equals(userHomeDirectoryString)) {
 			throw new UserApplicationDirectoryException("System did not provide a \"user.home\" property");
+		}
 		
 		final File userApplicationDirectory = new File(userHomeDirectoryString, Settings.getPreferences().get("user_application_directory", Settings.USER_APPLICATION_SUBDIRECTORY.getPath()));
 		
 		try {
-
-			if(!userApplicationDirectory.isDirectory()) {
+			if (!userApplicationDirectory.isDirectory()) {
 				getLoggerForThisMethod().log(Level.INFO, "user application directory nonexistent, creating: " + userApplicationDirectory.getAbsolutePath());
 				userApplicationDirectory.mkdirs();
 
-				if(!userApplicationDirectory.isDirectory()) {
+				if (!userApplicationDirectory.isDirectory()) {
 					getLoggerForThisMethod().log(Level.WARNING, "failed to create user application directory: " + userApplicationDirectory.getAbsolutePath());
 					throw new UserApplicationDirectoryException("directory does not exist and cannot be created");
 				}
 			}
 			
-			if(!userApplicationDirectory.canRead()) {
+			if (!userApplicationDirectory.canRead()) {
 				getLoggerForThisMethod().log(Level.WARNING, "user application directory exists but cannot be read from: " + userApplicationDirectory.getAbsolutePath());
 				throw new UserApplicationDirectoryException("directory exists but cannot be read from");
 			}
 			
-			if(!userApplicationDirectory.canWrite()) {
+			if (!userApplicationDirectory.canWrite()) {
 				getLoggerForThisMethod().log(Level.WARNING, "user application directory exists but cannot be written to: " + userApplicationDirectory.getAbsolutePath());
 				throw new UserApplicationDirectoryException("directory exists but cannot be written to");	
 			}
 
 			return userApplicationDirectory;
-		} catch(final SecurityException exception) {
+		} catch (final SecurityException exception) {
 			throw new UserApplicationDirectoryException(exception);
 		}
 	}
 	
 	/**
-	 * TODO doc
-	 * 
-	 * Warning: this method can only be used directly.
+	 * If a method {@code A.a()} calls a method {@code B.b()}, then the result of calling this method in {@code b()} will be {@code A.class}.
+	 * <br>Warning: this method can only be used directly.
 	 * <br>If you want to refactor your code, you can re-implement the functionality using {@code Thread.currentThread().getStackTrace()}.
 	 * 
 	 * @return {@code null} if the caller class cannot be retrieved
@@ -111,9 +120,8 @@ public final class Tools {
 	}
 	
 	/**
-	 * TODO doc
-	 * 
-	 * Warning: this method can only be used directly.
+	 * If a method {@code a()} calls a method {@code b()}, then the result of calling this method in b() will be "a".
+	 * <br>Warning: this method can only be used directly.
 	 * <br>If you want to refactor your code, you can re-implement the functionality using {@code Thread.currentThread().getStackTrace()}.
 	 * 
 	 * @return {@code null} if the caller method cannot be retrieved
@@ -200,11 +208,23 @@ public final class Tools {
 	 * @throws RuntimeException if an appropriate setter cannot be retrieved
 	 */
 	public static final Method getSetter(final Object object, final String propertyName, final Class<?> propertyClass) {
+		final String setterName = "set" + toUpperCamelCase(propertyName);
+		
 		try {
-			return object.getClass().getMethod("set" + toUpperCamelCase(propertyName), propertyClass);
+			// Try to retrieve a public setter
+			return object.getClass().getMethod(setterName, propertyClass);
 		} catch (final Exception exception) {
-			return throwUnchecked(exception);
+			// Do nothing
 		}
+		
+		try {
+			// Try to retrieve a setter declared in object's class, regardless of its visibility
+			return object.getClass().getDeclaredMethod(setterName, propertyClass);
+		} catch (final Exception exception) {
+			// Do nothing
+		}
+		
+		throw new RuntimeException("Unable to retrieve a getter for property " + propertyName);
 	}
 	
 	/**
@@ -223,8 +243,18 @@ public final class Tools {
 		final String upperCamelCase = toUpperCamelCase(propertyName);
 		
 		for (final String prefix : array("get", "is", "has")) {
+			final String getterName = prefix + upperCamelCase;
+			
 			try {
-				return object.getClass().getMethod(prefix + upperCamelCase);
+				// Try to retrieve a public getter
+				return object.getClass().getMethod(getterName);
+			} catch (final Exception exception) {
+				// Do nothing
+			}
+			
+			try {
+				// Try to retrieve a getter declared in object's class, regardless of its visibility
+				return object.getClass().getDeclaredMethod(getterName);
 			} catch (final Exception exception) {
 				// Do nothing
 			}
@@ -234,7 +264,7 @@ public final class Tools {
 	}
 	
 	/**
-	 * TODO doc
+	 * Converts "someName" into "SomeName".
 	 * 
 	 * @param lowerCamelCase
 	 * <br>Should not be null
@@ -247,12 +277,12 @@ public final class Tools {
 	}
 	
 	/**
-	 * TODO doc
+	 * Converts {@code null} into "", otherwise returns the parameter untouched. 
 	 * 
 	 * @param string
 	 * <br>Can be null
 	 * <br>Shared parameter
-	 * @return {@code string}
+	 * @return {@code string} or ""
 	 * <br>A non-null value
 	 * <br>A shared value
 	 */
@@ -261,7 +291,7 @@ public final class Tools {
 	}
 	
 	/**
-	 * TODO doc
+	 * Convenience method to build arrays for non-primitive types.
 	 * 
 	 * @param <T> the actual type of the elements
 	 * @param elements
@@ -276,7 +306,8 @@ public final class Tools {
 	}
 	
 	/**
-	 * TODO doc
+	 * Use this method when you want to propagate a checked exception wrapped in a runtime exception
+	 * instead of using the normal checked exception mechanism. 
 	 * 
 	 * @param <T> the type that the caller is supposed to return
 	 * @param cause
@@ -297,9 +328,9 @@ public final class Tools {
 	}
 	
     /**
-     * Concatenates the source location of the call and the string representations
-     * of the parameters separated by spaces.
+     * Concatenates the source location of the call and the string representations of the parameters separated by spaces.
      * <br>This is method helps to perform console debugging using System.out or System.err.
+     * 
      * @param stackIndex 1 is the source of this method, 2 is the source of the call, 3 is the source of the call's caller, and so forth
      * <br>Range: {@code [O .. Integer.MAX_VALUE]}
      * @param objects
@@ -322,16 +353,12 @@ public final class Tools {
     /**
      * Prints on the standard output the concatenation of the source location of the call
      * and the string representations of the parameters separated by spaces.
+     * 
      * @param objects
      * <br>Should not be null
      */
     public static final void debugPrint(final Object... objects) {
         System.out.println(debug(3, objects));
     }
-	
-	
-	private Tools() {
-		// do nothing, just prevent instantiation
-	}
-
+    
 }

@@ -176,32 +176,36 @@ public class ToolsTest {
 			assertNotNull(getter);
 			assertEquals("getBooleanProperty3", getter.getName());
 		}
+		{
+			final Method getter = Tools.getGetter(objectWithArbitraryProperties, "packagePrivateStringProperty");
+			
+			assertNotNull(getter);
+			assertEquals("getPackagePrivateStringProperty", getter.getName());
+		}
 	}
 	
 	@Test
 	public final void testGetGetterFailure() {
 		final ObjectWithArbitraryProperties objectWithArbitraryProperties = new ObjectWithArbitraryProperties();
-		Method getter;
-		
 		{
 			try {
 				// Missing property
-				getter = Tools.getGetter(objectWithArbitraryProperties, "missingProperty");
+				final Method getter = Tools.getGetter(objectWithArbitraryProperties, "missingProperty");
+				
+				fail("getGetter() should have failed but instead returned " + getter);
 			} catch (final RuntimeException expectedException) {
-				return;
+				// Do nothing
 			}
-			
-			fail("getGetter() should have failed but instead returned " + getter);
 		}
 		{
 			try {
 				// Bad casing
-				getter = Tools.getGetter(objectWithArbitraryProperties, "INTPROPERTY");
+				final Method getter = Tools.getGetter(objectWithArbitraryProperties, "INTPROPERTY");
+				
+				fail("getGetter() should have failed but instead returned " + getter);
 			} catch (final RuntimeException expectedException) {
-				return;
+				// Do nothing
 			}
-			
-			fail("getGetter() should have failed but instead returned " + getter);
 		}
 	}
 	
@@ -210,53 +214,59 @@ public class ToolsTest {
 		final ObjectWithArbitraryProperties objectWithArbitraryProperties = new ObjectWithArbitraryProperties();
 		
 		{
-			final Method getter = Tools.getSetter(objectWithArbitraryProperties, "intProperty", int.class);
+			final Method setter = Tools.getSetter(objectWithArbitraryProperties, "intProperty", int.class);
 			
-			assertNotNull(getter);
-			assertEquals("setIntProperty", getter.getName());
+			assertNotNull(setter);
+			assertEquals("setIntProperty", setter.getName());
 		}
 		{
-			final Method getter = Tools.getSetter(objectWithArbitraryProperties, "booleanProperty1", boolean.class);
+			final Method setter = Tools.getSetter(objectWithArbitraryProperties, "booleanProperty1", boolean.class);
 			
-			assertNotNull(getter);
-			assertEquals("setBooleanProperty1", getter.getName());
+			assertNotNull(setter);
+			assertEquals("setBooleanProperty1", setter.getName());
+		}
+		{
+			final Method setter = Tools.getSetter(objectWithArbitraryProperties, "packagePrivateStringProperty", String.class);
+			
+			assertNotNull(setter);
+			assertEquals("setPackagePrivateStringProperty", setter.getName());
 		}
 	}
 	
 	@Test
 	public final void testGetSetterFailure() {
 		final ObjectWithArbitraryProperties objectWithArbitraryProperties = new ObjectWithArbitraryProperties();
-		Method setter;
 		
 		{
 			try {
 				// Missing property
-				setter = Tools.getGetter(objectWithArbitraryProperties, "missingProperty");
+				final Method setter = Tools.getGetter(objectWithArbitraryProperties, "missingProperty");
+				
+				fail("getSetter() should have failed but instead returned " + setter);
 			} catch (final RuntimeException expectedException) {
-				return;
+				// Do nothing
 			}
 			
-			fail("getSetter() should have failed but instead returned " + setter);
 		}
 		{
 			try {
 				// Bad casing
-				setter = Tools.getSetter(objectWithArbitraryProperties, "INTPROPERTY", int.class);
+				final Method setter = Tools.getSetter(objectWithArbitraryProperties, "INTPROPERTY", int.class);
+				
+				fail("getSetter() should have failed but instead returned " + setter);
 			} catch (final RuntimeException expectedException) {
-				return;
+				// Do nothing
 			}
-			
-			fail("getSetter() should have failed but instead returned " + setter);
 		}
 		{
 			try {
 				// Mismatching parameter type
-				setter = Tools.getSetter(objectWithArbitraryProperties, "intProperty", boolean.class);
+				final Method setter = Tools.getSetter(objectWithArbitraryProperties, "intProperty", boolean.class);
+				
+				fail("getSetter() should have failed but instead returned " + setter);
 			} catch (final RuntimeException expectedException) {
-				return;
+				// Do nothing
 			}
-			
-			fail("getSetter() should have failed but instead returned " + setter);
 		}
 	}
 	
@@ -265,27 +275,34 @@ public class ToolsTest {
 		{
 			final String iso88591 = new String(new byte[] { (byte) 0xCE, (byte) 0xA9 }, "ISO-8859-1");
 			final String convertedString = Tools.iso88591ToUTF8(iso88591);
+			final String expectedResult = "Ω";
 			
 			assertNotNull(convertedString);
 			assertNotSame(convertedString, iso88591);
 			assertEquals("Î©", iso88591);
-			assertFalse("Ω".equals(iso88591));
-			assertEquals("Ω", convertedString);
+			assertFalse(expectedResult.equals(iso88591));
+			assertEquals(expectedResult, convertedString);
 		}
 		{
 			final String iso88591 = new String(new byte[] { (byte) 0xC3, (byte) 0xA9, (byte) 0xE2, (byte) 0x80, (byte) 0x99 }, "ISO-8859-1");
 			final String convertedString = Tools.iso88591ToUTF8(iso88591);
+			final String expectedResult = "é’";
 			
 			assertNotNull(convertedString);
 			assertNotSame(convertedString, iso88591);
-			assertFalse("é’".equals(iso88591));
-			assertEquals("é’", convertedString);
+			assertFalse(expectedResult.equals(iso88591));
+			assertEquals(expectedResult, convertedString);
 		}
 	}
 	
 	@Test
 	public final void testGetLoggerForThisMethod() {
 		assertTrue(Tools.getLoggerForThisMethod().getName().endsWith("testGetLoggerForThisMethod"));
+	}
+	
+	@Test
+	public final void testGetUserApplicationDirectory() {
+		assertNotNull(Tools.getUserApplicationDirectory());
 	}
 	
 	/**
@@ -367,6 +384,8 @@ public class ToolsTest {
 		
 		private boolean booleanProperty3;
 		
+		private String packagePrivateStringProperty;
+		
 		/**
 		 * 
 		 * @return
@@ -421,6 +440,26 @@ public class ToolsTest {
 			this.booleanProperty3 = booleanProperty3;
 		}
 		
+		/**
+		 * 
+		 * @return
+		 * <br>A possibly null value
+		 * <br>A shared value
+		 */
+		final String getPackagePrivateStringProperty() {
+			return this.packagePrivateStringProperty;
+		}
+		
+		/**
+		 * 
+		 * @param packagePrivateStringProperty
+		 * <br>Can be null
+		 * <br>Shared parameter
+		 */
+		final void setPackagePrivateStringProperty(final String packagePrivateStringProperty) {
+			this.packagePrivateStringProperty = packagePrivateStringProperty;
+		}
+		
 	}
-
+	
 }
