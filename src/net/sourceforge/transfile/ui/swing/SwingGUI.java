@@ -509,6 +509,10 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		
 	}
 	
+	static {
+		GUITools.useSystemLookAndFeel();
+	}
+	
 	/**
 	 * Adds {@code menu} to {@code menuBar} if {@code menu} contains at least one sub element.
 	 * @param menuBar

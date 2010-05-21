@@ -19,9 +19,10 @@
 
 package net.sourceforge.transfile.ui.swing;
 
+import static net.sourceforge.transfile.ui.swing.GUITools.horizontalFlow;
+
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.util.Collections;
 import java.util.Comparator;
@@ -34,7 +35,6 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.event.CellEditorListener;
@@ -48,7 +48,7 @@ import net.sourceforge.transfile.settings.Settings;
 /**
  * Preferences frame that allows the user to configure the application variables.
  * <br>These variables can be found in {@link net.sourceforge.transfile.settings.Settings}.
- * <br>When the user clicks "Ok", the changes are committed to the Preferences API via {@link Settings#getPreferences}
+ * <br>When the user clicks "Ok", the changes are committed to the Preferences API via {@link Settings#getPreferences}.
  *
  * @author codistmonk (creation 2010-05-09)
  *
@@ -73,7 +73,7 @@ public class PreferencesFrame extends JDialog {
 		this.setLayout(new BorderLayout());
 		
 		this.add(new JScrollPane(this.createTable()), BorderLayout.CENTER);
-		this.add(horizontalBox(
+		this.add(horizontalFlow(
 				new JButton(this.new OkAction()),
 				new JButton(this.new CancelAction())
 		), BorderLayout.SOUTH);
@@ -293,29 +293,5 @@ public class PreferencesFrame extends JDialog {
 		
 		return result;
 	}
-	
-	/*
-	 * TODO move the following methods elsewhere
-	 * These methods are usually part of utility classes I use in my projects.
-	 * I put them here because I didn't want to create too much classes at first.
-	 */
-	
-    /**
-     *
-     * @param components
-     * <br>Should not be null
-     * @return
-     * <br>A new value
-     * <br>A non-null value
-     */
-    public static final JPanel horizontalBox(final Component... components) {
-    	final JPanel result = new JPanel(new FlowLayout());
-
-        for (final Component component : components) {
-            result.add(component);
-        }
-
-        return result;
-    }
     
 }
