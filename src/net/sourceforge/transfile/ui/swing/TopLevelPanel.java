@@ -61,13 +61,12 @@ abstract class TopLevelPanel extends JPanel {
 	/**
 	 * Constructs a TopLevelPanel instance
 	 * 
-	 * @param title the title to be used for this TopLevelPanel
+	 * @param window
+	 * <br>Should not be null
+	 * <br>Shared parameter
 	 */
 	public TopLevelPanel(final SwingGUI window) {
 		this.window = window;
-		
-		// create GUI elements
-		setup();
 		
 		// by default, TopLevelPanels are hidden
 		setVisible(false);
@@ -173,12 +172,6 @@ abstract class TopLevelPanel extends JPanel {
 	 * 
 	 */
 	protected abstract void onHide();
-	
-	/**
-	 * Creates the panel's GUI elements
-	 * 
-	 */
-	protected abstract void setup();
 	
 	/**
 	 * Loads state/settings

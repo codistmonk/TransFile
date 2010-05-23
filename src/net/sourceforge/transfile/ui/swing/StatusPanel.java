@@ -78,20 +78,20 @@ public class StatusPanel extends TopLevelPanel {
 	
 	/**
 	 * Creates a StatusPanel
-	 * 
+	 * @param window 
+	 * <br>Should not be null
+	 * <br>Shared parameter
 	 */
 	public StatusPanel(final SwingGUI window) {
 		super(window);
 		
 		// listen for new status messages
 		getWindow().getStatusService().addStatusListener(new StatusChangeListener());
+		
+		this.setup();
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void setup() {
+	private final void setup() {
 		setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		

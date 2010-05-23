@@ -67,6 +67,8 @@ public class SendPanel extends TopLevelPanel {
 	 */
 	public SendPanel(final SwingGUI window) {
 		super(window);
+		
+		this.setup();
 	}
 	
 	/**
@@ -104,10 +106,6 @@ public class SendPanel extends TopLevelPanel {
 		
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
 	protected final void setup() {
 		this.operationListComponent = this.createOperationListComponent();
 		

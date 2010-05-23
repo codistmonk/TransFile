@@ -33,11 +33,19 @@ import javax.swing.JButton;
  *
  */
 class ReceivePanel extends TopLevelPanel {
-
+	
 	private static final long serialVersionUID = -3454758528985441231L;
-
+	
+	/**
+	 * 
+	 * @param window
+	 * <br>Should not be null
+	 * <br>Shared parameter
+	 */
 	public ReceivePanel(final SwingGUI window) {
-		super(window);	
+		super(window);
+		
+		this.setup();
 	}
 	
 	/**
@@ -75,11 +83,7 @@ class ReceivePanel extends TopLevelPanel {
 		
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void setup() {
+	private final void setup() {
 		setLayout(new GridBagLayout());
 		
 		final JButton receiveButton = translate(new JButton("button_receive_file"));

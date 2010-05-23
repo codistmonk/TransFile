@@ -143,13 +143,15 @@ public class NetworkPanel extends TopLevelPanel {
 	/**
 	 * Creates a NetworkPanel
 	 * 
-	 * @param gui the main GUI class aggregating this NetworkPanel
+	 * @param window the main GUI class aggregating this NetworkPanel
 	 * @param backend the backend to use
 	 */
 	public NetworkPanel(final SwingGUI window, final ControllableBackend backend) {
 		super(window);
 		
 		this.backend = backend;
+		
+		this.setup();
 	}
 	
 	/**
@@ -185,11 +187,7 @@ public class NetworkPanel extends TopLevelPanel {
 		// do nothing
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void setup() {
+	private final void setup() {
 		setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		
