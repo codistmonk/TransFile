@@ -154,7 +154,7 @@ public class OperationComponent extends JPanel {
 	private final JProgressBar createProgressBar() {
 		final JProgressBar result = new JProgressBar();
 		
-		result.setString(this.fileName + "queued");
+		result.setString(this.fileName + " (queued)");
 		result.setStringPainted(true);
 		
 		return result;

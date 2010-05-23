@@ -62,8 +62,6 @@ public class SendPanel extends TopLevelPanel {
 		this.operationListComponent = this.createOperationListComponent();
 		
 		this.setup();
-		
-		this.setVisible(true);
 	}
 	
 	/**
