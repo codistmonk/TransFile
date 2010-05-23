@@ -64,6 +64,8 @@ public class SendPanel extends TopLevelPanel {
 		this.operationListComponent = this.createOperationListComponent();
 		
 		this.setup();
+		
+		this.setVisible(true);
 	}
 	
 	/**
@@ -173,6 +175,7 @@ public class SendPanel extends TopLevelPanel {
 	private final JButton createAddButton() {
 		final JButton result = rollover(new JButton(this.new AddAction()), "add", true);
 		
+		translate(result);
 		result.setMaximumSize(new Dimension(Integer.MAX_VALUE, ADD_BUTTON_HEIGHT));
 		result.setPreferredSize(new Dimension(0, ADD_BUTTON_HEIGHT));
 		result.setAlignmentX(0.5F);
@@ -187,12 +190,9 @@ public class SendPanel extends TopLevelPanel {
 	 *
 	 */
 	private class AddAction extends AbstractAction {
-
-		/**
-		 * Package-private constructor to suppress visibility warnings.
-		 */
+		
 		AddAction() {
-			super("Add");
+			super("add_button_text");
 		}
 		
 		@Override
