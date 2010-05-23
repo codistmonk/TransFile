@@ -26,7 +26,6 @@ import static net.sourceforge.transfile.ui.swing.GUITools.titleBorder;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetAdapter;
 import java.awt.dnd.DropTargetDragEvent;
@@ -37,16 +36,9 @@ import java.io.File;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-
-import net.sourceforge.transfile.tools.Tools;
 
 /**
  * 
@@ -57,7 +49,7 @@ import net.sourceforge.transfile.tools.Tools;
  */
 public class SendPanel extends TopLevelPanel {
 	
-	private OperationListComponent operationListComponent;
+	private final OperationListComponent operationListComponent;
 	
 	/**
 	 * 
@@ -67,6 +59,7 @@ public class SendPanel extends TopLevelPanel {
 	 */
 	public SendPanel(final SwingGUI window) {
 		super(window);
+		this.operationListComponent = this.createOperationListComponent();
 		
 		this.setup();
 	}
@@ -107,8 +100,6 @@ public class SendPanel extends TopLevelPanel {
 	}
 	
 	protected final void setup() {
-		this.operationListComponent = this.createOperationListComponent();
-		
 		this.setLayout(new BorderLayout());
 		
 		this.add(titleBorder("Send", scrollable(this.operationListComponent)), BorderLayout.CENTER);
@@ -160,6 +151,8 @@ public class SendPanel extends TopLevelPanel {
 	 */
 	private final OperationListComponent createOperationListComponent() {
 		final OperationListComponent result = new OperationListComponent();
+		
+		result.setBackground(Color.GRAY);
 		
 		result.add(this.createAddButton(), 0);
 		
@@ -255,183 +248,5 @@ public class SendPanel extends TopLevelPanel {
 	}
 	
 	private static final long serialVersionUID = -3849684830598909661L;
-	
-	/**
-	 * 
-	 * @author codistmonk (creation 2010-05-20)
-	 *
-	 */
-	private static class OperationListComponent extends Box {
-		
-		public OperationListComponent() {
-			super(BoxLayout.Y_AXIS);
-			
-			this.add(Box.createGlue());
-		}
-		
-		private static final long serialVersionUID = 5262152364325099513L;
-		
-	}
-	
-	/**
-	 * 
-	 * @author codistmonk (creation 2010-05-20)
-	 *
-	 */
-	private static class OperationComponent extends JPanel {
-		
-		private final String fileName;
-		
-		/**
-		 * 
-		 * @param fileName
-		 * <br>Should not be null
-		 * <br>Shared parameter
-		 */
-		public OperationComponent(final String fileName) {
-			this.fileName = fileName;
-			
-			this.initializeComponents();
-			
-			this.setMaximumSize(new Dimension(Integer.MAX_VALUE, MAXIMUM_HEIGHT));
-		}
-		
-		private final void initializeComponents() {
-			final GridBagConstraints constraints = new GridBagConstraints();
-			
-			{
-				constraints.gridx = 0;
-				constraints.gridy = 0;
-				constraints.weightx = 1.0;
-				constraints.weighty = 0.0;
-				constraints.ipadx = 1;
-				constraints.ipady = VERTICAL_PADDING;
-				constraints.fill = GridBagConstraints.HORIZONTAL;
-				
-				GUITools.add(this, this.createProgressBar(), constraints);
-			}
-			{
-				constraints.gridx = 1;
-				constraints.gridy = 0;
-				constraints.weightx = 0.0;
-				constraints.weighty = 0.0;
-				constraints.ipadx = 1;
-				constraints.ipady = VERTICAL_PADDING;
-				constraints.fill = GridBagConstraints.NONE;
-				
-				GUITools.add(this, createStartButton(), constraints);
-			}
-			{
-				constraints.gridx = 2;
-				constraints.gridy = 0;
-				constraints.weightx = 0.0;
-				constraints.weighty = 0.0;
-				constraints.ipadx = 1;
-				constraints.ipady = VERTICAL_PADDING;
-				constraints.fill = GridBagConstraints.NONE;
-				
-				GUITools.add(this, this.createRemoveButton(), constraints);
-			}
-		}
-		
-		/**
-		 * 
-		 * TODO doc
-		 * @return
-		 * <br>A non-null value
-		 * <br>A new value
-		 */
-		private final JProgressBar createProgressBar() {
-			final JProgressBar result = new JProgressBar();
-			
-			result.setString(this.fileName + "queued");
-			result.setStringPainted(true);
-			
-			return result;
-		}
-		
-		/**
-		 * 
-		 * TODO doc
-		 * @return
-		 * <br>A non-null value
-		 * <br>A new value
-		 */
-		private final JButton createRemoveButton() {
-			return rollover(new JButton(this.new RemoveAction()), "remove", false);
-		}
-		
-		/**
-		 * 
-		 * @author codistmonk (creation 2010-05-20)
-		 *
-		 */
-		private class RemoveAction extends AbstractAction {
-			
-			/**
-			 * Package-private constructor to suppress visibility warnings.
-			 */
-			RemoveAction() {
-				// Do nothing
-			}
-			
-			@Override
-			public final void actionPerformed(final ActionEvent event) {
-				final JComponent parent = (JComponent) OperationComponent.this.getParent();
-				
-				if (parent != null) {
-					parent.remove(OperationComponent.this);
-					
-					// Update scroll pane
-					parent.revalidate();
-					
-					parent.getRootPane().repaint();
-				}
-			}
-			
-			private static final long serialVersionUID = -2137598910170961094L;
-			
-		}
-		
-		private static final long serialVersionUID = 195201935191732396L;
-		
-		public static final int MAXIMUM_HEIGHT = 48;
-		
-		public static final int VERTICAL_PADDING = 16;
-		
-		/**
-		 * 
-		 * TODO doc
-		 * @return
-		 * <br>A non-null value
-		 * <br>A new value
-		 */
-		private static final JButton createStartButton() {
-			return rollover(new JButton(new StartAction()), "start", false);
-		}
-		
-		/**
-		 * 
-		 * @author codistmonk (creation 2010-05-20)
-		 *
-		 */
-		private static class StartAction extends AbstractAction {
-			
-			StartAction() {
-				super("");
-			}
-			
-			@Override
-			public final void actionPerformed(final ActionEvent event) {
-				// TODO
-				Tools.debugPrint("TODO");
-				JOptionPane.showMessageDialog(null, "Not implemented");
-			}
-			
-			private static final long serialVersionUID = 2945622216824469468L;
-			
-		}
-		
-	}
 	
 }
