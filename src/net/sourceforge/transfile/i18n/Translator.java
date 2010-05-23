@@ -39,6 +39,8 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.logging.Level;
 
+import net.sourceforge.transfile.tools.Tools;
+
 /**
  * Instances of this class can translate messages using locales and resource bundles.
  * <br>The easiest way to add translation to a Swing program with this class is by using the static methods in {@link Translator.Helpers}.
@@ -245,6 +247,7 @@ public class Translator {
 			
 			translatedMessage = iso88591ToUTF8(messages.getString(translationKey));
 		} catch (final MissingResourceException exception) {
+			System.err.println(Tools.debug(2, exception.getMessage()));
 			getLoggerForThisMethod().log(Level.WARNING, "Missing translation for locale (" + Translator.this.getLocale() + ") of " + translationKey);
 		}
 		

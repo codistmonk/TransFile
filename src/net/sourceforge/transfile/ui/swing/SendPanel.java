@@ -19,6 +19,7 @@
 
 package net.sourceforge.transfile.ui.swing;
 
+import static net.sourceforge.transfile.i18n.Translator.Helpers.translate;
 import static net.sourceforge.transfile.ui.swing.GUITools.rollover;
 import static net.sourceforge.transfile.ui.swing.GUITools.scrollable;
 import static net.sourceforge.transfile.ui.swing.GUITools.titleBorder;
@@ -39,6 +40,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
+import javax.swing.JPanel;
 
 /**
  * 
@@ -99,14 +101,6 @@ public class SendPanel extends TopLevelPanel {
 		
 	}
 	
-	protected final void setup() {
-		this.setLayout(new BorderLayout());
-		
-		this.add(titleBorder("Send", scrollable(this.operationListComponent)), BorderLayout.CENTER);
-		
-		this.new FileDropHandler(this);
-	}
-	
 	/**
 	 * {@inheritDoc}
 	 */
@@ -140,6 +134,18 @@ public class SendPanel extends TopLevelPanel {
 			
 			this.repaint();
 		}
+	}
+	
+	private final void setup() {
+		this.setLayout(new BorderLayout());
+		
+		final JPanel titledPanel = titleBorder("send_list_title", scrollable(this.operationListComponent));
+		
+		translate(titledPanel.getBorder());
+		
+		this.add(titledPanel, BorderLayout.CENTER);
+		
+		this.new FileDropHandler(this);
 	}
 	
 	/**

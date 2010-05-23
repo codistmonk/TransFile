@@ -20,11 +20,12 @@
 package net.sourceforge.transfile.ui.swing;
 
 import static net.sourceforge.transfile.i18n.Translator.Helpers.translate;
+import static net.sourceforge.transfile.ui.swing.GUITools.scrollable;
+import static net.sourceforge.transfile.ui.swing.GUITools.titleBorder;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.BorderLayout;
 
-import javax.swing.JButton;
+import javax.swing.JPanel;
 
 /**
  * 
@@ -34,7 +35,7 @@ import javax.swing.JButton;
  */
 class ReceivePanel extends TopLevelPanel {
 	
-	private static final long serialVersionUID = -3454758528985441231L;
+	private final OperationListComponent operationListComponent;
 	
 	/**
 	 * 
@@ -44,6 +45,7 @@ class ReceivePanel extends TopLevelPanel {
 	 */
 	public ReceivePanel(final SwingGUI window) {
 		super(window);
+		this.operationListComponent = new OperationListComponent();
 		
 		this.setup();
 	}
@@ -83,16 +85,6 @@ class ReceivePanel extends TopLevelPanel {
 		
 	}
 	
-	private final void setup() {
-		setLayout(new GridBagLayout());
-		
-		final JButton receiveButton = translate(new JButton("button_receive_file"));
-		final GridBagConstraints receiveButtonConstraints = new GridBagConstraints();
-		receiveButtonConstraints.gridx = 0;
-		receiveButtonConstraints.gridy = 0;
-		add(receiveButton, receiveButtonConstraints);
-	}
-
 	/** 
 	 * {@inheritDoc}
 	 */
@@ -110,4 +102,17 @@ class ReceivePanel extends TopLevelPanel {
 		// TODO Auto-generated method stub
 		
 	}	
+	
+	private final void setup() {
+		this.setLayout(new BorderLayout());
+		
+		final JPanel titledPanel = titleBorder("receive_list_title", scrollable(this.operationListComponent));
+		
+		translate(titledPanel.getBorder());
+		
+		this.add(titledPanel, BorderLayout.CENTER);
+	}
+	
+	private static final long serialVersionUID = -3454758528985441231L;
+	
 }

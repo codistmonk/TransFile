@@ -6,6 +6,8 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 
+import net.sourceforge.transfile.ui.swing.OperationComponent.SelectionModel;
+
 /**
  * 
  * @author codistmonk (creation 2010-05-20)
@@ -13,11 +15,11 @@ import javax.swing.BoxLayout;
  */
 public class OperationListComponent extends Box {
 	
-	private final OperationComponent.SelectionModel selectionModel;
+	private final SelectionModel selectionModel;
 	
 	public OperationListComponent() {
 		super(BoxLayout.Y_AXIS);
-		this.selectionModel = new OperationComponent.SelectionModel();
+		this.selectionModel = new SelectionModel();
 		
 		this.setBackground(DEFAULT_BACKGROUND_COLOR);
 		this.setBorder(BorderFactory.createLineBorder(OperationComponent.DEFAULT_BORDER_COLOR));
@@ -31,7 +33,7 @@ public class OperationListComponent extends Box {
 	 * <br>A non-null value
 	 * <br>A shared value
 	 */
-	public final OperationComponent.SelectionModel getSelectionModel() {
+	public final SelectionModel getSelectionModel() {
 		return this.selectionModel;
 	}
 	
