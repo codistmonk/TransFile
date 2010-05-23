@@ -62,6 +62,8 @@ public class SendPanel extends TopLevelPanel {
 		this.operationListComponent = this.createOperationListComponent();
 		
 		this.setup();
+		
+		this.setVisible(true);
 	}
 	
 	/**
@@ -133,7 +135,7 @@ public class SendPanel extends TopLevelPanel {
 	 */
 	final void addOperation(final File file) {
 		if (file.isFile()) {
-			this.operationListComponent.add(new OperationComponent(file.getName()), this.operationListComponent.getComponentCount() - 2);
+			this.operationListComponent.add(new OperationComponent(this.operationListComponent.getSelectionModel(), file.getName()), this.operationListComponent.getComponentCount() - 2);
 			
 			// Update scroll pane
 			this.operationListComponent.revalidate();
@@ -152,8 +154,6 @@ public class SendPanel extends TopLevelPanel {
 	private final OperationListComponent createOperationListComponent() {
 		final OperationListComponent result = new OperationListComponent();
 		
-		result.setBackground(Color.GRAY);
-		
 		result.add(this.createAddButton(), 0);
 		
 		return result;
@@ -169,9 +169,10 @@ public class SendPanel extends TopLevelPanel {
 	private final JButton createAddButton() {
 		final JButton result = rollover(new JButton(this.new AddAction()), "add", true);
 		
-		result.setMaximumSize(new Dimension(Integer.MAX_VALUE, OperationComponent.MAXIMUM_HEIGHT));
-		result.setPreferredSize(new Dimension(0, OperationComponent.MAXIMUM_HEIGHT));
+		result.setMaximumSize(new Dimension(Integer.MAX_VALUE, ADD_BUTTON_HEIGHT));
+		result.setPreferredSize(new Dimension(0, ADD_BUTTON_HEIGHT));
 		result.setAlignmentX(0.5F);
+		result.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, OperationComponent.DEFAULT_BORDER_COLOR));
 		
 		return result;
 	}
@@ -248,5 +249,7 @@ public class SendPanel extends TopLevelPanel {
 	}
 	
 	private static final long serialVersionUID = -3849684830598909661L;
+	
+	private static final int ADD_BUTTON_HEIGHT = OperationComponent.MAXIMUM_HEIGHT - 10;
 	
 }

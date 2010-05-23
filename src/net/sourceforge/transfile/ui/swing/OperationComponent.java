@@ -4,8 +4,11 @@ import static net.sourceforge.transfile.ui.swing.GUITools.rollover;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
@@ -24,18 +27,80 @@ import net.sourceforge.transfile.tools.Tools;
  */
 public class OperationComponent extends JPanel {
 	
+	private final SelectionModel selectionModel;
+	
 	private final String fileName;
 	
 	/**
 	 * 
+	 * @param selectionModel 
+	 * <br>Can be null
+	 * <br>Shared parameter
 	 * @param fileName
 	 * <br>Should not be null
 	 * <br>Shared parameter
 	 */
-	public OperationComponent(final String fileName) {
+	public OperationComponent(final SelectionModel selectionModel, final String fileName) {
+		this.selectionModel = selectionModel;
 		this.fileName = fileName;
 		
+		this.addMouseListener(new MouseAdapter() {
+			
+			@Override
+			public final void mousePressed(final MouseEvent event) {
+				OperationComponent.this.select();
+			}
+			
+		});
+		
 		this.setup();
+	}
+	
+	@Override
+	public final void paint(final Graphics graphics) {
+		if (this.isSelected()) {
+			this.setBackground(Color.BLUE);
+		}
+		else if (this.getParent() != null) {
+			final int z = this.getParent().getComponentZOrder(this);
+			
+			this.setBackground(z % 2 == 0 ? DEFAULT_BACKGROUND_COLOR : ALTERNATE_BACKGROUND_COLOR);
+		}
+		else {
+			this.setBackground(DEFAULT_BACKGROUND_COLOR);
+		}
+		
+		super.paint(graphics);
+	}
+	
+	/**
+	 * Does nothing if the selection model is null.
+	 */
+	public final void deselect() {
+		if (this.selectionModel != null) {
+			this.selectionModel.setSelection(null);
+		}
+	}
+	
+	/**
+	 * Does nothing if the selection model is null.
+	 */
+	public final void select() {
+		if (this.selectionModel != null) {
+			this.selectionModel.setSelection(this);
+			
+			if (this.getParent() != null) {
+				this.getParent().repaint();
+			}
+		}
+	}
+	
+	/**
+	 * 
+	 * @return {@code true} if the selection model is not null and {@code this} is selected.
+	 */
+	public final boolean isSelected() {
+		return this.selectionModel != null && this.selectionModel.getSelection() == this;
 	}
 	
 	private final void setup() {
@@ -76,7 +141,7 @@ public class OperationComponent extends JPanel {
 		}
 		
 		this.setMaximumSize(new Dimension(Integer.MAX_VALUE, MAXIMUM_HEIGHT));
-		this.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+		this.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, DEFAULT_BORDER_COLOR));
 	}
 	
 	/**
@@ -176,5 +241,42 @@ public class OperationComponent extends JPanel {
 	public static final int MAXIMUM_HEIGHT = 48;
 	
 	public static final int VERTICAL_PADDING = 16;
+	
+	public static final Color DEFAULT_BACKGROUND_COLOR = Color.WHITE;
+	
+	public static final Color ALTERNATE_BACKGROUND_COLOR = Color.LIGHT_GRAY;
+	
+	public static final Color DEFAULT_BORDER_COLOR = Color.BLACK;
+	
+	/**
+	 * 
+	 * @author codistmonk (creation 2010-05-23)
+	 *
+	 */
+	public static class SelectionModel {
+		
+		private OperationComponent selection;
+		
+		/**
+		 * 
+		 * @return
+		 * <br>A possibly null value
+		 * <br>A shared value
+		 */
+		public final OperationComponent getSelection() {
+			return this.selection;
+		}
+		
+		/**
+		 * 
+		 * @param selection
+		 * <br>Can be null
+		 * <br>Shared parameter
+		 */
+		public final void setSelection(final OperationComponent selection) {
+			this.selection = selection;
+		}
+		
+	}
 	
 }
