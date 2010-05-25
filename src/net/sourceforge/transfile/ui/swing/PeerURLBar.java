@@ -35,7 +35,6 @@ import javax.swing.MutableComboBoxModel;
 import net.sourceforge.transfile.exceptions.SerializationException;
 import net.sourceforge.transfile.exceptions.SerializationFileInUseException;
 import net.sourceforge.transfile.network.PeerURL;
-import net.sourceforge.transfile.settings.Settings;
 import net.sourceforge.transfile.tools.Tools;
 
 
@@ -61,7 +60,7 @@ class PeerURLBar extends JComboBox {
 	 * Typically, entering a (valid) PeerURL and pressing enter causes such a request to add for an item
 	 * to be added, with said item being the PeerURL entered.
 	 */
-	public static final int maxRetainedItems = Settings.getPreferences().getInt("peerurlbar_max_retained_items", Settings.PEERURLBAR_MAX_RETAINED_ITEMS);
+	public final int maxRetainedItems;
 	
 	private static final long serialVersionUID = -8782347394069390311L;
 		
@@ -90,19 +89,25 @@ class PeerURLBar extends JComboBox {
 	 * Constructs a new instance, loading state from the specified file. State will be saved upon
 	 * request ({@link #saveModel}).
 	 * 
-	 * @param
+	 * @param stateFileName
 	 * <br />File name (not path) of the file load state from and to save state to
+	 * <br />Should not be null
+	 * @param maxRetainedItems
+	 * <br />The number of recent values to remember
+	 * <br />Should be at least 1
 	 * <br />Should not be null
 	 * @throws SerializationFileInUseException if the specified file name is already in use 
 	 * 
 	 */
-	public PeerURLBar(final String stateFileName) throws SerializationFileInUseException {
+	public PeerURLBar(final String stateFileName, final int maxRetainedItems) throws SerializationFileInUseException {
 		this.stateFile = new File(Tools.getUserApplicationDirectory(), stateFileName);
 		
 		if(usedStateFiles.contains(this.stateFile))
 			throw new SerializationFileInUseException(this.stateFile);
 		
 		this.persistent = true;
+		
+		this.maxRetainedItems = maxRetainedItems;
 			
 		usedStateFiles.add(this.stateFile);
 		
@@ -113,10 +118,17 @@ class PeerURLBar extends JComboBox {
 	 * Constructs a new instance without loading state. State will NOT be saved to,
 	 * even if {@link #saveModel} is called.
 	 * 
+	 * @param maxRetainedItems
+	 * <br />The number of recent values to remember
+	 * <br />Should be at least 1
+	 * <br />Should not be null
 	 */
-	public PeerURLBar() {
+	public PeerURLBar(final int maxRetainedItems) {
 		this.stateFile = null;
 		this.persistent = false;
+		
+		this.maxRetainedItems = maxRetainedItems;
+		
 		setup();
 	}
 
@@ -218,11 +230,11 @@ class PeerURLBar extends JComboBox {
 					getLoggerForThisMethod().log(Level.FINE, "successfully loaded PeerURLBar state from file: " + PeerURLBar.this.getStateFile().getAbsolutePath());
 				} catch (Throwable e) {
 					getLoggerForThisMethod().log(Level.WARNING, "failed to load PeerURLBar state from file: " + PeerURLBar.this.getStateFile().getAbsolutePath());
-					this.holder = new ComboBoxItemsHolder(maxRetainedItems, PeerURLBar.this.getStateFile());
+					this.holder = new ComboBoxItemsHolder(PeerURLBar.this.maxRetainedItems, PeerURLBar.this.getStateFile());
 				}
 			} else {
 				getLoggerForThisMethod().log(Level.FINE, "not loading PeerURLBar state from file, initializing empty model");
-				this.holder = new ComboBoxItemsHolder(maxRetainedItems, null);
+				this.holder = new ComboBoxItemsHolder(PeerURLBar.this.maxRetainedItems, null);
 			}
 		}
 		
@@ -236,10 +248,14 @@ class PeerURLBar extends JComboBox {
 		}
 
 		/**
-		 * {@inheritDoc}
+		 * Inserts the provided element as the first element. If the model already contains {@code maxRetainedItems} elements,
+		 * the last (oldest) element in the model is removed. Does not set or change the selected item. Ignores attempts to
+		 * add duplicate elements without throwing an exception.
+		 * 
+		 * @param e the element to insert
 		 */
 		@Override
-		public void addElement(Object e) {
+		public void addElement(final Object e) {
 			if(this.holder.items.contains(e))
 				return;
 			
@@ -251,38 +267,30 @@ class PeerURLBar extends JComboBox {
 		}
 		
 		/**
-		 * {@inheritDoc}
+		 * Operation not supported
+		 * 
 		 */
 		@Override
-		public void insertElementAt(Object e, int ePosition) {
-			if(this.holder.items.contains(e))
-				return;
-			
-			this.holder.items.add(ePosition, e);
-		
-			removeExcessiveItems();
-			
-			fireContentsChanged(PeerURLBar.this, ePosition, this.holder.items.size() - 1);
+		public void insertElementAt(final Object e, final int ePosition) {
+			throw new UnsupportedOperationException(this.getClass().getSimpleName() + ".insertElementAt(Object, int)");
 		}
 
 		/**
-		 * {@inheritDoc}
+		 * Operation not supported
+		 * 
 		 */
 		@Override
-		public void removeElement(Object e) {
-			removeElementAt(this.holder.items.indexOf(e));
+		public void removeElement(final Object e) {
+			throw new UnsupportedOperationException(this.getClass().getSimpleName() + ".removeElement(Object)");
 		}
 
 		/**
-		 * {@inheritDoc}
+		 * Operation not supported
+		 * 
 		 */
 		@Override
-		public void removeElementAt(int ePosition) {
-			this.holder.items.remove(ePosition);
-			if(ePosition == this.holder.items.size())
-				fireIntervalRemoved(PeerURLBar.this, ePosition, ePosition);
-			else
-				fireContentsChanged(PeerURLBar.this, ePosition, this.holder.items.size() - 1);
+		public void removeElementAt(final int ePosition) {
+			throw new UnsupportedOperationException(this.getClass().getSimpleName() + ".removeElementAt(int)");
 		}
 
 		/**
@@ -297,7 +305,7 @@ class PeerURLBar extends JComboBox {
 		 * {@inheritDoc}
 		 */
 		@Override
-		public void setSelectedItem(Object itemToSelect) {
+		public void setSelectedItem(final Object itemToSelect) {
 			this.holder.selectedItem = itemToSelect;
 			int i = this.holder.items.indexOf(itemToSelect);
 			// if the selected item already exists (user picked it from the drop-down list or re-entered it)
@@ -325,7 +333,7 @@ class PeerURLBar extends JComboBox {
 		 * {@inheritDoc}
 		 */
 		@Override
-		public Object getElementAt(int index) {			
+		public Object getElementAt(final int index) {			
 			return this.holder.items.get(index);
 		}
 
@@ -342,7 +350,7 @@ class PeerURLBar extends JComboBox {
 		 * 
 		 */
 		private void removeExcessiveItems() {
-			while(this.holder.items.size() > maxRetainedItems)
+			while(this.holder.items.size() > PeerURLBar.this.maxRetainedItems)
 				this.holder.items.remove(this.holder.items.size() - 1);			
 		}
 		

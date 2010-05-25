@@ -55,6 +55,7 @@ import net.sourceforge.transfile.exceptions.SerializationFileInUseException;
 import net.sourceforge.transfile.network.exceptions.LinkFailedException;
 import net.sourceforge.transfile.network.exceptions.PeerURLFormatException;
 import net.sourceforge.transfile.settings.Settings;
+import net.sourceforge.transfile.settings.exceptions.IllegalConfigValueException;
 
 
 /**
@@ -554,11 +555,15 @@ public class NetworkPanel extends TopLevelPanel {
 		c.gridx = 0;
 		c.gridy = 0;
 		
+		final int maxRetainedItems = Settings.getPreferences().getInt("peerurlbar_max_retained_items", Settings.PEERURLBAR_MAX_RETAINED_ITEMS);
+		if(maxRetainedItems < 1)
+			throw new IllegalConfigValueException("peerurlbar_max_retained_items", Integer.toString(maxRetainedItems));
+		
 		try {
-			this.remoteURLBar = new PeerURLBar(Settings.REMOTE_PEERURLBAR_STATE_FILE_NAME);
+			this.remoteURLBar = new PeerURLBar(Settings.getPreferences().get("remote_peerurlbar_state_file_name", Settings.REMOTE_PEERURLBAR_STATE_FILE_NAME), maxRetainedItems);
 		} catch(SerializationFileInUseException e) {
 			getLoggerForThisMethod().log(Level.WARNING, "remote PeerURLBar state file already in use, falling back to a non-persistent PeerURLBar", e);
-			this.remoteURLBar = new PeerURLBar();
+			this.remoteURLBar = new PeerURLBar(maxRetainedItems);
 		}
 		
 		this.remoteURLPanel.add(this.remoteURLBar, c);		

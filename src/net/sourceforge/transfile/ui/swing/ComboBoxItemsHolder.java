@@ -28,6 +28,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 import net.sourceforge.transfile.exceptions.SerializationException;
 import net.sourceforge.transfile.exceptions.SerializationFileNotFoundException;
@@ -54,9 +55,8 @@ class ComboBoxItemsHolder implements Serializable {
 
 	/*
 	 * The container the items in the combo box' drop-down menu are stored in.
-	 * The ArrayList is initialized with a size equal to the maximum number of items retained.
 	 */
-	public final ArrayList<Object> items;
+	public final List<Object> items;
 
 	/*
 	 * The currently selected item, or null if there is no selection
@@ -72,7 +72,11 @@ class ComboBoxItemsHolder implements Serializable {
 	 */
 	public ComboBoxItemsHolder(final int maxRetainedItems, final File stateFile) {
 		this.stateFile = stateFile;
-		this.items = new ArrayList<Object>(maxRetainedItems);
+		
+		// initialize list of items with a capacity of the maximum number of retained items + 1 so that
+		// even when the maximum number of items is reached, an item can be added just before
+		// another one is removed without having to expand the underlying array
+		this.items = new ArrayList<Object>(maxRetainedItems + 1);
 	}
 
 	/**
