@@ -32,9 +32,9 @@ import javax.swing.MutableComboBoxModel;
 import org.junit.*;
 
 /**
- * <p>Tests ...transfile.ui.swing.PeerURLBar.PeerURLBarModel.</p>
+ * <p>Tests net.sourceforge.transfile.ui.swing.PeerURLBar.PeerURLBarModel.</p>
  * 
- * <p>Does not cover persistence at this time.</p>
+ * <p>Does not cover persistence or the firing of events at this time.</p>
  *
  * @author Martin Riedel
  *
