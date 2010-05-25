@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.lang.reflect.Array;
 
 import net.sourceforge.transfile.settings.Settings;
 import net.sourceforge.transfile.tools.exceptions.UserApplicationDirectoryException;
@@ -359,6 +360,95 @@ public final class Tools {
      */
     public static final void debugPrint(final Object... objects) {
         System.out.println(debug(3, objects));
+    }
+    
+    /**
+     * <p>Copy-concatenates the two provided arrays.</p>
+     * 
+     * <p><strong>Stay away from arrays wherever possible!</strong></p>
+     * 
+     * @param <T>
+     * <br />The type of the arrays being concatenated
+     * @param a
+     * <br />The array to be prepended to {@code b}
+     * <br />Should not be null
+     * @param b
+     * <br />The array to be appended to {@code a}
+     * <br />Should not be null
+     * @return 
+     * The concatenation of the two provided arrays<br />
+     * Never null<br />
+     * Possibly an array of length 0
+     */
+    @SuppressWarnings("unchecked")
+	public static final <T> T[] arrayConcat(final T[] a, final T[] b) {
+    	if(a.length == 0)
+    		return b;
+    	if(b.length == 0)
+    		return a;
+    	
+    	final T[] c = (T[]) Array.newInstance(a.getClass().getComponentType(), a.length + b.length);
+    	
+    	System.arraycopy(a, 0, c, 0, a.length);
+        System.arraycopy(b, 0, c, a.length, b.length);
+    	
+    	return c;
+    }
+
+    /**
+     * <p>Prepends an object to an array, producing a new array.</p>
+     * 
+     * <p><strong>Stay away from arrays wherever possible!</strong></p>
+     * 
+     * @param <T>
+     * <br />The type of the entities being concatenated
+     * @param a
+     * <br />The object to be prepended to {@code b}
+     * <br />Should not be null
+     * @param b
+     * <br />The array {@code a} is being prepended to
+     * <br />Should not be null
+     * @return 
+     * The concatenation of the provided object and the provided array<br />
+     * Never null
+     */
+    @SuppressWarnings("unchecked")
+	public static final <T> T[] arrayConcat(final T a, final T[] b) {
+    	final T[] c = (T[]) Array.newInstance(a.getClass(), b.length + 1);
+		c[0] = a;
+    	
+    	if(b.length > 0)
+    		System.arraycopy(b, 0, c, 1, b.length);
+        
+        return c;
+    }
+    
+    /**
+     * <p>Appends an object to an array, producing a new array.</p>
+     * 
+     * <p><strong>Stay away from arrays wherever possible!</strong></p>
+     * 
+     * @param <T>
+     * <br />The type of the entities being concatenated
+     * @param a
+     * <br />The array {@code b} is being appended to
+     * <br />Should not be null
+     * @param b
+     * <br />The object to be appended to {@code a}
+     * <br />Should not be null
+     * @return 
+     * The concatenation of the provided array and the provided object<br />
+     * Never null
+     */
+    @SuppressWarnings("unchecked")
+	public static final <T> T[] arrayConcat(final T[] a, final T b) {
+    	final T[] c = (T[]) Array.newInstance(b.getClass(), a.length + 1);
+    	c[c.length - 1] = b;
+    	
+    	if(a.length > 0)
+    		System.arraycopy(a, 0, c, 0, a.length);
+    	
+    	return c;
     }
     
 }
