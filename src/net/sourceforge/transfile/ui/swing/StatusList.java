@@ -95,7 +95,7 @@ public class StatusList extends JList {
 	 * @author Martin Riedel
 	 *
 	 */
-	private static class StatusListModel extends AbstractListModel {
+	static class StatusListModel extends AbstractListModel {
 
 		private static final long serialVersionUID = -4679723768372813345L;
 			
@@ -253,15 +253,53 @@ public class StatusList extends JList {
 	 * @author Martin Riedel
 	 *
 	 */
-	private static class StatusDummy extends StatusMessage {
-
+	static final class StatusDummy extends StatusMessage {
+	
+		public static final String DUMMY_TEXT = "";
+		
+		private final String dummyField = "42";
+		
 		/**
 		 * Constructs a new StatusDummy
 		 * 
 		 */
 		public StatusDummy() {
-			super("");
+			super(DUMMY_TEXT);
 		}
+
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = super.hashCode();
+			result = prime * result
+					+ ((this.dummyField == null) ? 0 : this.dummyField.hashCode());
+			return result;
+		}
+
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (!super.equals(obj))
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			StatusDummy other = (StatusDummy) obj;
+			if (this.dummyField == null) {
+				if (other.dummyField != null)
+					return false;
+			} else if (!this.dummyField.equals(other.dummyField))
+				return false;
+			return true;
+		}
+		
+		
 		
 	}
 

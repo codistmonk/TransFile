@@ -20,6 +20,7 @@
 package net.sourceforge.transfile.ui.swing;
 
 import static org.junit.Assert.*;
+import static net.sourceforge.transfile.tools.UnitTestingTools.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,6 +29,8 @@ import java.util.List;
 import java.util.Random;
 
 import javax.swing.MutableComboBoxModel;
+
+import net.sourceforge.transfile.tools.MutableModelAdapter;
 
 import org.junit.*;
 
@@ -45,6 +48,18 @@ public class PeerURLBarModelTest {
 	
 	private PeerURLBar bar;
 	private MutableComboBoxModel model;
+	
+	private final MutableModelAdapter modelAdapter = new MutableModelAdapter() {
+		
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public <T> void addElement(final T newElement) {
+			PeerURLBarModelTest.this.getModel().addElement(newElement);
+		}
+		
+	};
 	
 	@Before
 	public void setup() {
@@ -72,7 +87,7 @@ public class PeerURLBarModelTest {
 		this.model.addElement(e);
 		
 		assertEquals(1, this.model.getSize());
-		assertArrayEquals(new Object[] { e }, modelToArray());
+		assertArrayEquals(new Object[] { e }, modelToArray(this.model));
 		assertEquals(e, this.model.getElementAt(0));
 		assertSame(e, this.model.getElementAt(0));
 		assertNull(this.model.getSelectedItem());
@@ -85,7 +100,7 @@ public class PeerURLBarModelTest {
 		this.model.addElement(e);
 		
 		assertEquals(1, this.model.getSize());
-		assertArrayEquals(new Integer[] { e }, modelToArray());
+		assertArrayEquals(new Integer[] { e }, modelToArray(this.model));
 		assertEquals(e, this.model.getElementAt(0));
 		assertSame(e, this.model.getElementAt(0));
 		assertNull(this.model.getSelectedItem());
@@ -98,7 +113,7 @@ public class PeerURLBarModelTest {
 		this.model.addElement(e);
 		
 		assertEquals(1, this.model.getSize());
-		assertArrayEquals(new String[] { e }, modelToArray());
+		assertArrayEquals(new String[] { e }, modelToArray(this.model));
 		assertEquals(e, this.model.getElementAt(0));
 		assertSame(e, this.model.getElementAt(0));
 		assertNull(this.model.getSelectedItem());
@@ -117,14 +132,14 @@ public class PeerURLBarModelTest {
 		Collections.reverse(elements);
 		
 		assertEquals(maxRetainedItems, this.model.getSize());
-		assertArrayEquals(elements.toArray(), modelToArray());
+		assertArrayEquals(elements.toArray(), modelToArray(this.model));
 		
 		this.model.addElement(i);
 		elements.add(0, i);
 		elements.remove(maxRetainedItems);
 		
 		assertEquals(maxRetainedItems, this.model.getSize());
-		assertArrayEquals(elements.toArray(), modelToArray());
+		assertArrayEquals(elements.toArray(), modelToArray(this.model));
 		
 		i++;
 		this.model.addElement(i);
@@ -132,7 +147,7 @@ public class PeerURLBarModelTest {
 		elements.remove(maxRetainedItems);
 		
 		assertEquals(maxRetainedItems, this.model.getSize());
-		assertArrayEquals(elements.toArray(), modelToArray());
+		assertArrayEquals(elements.toArray(), modelToArray(this.model));
 	}
 	
 	@Test
@@ -155,7 +170,7 @@ public class PeerURLBarModelTest {
 		Collections.reverse(elements);
 		
 		assertEquals(maxRetainedItems, this.model.getSize());
-		assertArrayEquals(elements.toArray(), modelToArray());
+		assertArrayEquals(elements.toArray(), modelToArray(this.model));
 	}
 	
 	@Test
@@ -167,7 +182,7 @@ public class PeerURLBarModelTest {
 			this.model.addElement(4);
 		} catch(final UnsupportedOperationException exception) {
 			assertEquals(2, this.model.getSize());
-			assertArrayEquals(new Integer[] { 3, 1 }, modelToArray());
+			assertArrayEquals(new Integer[] { 3, 1 }, modelToArray(this.model));
 			return;
 		}
 		
@@ -179,10 +194,10 @@ public class PeerURLBarModelTest {
 		final Integer e1 = new Integer(4);
 		final Integer e2 = new Integer(4);
 		
-		addElementsToModel(1, 2, 3, e1, e2, 5);
+		addElementsToModel(this.modelAdapter, 1, 2, 3, e1, e2, 5);
 		
 		assertEquals(5, this.model.getSize());
-		assertArrayEquals(new Integer[] { 5, e1, 3, 2, 1 }, modelToArray());
+		assertArrayEquals(new Integer[] { 5, e1, 3, 2, 1 }, modelToArray(this.model));
 		assertSame(e1, this.model.getElementAt(1));
 		assertNotSame(e2, this.model.getElementAt(1));
 		assertEquals(e1, this.model.getElementAt(1));
@@ -201,7 +216,7 @@ public class PeerURLBarModelTest {
 		} catch(final UnsupportedOperationException exception) {
 			assertEquals(2, this.model.getSize());
 			assertSame(e, this.model.getElementAt(1));
-			assertArrayEquals(new Integer[] { 24, 42 }, modelToArray());
+			assertArrayEquals(new Integer[] { 24, 42 }, modelToArray(this.model));
 			return;
 		}
 		
@@ -220,7 +235,7 @@ public class PeerURLBarModelTest {
 		} catch(final UnsupportedOperationException exception) {
 			assertEquals(1, this.model.getSize());
 			assertSame(e, this.model.getElementAt(0));
-			assertArrayEquals(new String[] { e }, modelToArray());
+			assertArrayEquals(new String[] { e }, modelToArray(this.model));
 			return;
 		}
 		
@@ -231,12 +246,12 @@ public class PeerURLBarModelTest {
 	public void setExistingSelectedItem() {
 		final String e = "e";
 		
-		addElementsToModel("a", "b", "c", "d", "e", "f");
+		addElementsToModel(this.modelAdapter, "a", "b", "c", "d", "e", "f");
 		
 		this.model.setSelectedItem(e);
 		
 		assertEquals(6, this.model.getSize());
-		assertArrayEquals(new String[] { e, "f", "d", "c", "b", "a" }, modelToArray());
+		assertArrayEquals(new String[] { e, "f", "d", "c", "b", "a" }, modelToArray(this.model));
 		assertSame(e, this.model.getElementAt(0));
 		assertSame(e, this.model.getSelectedItem());
 		assertEquals(e, this.model.getSelectedItem());
@@ -246,12 +261,12 @@ public class PeerURLBarModelTest {
 	public void setExistingSelectedItemAt0() {
 		final Double e = 0.3;
 		
-		addElementsToModel(0.1, 0.2, 0.3);
+		addElementsToModel(this.modelAdapter, 0.1, 0.2, 0.3);
 		
 		this.model.setSelectedItem(e);
 		
 		assertEquals(3, this.model.getSize());
-		assertArrayEquals(new Double[] { e, 0.2, 0.1 }, modelToArray());
+		assertArrayEquals(new Double[] { e, 0.2, 0.1 }, modelToArray(this.model));
 		assertSame(e, this.model.getSelectedItem());
 		assertEquals(e, this.model.getSelectedItem());	
 	}
@@ -260,12 +275,12 @@ public class PeerURLBarModelTest {
 	public void reselectSelectedItem() {
 		final Integer e = -2;
 		
-		addElementsToModel(-1, -2, -3);
+		addElementsToModel(this.modelAdapter, -1, -2, -3);
 		
 		this.model.setSelectedItem(e);
 		
 		assertEquals(3, this.model.getSize());
-		assertArrayEquals(new Integer[] { e, -3, -1 }, modelToArray());
+		assertArrayEquals(new Integer[] { e, -3, -1 }, modelToArray(this.model));
 		assertSame(e, this.model.getElementAt(0));
 		assertSame(e, this.model.getSelectedItem());
 		assertEquals(e, this.model.getSelectedItem());
@@ -273,7 +288,7 @@ public class PeerURLBarModelTest {
 		this.model.setSelectedItem(e);
 
 		assertEquals(3, this.model.getSize());
-		assertArrayEquals(new Integer[] { -2, -3, -1 }, modelToArray());
+		assertArrayEquals(new Integer[] { -2, -3, -1 }, modelToArray(this.model));
 		assertEquals(-2, this.model.getSelectedItem());
 	}
 	
@@ -281,44 +296,28 @@ public class PeerURLBarModelTest {
 	public void setNewSelectedItem() {
 		final Integer e = 2;
 		
-		addElementsToModel(1, 3, 4, 5);
+		addElementsToModel(this.modelAdapter, 1, 3, 4, 5);
 		
 		this.model.setSelectedItem(e);
 		
 		assertEquals(4, this.model.getSize());
-		assertArrayEquals(new Integer[] { 5, 4, 3, 1 }, modelToArray());
+		assertArrayEquals(new Integer[] { 5, 4, 3, 1 }, modelToArray(this.model));
 	}
 	
 	@Test 
 	public void clearSelection() {
-		addElementsToModel(10, 20, 30, 40, 50);
+		addElementsToModel(this.modelAdapter, 10, 20, 30, 40, 50);
 		
 		this.model.setSelectedItem(30);
 		this.model.setSelectedItem(null);
 		
 		assertNull(this.model.getSelectedItem());
 		assertEquals(5, this.model.getSize());
-		assertArrayEquals(new Integer[] { 30, 50, 40, 20, 10 }, modelToArray());
+		assertArrayEquals(new Integer[] { 30, 50, 40, 20, 10 }, modelToArray(this.model));
 	}
 	
-	
-	private void addElementsToModel(final Object... elements) {
-		addArrayElementsToModel(elements);
-	}
-	
-	
-	private void addArrayElementsToModel(final Object[] elements) {
-		for(final Object e: elements)
-			this.model.addElement(e);
-	}
-	
-	private Object[] modelToArray() {
-		final List<Object> actualValues = new ArrayList<Object>(this.model.getSize());
-		
-		for(int i = 0; i < this.model.getSize(); i++)
-			actualValues.add(this.model.getElementAt(i));
-		
-		return actualValues.toArray();
+	MutableComboBoxModel getModel() {
+		return this.model;
 	}
 
 }

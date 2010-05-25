@@ -123,6 +123,39 @@ interface StatusService extends Iterable<StatusService.StatusMessage> {
 		public String toString() {
 			return this.getText();
 		}
+
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((this.text == null) ? 0 : this.text.hashCode());
+			return result;
+		}
+
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public boolean equals(final Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			StatusMessage other = (StatusMessage) obj;
+			if (this.text == null) {
+				if (other.text != null)
+					return false;
+			} else if (!this.text.equals(other.text))
+				return false;
+			return true;
+		}
+		
+		
 	}
 
 }
