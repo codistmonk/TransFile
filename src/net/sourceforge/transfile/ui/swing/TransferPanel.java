@@ -19,70 +19,34 @@
 
 package net.sourceforge.transfile.ui.swing;
 
-import static net.sourceforge.transfile.i18n.Translator.Helpers.translate;
-import static net.sourceforge.transfile.ui.swing.GUITools.scrollable;
-import static net.sourceforge.transfile.ui.swing.GUITools.titleBorder;
-
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 
-import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 
 /**
- * 
- * 
- * @author Martin Riedel
+ * TODO doc
+ *
+ * @author codistmonk (creation 2010-05-25)
  *
  */
-class ReceivePanel extends TopLevelPanel {
+public class TransferPanel extends TopLevelPanel {
 	
-	private final OperationListComponent operationListComponent;
+	private final SendPanel sendPanel;
+	
+	private final ReceivePanel receivePanel;
 	
 	/**
-	 * 
 	 * @param window
 	 * <br>Should not be null
 	 * <br>Shared parameter
 	 */
-	public ReceivePanel(final SwingGUI window) {
+	public TransferPanel(final SwingGUI window) {
 		super(window);
-		this.operationListComponent = new OperationListComponent();
+		this.sendPanel = new SendPanel(window);
+		this.receivePanel = new ReceivePanel(window);
 		
 		this.setup();
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void onQuit() {
-		// do nothing
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void onInit() {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void onHide() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void onShow() {
-		// TODO Auto-generated method stub
-		
 	}
 	
 	/** 
@@ -91,30 +55,62 @@ class ReceivePanel extends TopLevelPanel {
 	@Override
 	protected void loadState() {
 		// TODO Auto-generated method stub
-		
 	}
+	
+	/** 
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void onHide() {
+		// TODO Auto-generated method stub
 
+	}
+	
+	/** 
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void onInit() {
+		// TODO Auto-generated method stub
+	}
+	
+	/** 
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void onQuit() {
+		// TODO Auto-generated method stub
+	}
+	
+	/** 
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void onShow() {
+		// TODO Auto-generated method stub
+	}
+	
 	/** 
 	 * {@inheritDoc}
 	 */
 	@Override
 	protected void saveState() {
 		// TODO Auto-generated method stub
-		
-	}	
+	}
 	
 	private final void setup() {
 		this.setLayout(new BorderLayout());
 		
-		final JPanel titledPanel = titleBorder("receive_list_title", scrollable(this.operationListComponent));
+		this.sendPanel.setPreferredSize(new Dimension(340, 150));
 		
-		translate(titledPanel.getBorder());
+		this.receivePanel.setPreferredSize(new Dimension(340, 150));
 		
-		this.add(titledPanel, BorderLayout.CENTER);
-		
-		this.setVisible(true);
+		this.add(new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+				this.sendPanel,
+				this.receivePanel
+		));
 	}
 	
-	private static final long serialVersionUID = -3454758528985441231L;
+	private static final long serialVersionUID = 741764422630681769L;
 	
 }

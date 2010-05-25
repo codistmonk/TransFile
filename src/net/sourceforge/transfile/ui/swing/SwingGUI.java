@@ -88,10 +88,9 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	 * References to the TopLevelPanels
 	 */
 	private NetworkPanel networkPanel;
+	private TransferPanel transferPanel;
 	private StatusPanel statusPanel;
-	private SendPanel sendPanel;
-	private ReceivePanel receivePanel;
-
+	
 	/*
 	 * List containing all TopLevelPanels
 	 */
@@ -307,19 +306,10 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		this.panels.add(this.networkPanel);
 		pane.add(this.networkPanel);
 		
-		// "Send Files" panel
+		// "Transfer" panel
 		
-		this.sendPanel = new SendPanel(this);
-		this.sendPanel.setPreferredSize(new Dimension(340, 150));
-		this.panels.add(this.sendPanel);
-		pane.add(this.sendPanel);
-		
-		// "Receive Files" panel
-		
-		this.receivePanel = new ReceivePanel(this);
-		this.receivePanel.setPreferredSize(new Dimension(340, 150));
-		this.panels.add(this.receivePanel);
-		pane.add(this.receivePanel);
+		this.transferPanel = new TransferPanel(this);
+		pane.add(this.transferPanel);
 		
 		// "Status" panel
 		
@@ -384,17 +374,19 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	/**
 	 * 	Makes this Swing GUI look like a native application on the respective OS it's running on
 	 * 
+	 * @throws NativeLookAndFeelException if a native look and feel cannot be loaded
 	 */
-	private void setNativeLookAndFeel() throws NativeLookAndFeelException {
+	private final void setNativeLookAndFeel() throws NativeLookAndFeelException {
 		try {
 		    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		} catch(Exception e) {
-			throw new NativeLookAndFeelException(e);
+		} catch (final Exception exception) {
+			throw new NativeLookAndFeelException(exception);
 		}
 		
 		// Mac-specific adaptations
-		if(this.onMacOSX)
+		if (this.onMacOSX) {
 			MacOSXAdapter.adapt(this);
+		}
 	}
 	
 	/**
@@ -441,8 +433,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	private void showTransferScreen() {
 		Set<TopLevelPanel> visiblePanels = new HashSet<TopLevelPanel>(3);
 		
-		visiblePanels.add(this.sendPanel);
-		visiblePanels.add(this.receivePanel);
+		visiblePanels.add(this.transferPanel);
 		visiblePanels.add(this.statusPanel);
 		
 		setVisiblePanels(visiblePanels);

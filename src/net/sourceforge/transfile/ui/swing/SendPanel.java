@@ -146,6 +146,8 @@ public class SendPanel extends TopLevelPanel {
 		this.add(titledPanel, BorderLayout.CENTER);
 		
 		this.new FileDropHandler(this);
+		
+		this.setVisible(true);
 	}
 	
 	/**
