@@ -96,6 +96,8 @@ public class TransFile implements Runnable {
 		this.ui.start();
 	}
 	
+	public static final String PACKAGE_NAME = TransFile.class.getPackage().getName();
+	
 	/**
 	 * @param args
 	 */
@@ -138,10 +140,10 @@ public class TransFile implements Runnable {
 		fileHandler.setLevel(logLevel);
 		fileHandler.setFormatter(new SimpleFormatter());
 		
-		Logger.getLogger("net.sourceforge.transfile").addHandler(consoleHandler);
-		Logger.getLogger("net.sourceforge.transfile").addHandler(fileHandler);
+		Logger.getLogger(PACKAGE_NAME).addHandler(consoleHandler);
+		Logger.getLogger(PACKAGE_NAME).addHandler(fileHandler);
 		
-		Logger.getLogger("net.sourceforge.transfile").setLevel(logLevel);
+		Logger.getLogger(PACKAGE_NAME).setLevel(logLevel);
 	}
-
+	
 }

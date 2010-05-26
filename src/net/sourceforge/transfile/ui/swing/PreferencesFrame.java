@@ -19,6 +19,7 @@
 
 package net.sourceforge.transfile.ui.swing;
 
+import static net.sourceforge.transfile.tools.Tools.array;
 import static net.sourceforge.transfile.ui.swing.GUITools.horizontalFlow;
 
 import java.awt.BorderLayout;
@@ -28,6 +29,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.EventObject;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
 import javax.swing.DefaultCellEditor;
@@ -42,6 +45,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableModel;
 
+import net.sourceforge.transfile.TransFile;
 import net.sourceforge.transfile.i18n.Translator;
 import net.sourceforge.transfile.settings.Settings;
 
@@ -92,6 +96,10 @@ public class PreferencesFrame extends JDialog {
 			
 			if ("locale".equals(key)) {
 				Translator.getDefaultTranslator().setLocale(Translator.createLocale(value.toString()));
+			}
+			
+			if ("log_level".equals(key)) {
+				Logger.getLogger(TransFile.PACKAGE_NAME).setLevel(Level.parse(value.toString()));
 			}
 		}
 	}
@@ -144,6 +152,9 @@ public class PreferencesFrame extends JDialog {
 				final Object value, final boolean isSelected, final int row, final int column) {
 			if ("locale".equals(table.getValueAt(row, 0))) {
 				this.currentCellEditor = new DefaultCellEditor(new JComboBox(Translator.getDefaultTranslator().getAvailableLocales()));
+			}
+			else if ("log_level".equals(table.getValueAt(row, 0))) {
+				this.currentCellEditor = new DefaultCellEditor(new JComboBox(LOG_LEVELS));
 			}
 			else {
 				this.currentCellEditor = this.defaultCellEditor;
@@ -209,6 +220,18 @@ public class PreferencesFrame extends JDialog {
 		}
 		
 		private static final long serialVersionUID = -3204827079123577279L;
+		
+		private static final Level[] LOG_LEVELS = array(
+				Level.ALL,
+				Level.CONFIG, 
+				Level.FINE,
+				Level.FINER,
+				Level.FINEST,
+				Level.INFO,
+				Level.OFF,
+				Level.SEVERE,
+				Level.WARNING
+		);
 		
 	}
 	
