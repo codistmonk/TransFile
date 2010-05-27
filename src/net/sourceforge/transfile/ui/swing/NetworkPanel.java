@@ -52,7 +52,7 @@ import javax.swing.event.ChangeListener;
 import net.sourceforge.transfile.backend.ControllableBackend;
 import net.sourceforge.transfile.exceptions.SerializationException;
 import net.sourceforge.transfile.exceptions.SerializationFileInUseException;
-import net.sourceforge.transfile.network.exceptions.LinkFailedException;
+import net.sourceforge.transfile.network.exceptions.BilateralConnectException;
 import net.sourceforge.transfile.network.exceptions.PeerURLFormatException;
 import net.sourceforge.transfile.settings.Settings;
 import net.sourceforge.transfile.settings.exceptions.IllegalConfigValueException;
@@ -501,7 +501,7 @@ public class NetworkPanel extends TopLevelPanel {
 					} else if(cause instanceof IllegalStateException) {
 						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_illegal_state"), cause));
 						getLoggerForThisMethod().log(Level.SEVERE, "failed to connect", cause);
-					} else if(cause instanceof LinkFailedException) {
+					} else if(cause instanceof BilateralConnectException) {
 						// TODO...
 						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_no_link")));
 						getLoggerForThisMethod().log(Level.INFO, "failed to connect", cause);
@@ -768,7 +768,7 @@ public class NetworkPanel extends TopLevelPanel {
 			return;
 		}
 		
-		this.localURLField.setText(this.backend.makePeerURLString(this.selectedLocalAddress, ((Number) this.localPort.getValue()).intValue()));
+		this.localURLField.setText(this.backend.makePeerURL(this.selectedLocalAddress, ((Number) this.localPort.getValue()).intValue()));
 	}
 	
 	/**

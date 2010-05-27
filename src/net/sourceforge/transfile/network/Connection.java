@@ -19,17 +19,10 @@
 
 package net.sourceforge.transfile.network;
 
+import java.io.IOException;
 import java.net.Socket;
 
-import net.sourceforge.transfile.network.exceptions.ConnectFailedToSetTimeoutException;
-import net.sourceforge.transfile.network.exceptions.ConnectIOException;
-import net.sourceforge.transfile.network.exceptions.ConnectSecurityException;
-import net.sourceforge.transfile.network.exceptions.ConnectSocketFailedToCloseException;
-import net.sourceforge.transfile.network.exceptions.ConnectTimeoutException;
-import net.sourceforge.transfile.network.exceptions.ServerFailedToBindException;
-import net.sourceforge.transfile.network.exceptions.ServerFailedToCloseException;
-import net.sourceforge.transfile.settings.Settings;
-
+import net.sourceforge.transfile.network.exceptions.ConnectionFailedToCloseException;
 
 /**
  * TODO ...
@@ -37,89 +30,84 @@ import net.sourceforge.transfile.settings.Settings;
  * @author Martin Riedel
  *
  */
-abstract class Connection {
+class Connection {
 	
 	/*
-	 * PeerURL representing the peer this Connection connects to
+	 * Local host for this connection 
 	 */
-	private final PeerURL peer;
+	private final Peer localPeer;
 	
 	/*
-	 * True if the connection has been established successfully
+	 * Remote host for this connection
 	 */
-	private boolean connected = false;
-	
-	//TODO handle NumberFormatExceptions due to non-integer values in config files here and elsewhere
-	
-	/*
-	 * The maximum time in milliseconds for which both attempts to establish a connection from localhost to the remote peer
-	 * and attempts to accept a connection from the remote peer to the local host block in between checking
-	 * whether their respective threads have been interrupted
-	 */
-	protected static final int connectIntervalTimeout = Settings.getPreferences().getInt("connect_interval_time", Settings.CONNECT_INTERVAL_TIME);
-	
-	/*
-	 * The number of times those connection attempts (see above) check for thread interruption
-	 * before considering themselves timed out
-	 */
-	protected static final int connectMaxIntervals = Settings.getPreferences().getInt("connect_intervals", Settings.CONNECT_INTERVALS);
+	private final Peer remotePeer;
 	
 	/*
 	 * The Socket that connects to the remote peer
 	 */
-	protected Socket socket = null;
+	private final Socket socket;
 
 	
 	/**
-	 * 
 	 * TODO doc
+	 * 
 	 */
-	public Connection(final PeerURL peer) {
-		this.peer = peer;
+	public final Peer getLocalPeer() {
+		return this.localPeer;
 	}
 	
 	/**
-	 * 
 	 * TODO doc
+	 * 
 	 */
-	public final PeerURL getPeerURL() {
-		return this.peer;
+	public final Peer getRemotePeer() {
+		return this.remotePeer;
 	}
 	
 	/**
-	 * 
 	 * TODO doc
+	 * 
 	 */
 	public final boolean isConnected() {
-		return this.connected;
+		return this.socket.isConnected();
 	}
 	
 	/**
-	 * Blocks the calling thread until the connection has been established
-	 * 
-	 * @throws ServerFailedToBindException TODO ... 
-	 * @throws ConnectFailedToSetTimeoutException TODO ...
-	 * TODO ...
-	 * 
-	 */
-	public abstract void establish() throws ConnectIOException, ConnectSecurityException, 
-			ConnectTimeoutException, InterruptedException, ConnectSocketFailedToCloseException,
-			ServerFailedToCloseException, ServerFailedToBindException, ConnectFailedToSetTimeoutException;
-	
-	/**
-	 * 
 	 * TODO doc
+	 * @throws ConnectionFailedToCloseException 
+	 * 
 	 */
-	public final void authenticate() {
-		//TODO ...
+	public final void close() throws ConnectionFailedToCloseException {
+		try {
+			this.socket.close();
+		} catch (final IOException e) {
+			throw new ConnectionFailedToCloseException(e);
+		}
 	}
 	
 	/**
-	 * 
 	 * TODO doc
+	 * 
 	 */
-	protected final void setConnected(final boolean connected) {
-		this.connected = connected;
+	@Override
+	public final void finalize() {
+		if(!this.socket.isClosed()) {
+			try {
+				close();
+			} catch (ConnectionFailedToCloseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 	
+	/**
+	 * TODO doc
+	 * 
+	 */
+	Connection(final Socket socket, final Peer localPeer, final Peer remotePeer) {
+		this.socket = socket;
+		this.localPeer = localPeer;
+		this.remotePeer = remotePeer;
+	}
 }

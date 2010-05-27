@@ -34,7 +34,7 @@ import javax.swing.MutableComboBoxModel;
 
 import net.sourceforge.transfile.exceptions.SerializationException;
 import net.sourceforge.transfile.exceptions.SerializationFileInUseException;
-import net.sourceforge.transfile.network.PeerURL;
+import net.sourceforge.transfile.network.Peer;
 import net.sourceforge.transfile.tools.Tools;
 
 
@@ -318,10 +318,10 @@ class PeerURLBar extends JComboBox {
 				if(this.holder.selectedItem instanceof String) {
 					String selectedString = (String) this.holder.selectedItem;
 					// if the selected item is a string and doesn't start with the correct protocol prefix
-					if(!selectedString.startsWith(PeerURL.protocolPrefix)) {
+					if(!selectedString.startsWith(Peer.PROTOCOL_PREFIX)) {
 						// prepend the protocol prefix
 						//TODO be smarter, recognize at least incomplete or maybe even mistyped prefixes and correct them
-						selectedString = PeerURL.protocolPrefix + selectedString;
+						selectedString = Peer.PROTOCOL_PREFIX + selectedString;
 						this.holder.selectedItem = selectedString;
 					}
 				}

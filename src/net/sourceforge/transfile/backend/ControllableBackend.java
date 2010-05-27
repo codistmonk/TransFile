@@ -26,7 +26,7 @@ import java.net.UnknownHostException;
 import java.util.Set;
 
 import net.sourceforge.transfile.network.exceptions.ConnectTimeoutException;
-import net.sourceforge.transfile.network.exceptions.LinkFailedException;
+import net.sourceforge.transfile.network.exceptions.BilateralConnectException;
 import net.sourceforge.transfile.network.exceptions.PeerURLFormatException;
 
 
@@ -67,7 +67,7 @@ public interface ControllableBackend {
 	 * 
 	 * TODO doc
 	 */
-	public String makePeerURLString(final String address, final int port);
+	public String makePeerURL(final String address, final int port);
 	
 	/**
 	 * TODO ...
@@ -82,6 +82,6 @@ public interface ControllableBackend {
 	 * @throws InterruptedException 
 	 */
 	public void connect(final String remoteURL, final int localPort) 
-			throws UnknownHostException, PeerURLFormatException, InterruptedException, LinkFailedException;
+			throws UnknownHostException, PeerURLFormatException, InterruptedException, BilateralConnectException;
 	
 }

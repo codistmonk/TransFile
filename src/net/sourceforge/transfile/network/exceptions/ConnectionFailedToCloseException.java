@@ -20,29 +20,52 @@
 package net.sourceforge.transfile.network.exceptions;
 
 /**
- * TODO ...
- * 
+ * TODO doc
+ *
  * @author Martin Riedel
  *
  */
-public class ConnectFailedToSetTimeoutException extends ConnectException {
+public class ConnectionFailedToCloseException extends Exception {
 
-	private static final long serialVersionUID = 4212248323350869232L;
+	private static final long serialVersionUID = 6143787676578418489L;
 
-	public ConnectFailedToSetTimeoutException() {
-		// exception default constructor, do nothing
+	/**
+	 * Constructs a new instance
+	 * TODO doc
+	 */
+	public ConnectionFailedToCloseException() {
+		// TODO Auto-generated constructor stub
 	}
 
-	public ConnectFailedToSetTimeoutException(String message) {
+	/**
+	 * Constructs a new instance
+	 * TODO doc
+	 * @param message
+	 */
+	public ConnectionFailedToCloseException(String message) {
 		super(message);
+		// TODO Auto-generated constructor stub
 	}
 
-	public ConnectFailedToSetTimeoutException(Throwable cause) {
+	/**
+	 * Constructs a new instance
+	 * TODO doc
+	 * @param cause
+	 */
+	public ConnectionFailedToCloseException(Throwable cause) {
 		super(cause);
+		// TODO Auto-generated constructor stub
 	}
 
-	public ConnectFailedToSetTimeoutException(String message, Throwable cause) {
+	/**
+	 * Constructs a new instance
+	 * TODO doc
+	 * @param message
+	 * @param cause
+	 */
+	public ConnectionFailedToCloseException(String message, Throwable cause) {
 		super(message, cause);
+		// TODO Auto-generated constructor stub
 	}
 
 }

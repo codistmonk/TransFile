@@ -25,9 +25,9 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Set;
 
-import net.sourceforge.transfile.network.Link;
-import net.sourceforge.transfile.network.PeerURL;
-import net.sourceforge.transfile.network.exceptions.LinkFailedException;
+import net.sourceforge.transfile.network.NetworkTools;
+import net.sourceforge.transfile.network.Peer;
+import net.sourceforge.transfile.network.exceptions.BilateralConnectException;
 import net.sourceforge.transfile.network.exceptions.PeerURLFormatException;
 
 
@@ -45,15 +45,6 @@ public class Backend implements ControllableBackend {
 	 * Reference to the user interface handling events triggered by the Backend
 	 */
 	private BackendEventHandler ui;
-	
-	/*
-	 * Stores the active connection, if any.
-	 * 
-	 * Multiple simultaneous connections might be supported at a later point and could be implemented
-	 * in the shape of a List<Connection>.
-	 *  
-	 */
-	private Link connection = null;
 	
 	/**
 	 * Constructs a Backend object
@@ -78,7 +69,7 @@ public class Backend implements ControllableBackend {
 	 */
 	@Override
 	public String findExternalAddress() throws MalformedURLException, IOException {
-		return Link.findExternalAddress();
+		return NetworkTools.findExternalAddress();
 	}
 	
 	/**
@@ -86,7 +77,7 @@ public class Backend implements ControllableBackend {
 	 */
 	@Override
 	public Set<String> findLocalAddresses() throws SocketException {
-		return Link.findLocalAddresses(false);
+		return NetworkTools.findLocalAddresses(false);
 	}
 	
 	/**
@@ -94,15 +85,15 @@ public class Backend implements ControllableBackend {
 	 */
 	@Override
 	public Set<String> findLocalAddresses(final boolean ipv4Only) throws SocketException {
-		return Link.findLocalAddresses(ipv4Only);
+		return NetworkTools.findLocalAddresses(ipv4Only);
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
-	public String makePeerURLString(final String address, final int port) {
-		return PeerURL.makePeerURLString(address, port);
+	public String makePeerURL(final String address, final int port) {
+		return Peer.makePeerURL(address, port);
 	}
 
 	/**
@@ -110,16 +101,8 @@ public class Backend implements ControllableBackend {
 	 */
 	@Override
 	public void connect(final String remoteURL, final int localPort) 
-			throws PeerURLFormatException, UnknownHostException, InterruptedException, LinkFailedException {
-		if(this.connection != null)
-			throw new IllegalStateException("already connected to a peer");
-		
-		try {
-			this.connection = new Link(remoteURL, localPort);
-		} finally {
-			// if something went wrong reset connection to null
-			this.connection = null;
-		}
+			throws PeerURLFormatException, UnknownHostException, InterruptedException, BilateralConnectException {
+		//TODO implement
 	}
 
 }

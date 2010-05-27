@@ -80,14 +80,15 @@ public final class Settings {
 	public static final String EXTERNAL_IP_SITE = "http://www.whatismyip.org/";
 	
 	/*
+	 * The amount of time in milliseconds after which a connection attempt is considered timed out
+	 */
+	public static final long CONNECT_TIMEOUT = 10000L;
+	
+	/*
 	 * The length of the time intervals between checks for thread interruption
 	 * in threads establishing TransFile connections
 	 */
 	public static final int CONNECT_INTERVAL_TIME = 100;
-	/*
-	 * The number of such intervals to go through before the connection attempt is considered timed out
-	 */
-	public static final int CONNECT_INTERVALS = 100;
 	
 	/*
 	 * The number of recent PeerURLs the PeerURLBar remembers
