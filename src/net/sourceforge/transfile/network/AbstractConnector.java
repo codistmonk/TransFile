@@ -81,7 +81,7 @@ public abstract class AbstractConnector implements Connector {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public synchronized Connection connect() throws IllegalStateException, ConnectException, InterruptedException {
+	public final synchronized Connection connect() throws IllegalStateException, ConnectException, InterruptedException {
 		if(this.executed)
 			throw new IllegalStateException();
 		
