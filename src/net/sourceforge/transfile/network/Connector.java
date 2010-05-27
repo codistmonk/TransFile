@@ -29,7 +29,7 @@ import net.sourceforge.transfile.settings.Settings;
  * if you need to (re-)connect the same local peer with the same remote peer again.</p>
  * 
  * <p>{@code Connector}s that extend {@link AbstractConnector} are thread-safe with respect to
- * {@link #connect}.</p>
+ * {@link #connect} and {@link #isExecuted}.</p>
  *
  * @author Martin Riedel
  *

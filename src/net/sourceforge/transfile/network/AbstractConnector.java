@@ -25,7 +25,7 @@ import net.sourceforge.transfile.network.exceptions.ConnectException;
  * TODO doc
  * 
  * <p>All {@link Connector}s extending {@code AbstractConnector} are thread-safe with respect to
- * {@link Connector#connect}.</p>
+ * {@link #connect} and {@link #isExecuted}.</p>
  *
  * @author Martin Riedel
  *
@@ -96,8 +96,9 @@ public abstract class AbstractConnector implements Connector {
 	/** 
 	 * {@inheritDoc}
 	 */
+	//TODO doc that this implementation blocks when a different thread is using this Connector to connect 
 	@Override
-	public boolean isExecuted() {
+	public final synchronized boolean isExecuted() {
 		return this.executed;
 	}
 	
