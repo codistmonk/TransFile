@@ -25,6 +25,7 @@ import static net.sourceforge.transfile.ui.swing.GUITools.horizontalFlow;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EventObject;
@@ -232,6 +233,17 @@ public class PreferencesFrame extends JDialog {
 				Level.SEVERE,
 				Level.WARNING
 		);
+		
+		static {
+			Arrays.sort(LOG_LEVELS, new Comparator<Level>() {
+				
+				@Override
+				public final int compare(final Level level1, final Level level2) {
+					return new Integer(level1.intValue()).compareTo(level2.intValue());
+				}
+				
+			});
+		}
 		
 	}
 	
