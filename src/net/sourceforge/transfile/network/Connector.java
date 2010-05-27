@@ -25,7 +25,7 @@ import net.sourceforge.transfile.settings.Settings;
 /**
  * <p>{@link Connection} factory</p>
  * 
- * <p>{@link #connect} may only be called once per {@code Connector} instance. Clone or copy-construct
+ * <p>{@link #connect} may only be called once per {@code Connector} instance. Clone the {@code Connector}
  * if you need to (re-)connect the same local peer with the same remote peer again.</p>
  * 
  * <p>{@code Connector}s that extend {@link AbstractConnector} are thread-safe with respect to
@@ -73,6 +73,9 @@ public interface Connector {
 	 * TODO doc
 	 * 
 	 * <p>Factory method for {@link Connection}.</p>
+	 * 
+	 * <p>May only be called once per {@code Connector} instance. Clone the {@code Connector}
+	 * if you need to (re-)connect the same local peer with the same remote peer again.</p>
 	 * 
 	 * <p>Must be implemented in a thread-safe manner.</p>
 	 * 
