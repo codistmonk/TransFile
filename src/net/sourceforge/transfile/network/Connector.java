@@ -23,9 +23,13 @@ import net.sourceforge.transfile.network.exceptions.ConnectException;
 import net.sourceforge.transfile.settings.Settings;
 
 /**
- * TODO doc
- *
- * <p>{@link Connection} Factory</p>
+ * <p>{@link Connection} factory</p>
+ * 
+ * <p>{@link #connect} may only be called once per {@code Connector} instance. Clone or copy-construct
+ * if you need to (re-)connect the same local peer with the same remote peer again.</p>
+ * 
+ * <p>{@code Connector}s that extend {@link AbstractConnector} are thread-safe with respect to
+ * {@link #connect}.</p>
  *
  * @author Martin Riedel
  *
@@ -44,6 +48,12 @@ public interface Connector {
 	 */
 	public static final int CONNECT_INTERVAL_TIMEOUT = Settings.getPreferences().getInt("connect_interval_time", Settings.CONNECT_INTERVAL_TIME);
 	
+	/**
+	 * 
+	 * 
+	 * @return true iff this instance has successfully created a {@link Connection} object
+	 */
+	public abstract boolean isExecuted();
 	
 	/**
 	 * 
@@ -62,12 +72,33 @@ public interface Connector {
 	/**
 	 * TODO doc
 	 * 
-	 * <p>Factory method for {@link Connection}</p>
+	 * <p>Factory method for {@link Connection}.</p>
+	 * 
+	 * <p>Must be implemented in a thread-safe manner.</p>
 	 * 
 	 * @param remotePeer
+	 * 
+	 * @throws IllegalStateException if this {@code Connector} has already established a connection
+	 * 
 	 * @return
 	 */
 	public abstract Connection connect() 
-		throws ConnectException, InterruptedException;
+		throws IllegalStateException, ConnectException, InterruptedException;
+	
+	/**
+	 * <p>Clones this instance, returning a new, ready to be executed {@code Connector}.</p>
+	 * 
+	 * <p>The result is <strong>not</strong> necessarily identical to {@code this}. While the local
+	 * and remote peers (and, at the discretion of implementing classes, possibly other members) are copied,
+	 * new clones are always ready to be executed ({@link #isExecuted()} will return {@code false}). This is
+	 * intended behaviour, making it possible to (re-)connect to a host after an earlier, successful
+	 * connection attempt.</p> 
+	 * 
+	 * @return
+	 * <br />A clone of this instance
+	 * <br />Never null
+	 */
+	public abstract Connector clone()
+		throws CloneNotSupportedException;
 	
 }

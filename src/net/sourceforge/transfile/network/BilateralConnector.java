@@ -48,17 +48,17 @@ import net.sourceforge.transfile.network.exceptions.ServerFailedToCloseException
 
 /**
  * TODO doc
- *
+ * 
  * @author Martin Riedel
  *
  */
-public class BilateralConnector implements Connector {
+public class BilateralConnector extends AbstractConnector {
 
-	private final Peer localPeer;
-	
-	private final Peer remotePeer;
-	
 	private final FutureTask<Socket> inboundConnectionAcceptor;
+	
+	private Exception outboundConnectionError = null;
+	
+	private Exception inboundConnectionError = null;
 	
 	
 	/**
@@ -69,44 +69,19 @@ public class BilateralConnector implements Connector {
 	 * @param remotePeer
 	 */
 	public BilateralConnector(final Peer localPeer, final Peer remotePeer) {
-		this.localPeer = localPeer;
-		this.remotePeer = remotePeer;
+		super(localPeer, remotePeer);
 		
 		this.inboundConnectionAcceptor = new FutureTask<Socket>(new ListenerTask(localPeer.getPort(), remotePeer));
-	}
-	
-	/**
-	 * 
-	 * TODO doc
-	 * @return
-	 */
-	@Override
-	public Peer getLocalPeer() {
-		return this.localPeer;
-	}
-	
-	/**
-	 * 
-	 * TODO doc
-	 * @return
-	 */
-	@Override
-	public Peer getRemotePeer() {
-		return this.remotePeer;
 	}
 	
 	/** 
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Connection connect()	throws BilateralConnectException, InterruptedException {		
+	public Connection _connect() throws BilateralConnectException, InterruptedException {		
 		
 		Connection outboundConnection = null;
 		Connection inboundConnection = null;
-		
-		// make these members and define getters as well as other Link state
-		Exception outboundConnectionError = null;
-		Exception inboundConnectionError = null;
 		
 		(new Thread(this.inboundConnectionAcceptor)).start();
 		
@@ -118,20 +93,20 @@ public class BilateralConnector implements Connector {
 			this.inboundConnectionAcceptor.cancel(true);
 			throw e;
 		} catch(final ConnectException e) {
-			outboundConnectionError = e;
+			this.outboundConnectionError = e;
 		}
 		
 		try {
-			inboundConnection = new Connection(this.inboundConnectionAcceptor.get(), this.localPeer, this.remotePeer);
+			inboundConnection = new Connection(this.inboundConnectionAcceptor.get(), getLocalPeer(), getRemotePeer());
 		} catch(final CancellationException e) {
 			throw new InterruptedException();
 		} catch(final ExecutionException e) {
 			// listening for an incoming connection from the peer failed
 			final Throwable cause = e.getCause();
 			if(cause instanceof ConnectException) {
-				inboundConnectionError = (Exception) cause;
+				this.inboundConnectionError = (Exception) cause;
 			} else if(cause instanceof ServerException) {
-				inboundConnectionError = (Exception) cause;
+				this.inboundConnectionError = (Exception) cause;
 			} else if(cause instanceof InterruptedException) {
 				// ignore
 				//TODO safe?
@@ -139,12 +114,16 @@ public class BilateralConnector implements Connector {
 				//TODO handle
 			}
 		}
-	
-		if(!((outboundConnection != null && outboundConnection.isConnected()) || 
-			 (inboundConnection != null && inboundConnection.isConnected())))
-			throw new BilateralConnectException(outboundConnectionError, inboundConnectionError);
 		
 		return selectConnection(outboundConnection, inboundConnection);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public BilateralConnector clone() {
+		return new BilateralConnector(getLocalPeer(), getRemotePeer());
 	}
 	
 	/**
@@ -191,7 +170,7 @@ public class BilateralConnector implements Connector {
 					throw new ConnectTimeoutException();
 			}
 			
-			return new Connection(socket, this.localPeer, this.remotePeer);
+			return new Connection(socket, getLocalPeer(), getRemotePeer());
 			
 		} finally {
 			
@@ -208,11 +187,27 @@ public class BilateralConnector implements Connector {
 	}
 		
 	/**
-	 * 
 	 * TODO doc
+	 * 
 	 * @return
 	 */
-	private Connection selectConnection(final Connection c1, final Connection c2) {
+	private Connection selectConnection(final Connection c1, final Connection c2) 
+			throws BilateralConnectException {
+		// if both connections have failed...
+		if((c1 == null || !c1.isConnected()) && (c2 == null || !c2.isConnected()))
+			throw new BilateralConnectException(this.outboundConnectionError, this.inboundConnectionError);
+		
+		// if c1 has been established but c2 has failed...
+		if(c1 != null && c1.isConnected())
+			if(c2 == null || !c2.isConnected())
+				return c1;
+		
+		// if c2 has been established but c1 has failed...
+		if(c2 != null && c2.isConnected())
+			if(c1 == null || !c1.isConnected())
+				return c2;
+		
+		// both connections have been established, negotiate the selection with the remote peer
 		//TODO implement
 		return c1;
 	}
@@ -223,6 +218,7 @@ public class BilateralConnector implements Connector {
 	 * author Martin Riedel
 	 *
 	 */
+	//TODO extract as a listener service
 	private static class ListenerTask implements Callable<Socket> {
 		
 		/*

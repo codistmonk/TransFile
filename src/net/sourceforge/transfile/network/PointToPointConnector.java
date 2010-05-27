@@ -28,7 +28,6 @@ import java.nio.channels.IllegalBlockingModeException;
 import net.sourceforge.transfile.exceptions.LogicError;
 import net.sourceforge.transfile.network.exceptions.ConnectBindException;
 import net.sourceforge.transfile.network.exceptions.ConnectException;
-import net.sourceforge.transfile.network.exceptions.ConnectIOException;
 import net.sourceforge.transfile.network.exceptions.ConnectSocketConfigException;
 import net.sourceforge.transfile.network.exceptions.ConnectSocketFailedToCloseException;
 import net.sourceforge.transfile.network.exceptions.ConnectTimeoutException;
@@ -39,19 +38,8 @@ import net.sourceforge.transfile.network.exceptions.ConnectTimeoutException;
  * @author Martin Riedel
  *
  */
-public class PointToPointConnector implements Connector {
+public class PointToPointConnector extends AbstractConnector {
 
-	/*
-	 * TODO doc
-	 */
-	private final Peer localPeer;
-
-	/*
-	 * TODO doc
-	 */
-	private final Peer remotePeer;
-	
-	
 	/**
 	 * 
 	 * Constructs a new instance
@@ -60,33 +48,14 @@ public class PointToPointConnector implements Connector {
 	 * @param remotePeer
 	 */
 	public PointToPointConnector(final Peer localPeer, final Peer remotePeer) {
-		this.localPeer = localPeer;
-		this.remotePeer = remotePeer;
-	}
-	
-	/**
-	 * 
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Peer getLocalPeer() {
-		return this.localPeer;
-	}
-	
-	/**
-	 * 
-	 * {@inheritDoc}
-	 */
-	@Override
-	public Peer getRemotePeer() {
-		return this.remotePeer;
+		super(localPeer, remotePeer);
 	}
 	
 	/** 
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Connection connect() throws ConnectException, InterruptedException {
+	public Connection _connect() throws ConnectException, InterruptedException {
 		final Socket socket = new Socket();
 		final long startTime = System.currentTimeMillis();
 		
@@ -94,7 +63,7 @@ public class PointToPointConnector implements Connector {
 			
 			// bind to the local IP address and port
 			try {
-				socket.bind(this.localPeer.toInetSocketAddress());
+				socket.bind(getLocalPeer().toInetSocketAddress());
 			} catch(final IOException e) {
 				throw new ConnectBindException(e);
 			}
@@ -109,7 +78,7 @@ public class PointToPointConnector implements Connector {
 			while(true) {
 				try {
 					// attempt to connect, timing out after connectIntervalTimeout milliseconds to check for thread interruption
-					socket.connect(this.remotePeer.toInetSocketAddress(), CONNECT_INTERVAL_TIMEOUT);
+					socket.connect(getRemotePeer().toInetSocketAddress(), CONNECT_INTERVAL_TIMEOUT);
 				} catch(final SocketTimeoutException e) {
 					// check if this thread has been interrupted
 					if(Thread.interrupted())
@@ -134,7 +103,7 @@ public class PointToPointConnector implements Connector {
 					throw new ConnectTimeoutException();
 			}
 			
-			return new Connection(socket, this.localPeer, this.remotePeer);
+			return new Connection(socket, getLocalPeer(), getRemotePeer());
 			
 		} finally {
 			
@@ -148,6 +117,14 @@ public class PointToPointConnector implements Connector {
 			}
 			
 		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public PointToPointConnector clone() {
+		return new PointToPointConnector(getLocalPeer(), getRemotePeer());
 	}
 
 }

@@ -26,6 +26,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
 import net.sourceforge.transfile.network.exceptions.BilateralConnectException;
+import net.sourceforge.transfile.network.exceptions.ConnectException;
 
 import org.junit.*;
 
@@ -64,7 +65,7 @@ public class BilateralConnectorTest {
 	
 	
 	@Test
-	public void connect() throws InterruptedException, ExecutionException {
+	public void connect() throws InterruptedException, ExecutionException, ConnectException {
 		try {
 			
 			final FutureTask<Connection> c2Task = new FutureTask<Connection>(new Callable<Connection>() {
