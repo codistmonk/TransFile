@@ -292,16 +292,14 @@ public class BilateralConnector extends AbstractConnector {
 					}
 
 					// check if a connection has been established
-					if(this.clientSocket != null) {
-						if(this.clientSocket.isConnected()) {
-							// check if the connection originates from the expected peer
-							if(this.clientSocket.getInetAddress().equals(this.remotePeer.getInetAddress()))
-								// if so, break the loop -> connection established
-								break;
-							// if not, discard the connection and keep going
-							getLoggerForThisMethod().log(Level.WARNING, "dropped connection from remote host " + this.clientSocket.getInetAddress().toString() + ": host is not the expected peer");
-							this.clientSocket = null;
-						}
+					if(this.clientSocket != null && this.clientSocket.isConnected()) {
+						// check if the connection originates from the expected peer
+						if(this.clientSocket.getInetAddress().equals(this.remotePeer.getInetAddress()))
+							// if so, break the loop -> connection established
+							break;
+						// if not, discard the connection and keep going
+						getLoggerForThisMethod().log(Level.WARNING, "dropped connection from remote host " + this.clientSocket.getInetAddress().toString() + ": host is not the expected peer");
+						this.clientSocket = null;
 					}
 
 					if(System.currentTimeMillis() - startTime >= CONNECT_TIMEOUT)
@@ -326,13 +324,11 @@ public class BilateralConnector extends AbstractConnector {
 					}
 				}
 				// unless the connection has been established successfully, close the client socket if it exists
-				if(!this.clientSocket.isConnected()) {
-					if(this.clientSocket != null) {
-						try {
-							this.clientSocket.close();
-						} catch(IOException e) {
-							throw new ConnectSocketFailedToCloseException(e);
-						}
+				if(this.clientSocket != null && !this.clientSocket.isConnected()) {
+					try {
+						this.clientSocket.close();
+					} catch(IOException e) {
+						throw new ConnectSocketFailedToCloseException(e);
 					}
 				}
 			}
