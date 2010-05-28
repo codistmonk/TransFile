@@ -54,7 +54,7 @@ import net.sourceforge.transfile.network.exceptions.ServerFailedToCloseException
  */
 public class BilateralConnector extends AbstractConnector {
 
-	private final FutureTask<Socket> inboundConnectionAcceptor;
+	private final FutureTask<Connection> inboundConnectionAcceptor;
 	
 	private Exception outboundConnectionError = null;
 	
@@ -71,7 +71,7 @@ public class BilateralConnector extends AbstractConnector {
 	public BilateralConnector(final Peer localPeer, final Peer remotePeer) {
 		super(localPeer, remotePeer);
 		
-		this.inboundConnectionAcceptor = new FutureTask<Socket>(new ListenerTask(localPeer.getPort(), remotePeer));
+		this.inboundConnectionAcceptor = new FutureTask<Connection>(new ListenerTask(localPeer, remotePeer));
 	}
 	
 	/** 
@@ -97,7 +97,7 @@ public class BilateralConnector extends AbstractConnector {
 		}
 		
 		try {
-			inboundConnection = new Connection(this.inboundConnectionAcceptor.get(), getLocalPeer(), getRemotePeer());
+			inboundConnection = this.inboundConnectionAcceptor.get();
 		} catch(final CancellationException e) {
 			throw new InterruptedException();
 		} catch(final ExecutionException e) {
@@ -194,22 +194,33 @@ public class BilateralConnector extends AbstractConnector {
 	private Connection selectConnection(final Connection c1, final Connection c2) 
 			throws BilateralConnectException {
 		// if both connections have failed...
-		if((c1 == null || !c1.isConnected()) && (c2 == null || !c2.isConnected()))
+		if(!isEstablished(c1) && !isEstablished(c2))
 			throw new BilateralConnectException(this.outboundConnectionError, this.inboundConnectionError);
 		
 		// if c1 has been established but c2 has failed...
-		if(c1 != null && c1.isConnected())
-			if(c2 == null || !c2.isConnected())
-				return c1;
+		if(isEstablished(c1) && !isEstablished(c2))
+			return c1;
 		
 		// if c2 has been established but c1 has failed...
-		if(c2 != null && c2.isConnected())
-			if(c1 == null || !c1.isConnected())
-				return c2;
+		if(!isEstablished(c1) && isEstablished(c2))
+			return c2;
 		
 		// both connections have been established, negotiate the selection with the remote peer
 		//TODO implement
 		return c1;
+	}
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @param c
+	 * <br />The {@code Connection} to check
+	 * <br />May be null
+	 * @return
+	 * <br />{@code true} iff the {@code Connection} is established/connected
+	 */
+	private static boolean isEstablished(final Connection c) {
+		return c != null && c.isConnected();
 	}
 	
 	/**
@@ -219,12 +230,12 @@ public class BilateralConnector extends AbstractConnector {
 	 *
 	 */
 	//TODO extract as a listener service
-	private static class ListenerTask implements Callable<Socket> {
+	private static class ListenerTask implements Callable<Connection> {
 		
 		/*
 		 * The local port the ServerThread will bind to
 		 */
-		private final int port;
+		private final Peer localPeer;
 		
 		/*
 		 * The peer who's expected to connect to the local host
@@ -250,8 +261,8 @@ public class BilateralConnector extends AbstractConnector {
 		 * @param remotePeer the peer to accept connections from
 		 */
 		//TODO properly bind to the entire local address, not just the port
-		public ListenerTask(final int port, final Peer remotePeer) {
-			this.port = port;
+		public ListenerTask(final Peer localPeer, final Peer remotePeer) {
+			this.localPeer = localPeer;
 			this.remotePeer = remotePeer;
 		}
 		
@@ -260,13 +271,19 @@ public class BilateralConnector extends AbstractConnector {
 		 *
 		 */
 		@Override
-		public Socket call() throws ConnectException, ServerException, InterruptedException {
+		public Connection call() 
+				throws ConnectException, ServerException, InterruptedException {
+			return acceptConnection();
+		}
+		
+		private Connection acceptConnection() 
+				throws ConnectException, ServerException, InterruptedException {
 			try {
 				final long startTime = System.currentTimeMillis();
 				
 				// start listening
 				//TODO bind to the specific address selected via the GUI, not just any/all
-				this.serverSocket = new ServerSocket(this.port);
+				this.serverSocket = new ServerSocket(this.localPeer.getPort());
 				
 				// set the timeout in milliseconds after which serverSocket.accept() will stop blocking
 				// so that we can check for thread interruption
@@ -307,13 +324,13 @@ public class BilateralConnector extends AbstractConnector {
 				}
 				
 				// if the flow reaches this point, a connection from the correct peer has been accepted
-				return this.clientSocket;
+				return new Connection(this.clientSocket, this.localPeer, this.remotePeer);
 			} catch(SocketException e) {
 				throw new ConnectSocketConfigException(e);
 			} catch(IOException e) {
-				throw new ServerFailedToBindException(this.port, e);
+				throw new ServerFailedToBindException(this.localPeer.getPort(), e);
 			} catch(SecurityException e) {
-				throw new ServerFailedToBindException(this.port, e);
+				throw new ServerFailedToBindException(this.localPeer.getPort(), e);
 			} finally {
 				// whatever happened, close the server socket if it exists
 				if(this.serverSocket != null) {
@@ -331,7 +348,7 @@ public class BilateralConnector extends AbstractConnector {
 						throw new ConnectSocketFailedToCloseException(e);
 					}
 				}
-			}
+			}			
 		}
 	}
 
