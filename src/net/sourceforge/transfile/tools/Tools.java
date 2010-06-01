@@ -369,32 +369,34 @@ public final class Tools {
      * 
      * @param <T>
      * <br />The type of the arrays being concatenated
-     * @param a
+     * @param left
      * <br />The array to be prepended to {@code b}
      * <br />Should not be null
-     * @param b
+     * @param right
      * <br />The array to be appended to {@code a}
      * <br />Should not be null
-     * @return 
-     * The concatenation of the two provided arrays<br />
-     * Never null<br />
-     * Possibly an array of length 0
+     * @return The concatenation of the two provided arrays
+     * <br /> {@code right} if {@code left.length == 0}, {@code left} if {@code right.length == 0}
+     * <br />Never null
+     * <br />Possibly an array of length 0
      */
     @SuppressWarnings("unchecked")
-	public static final <T> T[] arrayConcat(final T[] a, final T[] b) {
-    	if(a.length == 0)
-    		return b;
-    	if(b.length == 0)
-    		return a;
+	public static final <T> T[] arrayConcat(final T[] left, final T[] right) {
+    	if (left.length == 0) {
+    		return right;
+    	}
+    	if (right.length == 0) {
+    		return left;
+    	}
     	
-    	final T[] c = (T[]) Array.newInstance(a.getClass().getComponentType(), a.length + b.length);
+    	final T[] result = (T[]) Array.newInstance(left.getClass().getComponentType(), left.length + right.length);
     	
-    	System.arraycopy(a, 0, c, 0, a.length);
-        System.arraycopy(b, 0, c, a.length, b.length);
+    	System.arraycopy(left, 0, result, 0, left.length);
+        System.arraycopy(right, 0, result, left.length, right.length);
     	
-    	return c;
+    	return result;
     }
-
+    
     /**
      * <p>Prepends an object to an array, producing a new array.</p>
      * 
@@ -402,25 +404,26 @@ public final class Tools {
      * 
      * @param <T>
      * <br />The type of the entities being concatenated
-     * @param a
-     * <br />The object to be prepended to {@code b}
+     * @param elementToPrepend
+     * <br />The object to be prepended to {@code array}
      * <br />Should not be null
-     * @param b
-     * <br />The array {@code a} is being prepended to
+     * @param array
+     * <br />The array {@code elementToPrepend} is being prepended to
      * <br />Should not be null
-     * @return 
-     * The concatenation of the provided object and the provided array<br />
-     * Never null
+     * @return The concatenation of the provided object and the provided array
+     * <br /> Never null
      */
     @SuppressWarnings("unchecked")
-	public static final <T> T[] arrayConcat(final T a, final T[] b) {
-    	final T[] c = (T[]) Array.newInstance(a.getClass(), b.length + 1);
-		c[0] = a;
+	public static final <T> T[] arrayConcat(final T elementToPrepend, final T[] array) {
+    	final T[] result = (T[]) Array.newInstance(elementToPrepend.getClass(), array.length + 1);
     	
-    	if(b.length > 0)
-    		System.arraycopy(b, 0, c, 1, b.length);
+		result[0] = elementToPrepend;
+    	
+    	if (array.length > 0) {
+    		System.arraycopy(array, 0, result, 1, array.length);
+    	}
         
-        return c;
+        return result;
     }
     
     /**
@@ -430,25 +433,26 @@ public final class Tools {
      * 
      * @param <T>
      * <br />The type of the entities being concatenated
-     * @param a
-     * <br />The array {@code b} is being appended to
+     * @param array
+     * <br />The array {@code elementToAppend} is being appended to
      * <br />Should not be null
-     * @param b
-     * <br />The object to be appended to {@code a}
+     * @param elementToAppend
+     * <br />The object to be appended to {@code array}
      * <br />Should not be null
-     * @return 
-     * The concatenation of the provided array and the provided object<br />
-     * Never null
+     * @return The concatenation of the provided array and the provided object
+     * <br />Never null
      */
     @SuppressWarnings("unchecked")
-	public static final <T> T[] arrayConcat(final T[] a, final T b) {
-    	final T[] c = (T[]) Array.newInstance(b.getClass(), a.length + 1);
-    	c[c.length - 1] = b;
+	public static final <T> T[] arrayConcat(final T[] array, final T elementToAppend) {
+    	final T[] result = (T[]) Array.newInstance(elementToAppend.getClass(), array.length + 1);
     	
-    	if(a.length > 0)
-    		System.arraycopy(a, 0, c, 0, a.length);
+    	result[result.length - 1] = elementToAppend;
     	
-    	return c;
+    	if(array.length > 0) {
+    		System.arraycopy(array, 0, result, 0, array.length);
+    	}
+    	
+    	return result;
     }
     
 }

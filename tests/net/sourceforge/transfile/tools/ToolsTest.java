@@ -19,6 +19,8 @@
 
 package net.sourceforge.transfile.tools;
 
+import static net.sourceforge.transfile.tools.Tools.array;
+import static net.sourceforge.transfile.tools.Tools.arrayConcat;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -303,6 +305,96 @@ public class ToolsTest {
 	@Test
 	public final void testGetUserApplicationDirectory() {
 		assertNotNull(Tools.getUserApplicationDirectory());
+	}
+	
+	@Test
+	public final void testArrayConcat2Arrays() {
+		final Integer[] array1 = array(2);
+		final Integer[] array2 = array(3, 5);
+		final Integer[] array3 = array(7, 11, 13);
+		
+		{
+			final Object[] result = arrayConcat(array(), array());
+			
+			assertNotNull(result);
+			assertArrayEquals(array(), result);
+		}
+		{
+			final Object[] result = arrayConcat(array2, array());
+			
+			assertNotNull(result);
+			assertSame(array2, result);
+		}
+		{
+			final Object[] result = arrayConcat(array(), array3);
+			
+			assertNotNull(result);
+			assertSame(array3, result);
+		}
+		{
+			final Object[] result = arrayConcat(array1, array2);
+			
+			assertNotNull(result);
+			assertArrayEquals(array(2, 3, 5), result);
+		}
+		{
+			final Object[] result = arrayConcat(array3, array1);
+			
+			assertNotNull(result);
+			assertArrayEquals(array(7, 11, 13, 2), result);
+		}
+	}
+	
+	@Test
+	public final void testArrayConcatElementArray() {
+		final Integer element = 42;
+		final Integer[] array1 = array(2);
+		final Integer[] array3 = array(3, 5, 7);
+		
+		{
+			final Object[] result = arrayConcat(element, array());
+			
+			assertNotNull(result);
+			assertArrayEquals(array(element), result);
+		}
+		{
+			final Object[] result = arrayConcat(element, array1);
+			
+			assertNotNull(result);
+			assertArrayEquals(array(element, 2), result);
+		}
+		{
+			final Object[] result = arrayConcat(element, array3);
+			
+			assertNotNull(result);
+			assertArrayEquals(array(element, 3, 5, 7), result);
+		}
+	}
+	
+	@Test
+	public final void testArrayConcatArrayElement() {
+		final Integer element = 42;
+		final Integer[] array1 = array(2);
+		final Integer[] array3 = array(3, 5, 7);
+		
+		{
+			final Object[] result = arrayConcat(array(), element);
+			
+			assertNotNull(result);
+			assertArrayEquals(array(element), result);
+		}
+		{
+			final Object[] result = arrayConcat(array1, element);
+			
+			assertNotNull(result);
+			assertArrayEquals(array(2, element), result);
+		}
+		{
+			final Object[] result = arrayConcat(array3, element);
+			
+			assertNotNull(result);
+			assertArrayEquals(array(3, 5, 7, element), result);
+		}
 	}
 	
 	/**
