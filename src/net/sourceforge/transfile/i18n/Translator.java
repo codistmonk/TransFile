@@ -155,8 +155,9 @@ public class Translator {
 	}
 	
 	/**
+	 * Removes {@code object} from the list of autotranslatables and resets its text property to the translation key.
+	 * <br>That means that subsequent calls to {@link #setLocale(Locale)} won't update {@code object} anymore.
 	 * 
-	 * TODO doc
 	 * @param object
 	 * <br>Should not be null
 	 * <br>Input-output parameter
@@ -456,7 +457,17 @@ public class Translator {
 	 * <br>A non-null value
 	 */
 	public static final String getLanguageCountryVariant(final Locale locale) {
-		return locale.getLanguage() + "_" + locale.getCountry() + "_" + locale.getVariant();
+		String result = locale.getLanguage();
+		
+		if (locale.getCountry().length() > 0) {
+			result += "_" + locale.getCountry();
+		}
+		
+		if (locale.getVariant().length() > 0) {
+			result += "_" + locale.getVariant();
+		}
+		
+		return result;
 	}
 	
 	/**
