@@ -92,8 +92,11 @@ public abstract class AbstractConnectionTestBase {
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
 				dataMessage1,
-				new MessageMatcher(DisconnectMessage.class),
-				Connection.State.DISCONNECTED
+				// The state is changed as soon as the disconnect message is received
+				// That's why the logger detects the state change before the disconnect message
+				// TODO should this behavior be changed?
+				Connection.State.DISCONNECTED,
+				new MessageMatcher(DisconnectMessage.class)
 		), connectionLogger2.getEvents());
 	}
 	

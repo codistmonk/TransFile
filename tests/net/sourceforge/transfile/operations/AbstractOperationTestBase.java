@@ -72,8 +72,8 @@ public abstract class AbstractOperationTestBase {
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
 				acceptMessage,
-				new MessageMatcher(DisconnectMessage.class),
-				Connection.State.DISCONNECTED
+				Connection.State.DISCONNECTED,
+				new MessageMatcher(DisconnectMessage.class)
 				), connectionLogger1.getEvents());
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
