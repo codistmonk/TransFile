@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import net.sourceforge.transfile.operations.AbstractConnectionTestBase.ConnectionLogger;
+import net.sourceforge.transfile.operations.AbstractConnectionTestBase.ConnectionRecorder;
 import net.sourceforge.transfile.operations.Operation.State;
 
 import org.junit.Test;
@@ -46,8 +46,8 @@ public abstract class AbstractOperationTestBase {
 		final Connection[] connections = this.createMatchingConnectionPair();
 		final Connection connection1 = connections[0];
 		final Connection connection2 = connections[1];
-		final ConnectionLogger connectionLogger1 = new ConnectionLogger(connection1);
-		final ConnectionLogger connectionLogger2 = new ConnectionLogger(connection2);
+		final ConnectionRecorder connectionLogger1 = new ConnectionRecorder(connection1);
+		final ConnectionRecorder connectionLogger2 = new ConnectionRecorder(connection2);
 		
 		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);
 		assertEquals(connection2.getState(), Connection.State.DISCONNECTED);
@@ -58,7 +58,7 @@ public abstract class AbstractOperationTestBase {
 		
 		final File sourceFile = new File("tests/" + this.getClass().getPackage().getName().replaceAll("\\.", "/") + "/data.txt");
 		final Operation operation = this.createOperation(connection1, sourceFile);
-		final OperationLogger operationLogger = new OperationLogger(operation);
+		final OperationRecorder operationLogger = new OperationRecorder(operation);
 		final Message acceptMessage = new StateMessage(sourceFile, State.PROGRESSING);
 		
 		assertEquals(Operation.State.QUEUED, operation.getState());
@@ -103,9 +103,9 @@ public abstract class AbstractOperationTestBase {
 	 * <br>Range: {@code [0 .. Long.MAX_VALUE]}
 	 */
 	public static final void waitUntilState(final Operation operation, final State state, final long timeout) {
-		long time = System.currentTimeMillis();
+		final long maximumTime = System.currentTimeMillis() + timeout;
 		
-		while (System.currentTimeMillis() - time < timeout && operation.getState() != state) {
+		while (System.currentTimeMillis() <= maximumTime && operation.getState() != state) {
 			Thread.yield();
 		}
 	}
@@ -134,7 +134,13 @@ public abstract class AbstractOperationTestBase {
 	 */
 	public abstract Operation createOperation(Connection connection, File file);
 	
-	public static class OperationLogger implements Operation.Listener {
+	/**
+	 * TODO doc
+	 *
+	 * @author codistmonk (creation 2010-06-05)
+	 *
+	 */
+	public static class OperationRecorder implements Operation.Listener {
 		
 		private final Operation operation;
 		
@@ -146,7 +152,7 @@ public abstract class AbstractOperationTestBase {
 		 * <br>Should not be null
 		 * <br>Shared parameter
 		 */
-		public OperationLogger(final Operation operation) {
+		public OperationRecorder(final Operation operation) {
 			this.operation = operation;
 			this.events = new ArrayList<Object>();
 			

@@ -39,7 +39,7 @@ public abstract class AbstractConnectionTestBase {
 	@Test
 	public final void testToggleUnmatchedConnection() {
 		final Connection connection = this.createUnmatchedConnection();
-		final ConnectionLogger connectionLogger = new ConnectionLogger(connection);
+		final ConnectionRecorder connectionLogger = new ConnectionRecorder(connection);
 		
 		assertEquals(connection.getState(), Connection.State.DISCONNECTED);
 		
@@ -60,8 +60,8 @@ public abstract class AbstractConnectionTestBase {
 		final Connection[] connections = this.createMatchingConnectionPair();
 		final Connection connection1 = connections[0];
 		final Connection connection2 = connections[1];
-		final ConnectionLogger connectionLogger1 = new ConnectionLogger(connection1);
-		final ConnectionLogger connectionLogger2 = new ConnectionLogger(connection2);
+		final ConnectionRecorder connectionLogger1 = new ConnectionRecorder(connection1);
+		final ConnectionRecorder connectionLogger2 = new ConnectionRecorder(connection2);
 		final Message dataMessage1 = new DataMessage(new File("Dummy"), "Hello world!".getBytes());
 		final Message dataMessage2 = new DataMessage(new File("Dummy"), "42".getBytes());
 		
@@ -134,7 +134,7 @@ public abstract class AbstractConnectionTestBase {
 	 * @author codistmonk (creation 2010-06-05)
 	 *
 	 */
-	public static class ConnectionLogger implements Connection.Listener {
+	public static class ConnectionRecorder implements Connection.Listener {
 		
 		private final Connection connection;
 		
@@ -146,7 +146,7 @@ public abstract class AbstractConnectionTestBase {
 		 * <br>Should not be null
 		 * <br>Shared parameter
 		 */
-		public ConnectionLogger(final Connection connection) {
+		public ConnectionRecorder(final Connection connection) {
 			this.connection = connection;
 			this.events = new ArrayList<Object>();
 			

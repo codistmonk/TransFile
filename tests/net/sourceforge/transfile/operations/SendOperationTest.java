@@ -246,12 +246,9 @@ public class SendOperationTest extends AbstractOperationTestBase {
 			
 			private State remoteState;
 			
-			private final Thread dataSender;
-			
 			Controller() {
-				this.dataSender = this.new DataSender();
-				
 				SendOperationImplementation.this.getConnection().addConnectionListener(this);
+				this.new DataSender().start();
 			}
 			
 			/** 
@@ -298,10 +295,6 @@ public class SendOperationTest extends AbstractOperationTestBase {
 			public final void start() {
 				this.updateState(State.PROGRESSING, State.DONE, State.QUEUED);
 				this.sendStateMessage();
-				
-				if (this.dataSender.getState() == Thread.State.NEW) {
-					this.dataSender.start();
-				}
 			}
 			
 			/** 
@@ -401,14 +394,18 @@ public class SendOperationTest extends AbstractOperationTestBase {
 				@Override
 				public final void run() {
 					try {
-						final FileInputStream input = new FileInputStream(SendOperationImplementation.this.getLocalFile());
+						FileInputStream input = null;
 						
 						try {
 							Operation.State localState = this.getLocalState();
 							Operation.State remoteState = this.getRemoteState();
 							
 							while (localState != Operation.State.REMOVED && !this.isInterrupted()) {
-								if (localState == remoteState && localState == Operation.State.PROGRESSING) {
+								if (localState == remoteState && localState == Operation.State.PROGRESSING && this.getSourceFile() != null) {
+									if (input == null) {
+										input = new FileInputStream(this.getSourceFile());
+									}
+									
 									final int c = input.read();
 									
 									if (c != -1) {
@@ -422,11 +419,17 @@ public class SendOperationTest extends AbstractOperationTestBase {
 								remoteState = this.getRemoteState();
 							}
 						} finally {
-							input.close();
+							if (input != null) {
+								input.close();
+							}
 						}
 					} catch (final Exception exception) {
 						exception.printStackTrace();
 					}
+				}
+				
+				private final File getSourceFile() {
+					return SendOperationImplementation.this.getLocalFile();
 				}
 				
 				/**
@@ -457,10 +460,8 @@ public class SendOperationTest extends AbstractOperationTestBase {
 				 * <br>Shared parameter
 				 */
 				private final void sendData(final byte... data) {
-					final File sourceFile = SendOperationImplementation.this.getLocalFile();
-					
-					SendOperationImplementation.this.getConnection().sendMessage(new DataMessage(sourceFile, data));
-					Controller.this.dataSent(data.length, sourceFile.length());
+					SendOperationImplementation.this.getConnection().sendMessage(new DataMessage(this.getSourceFile(), data));
+					Controller.this.dataSent(data.length, this.getSourceFile().length());
 				}
 				
 			}
