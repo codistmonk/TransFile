@@ -19,6 +19,7 @@
 
 package net.sourceforge.transfile.operations;
 
+import static net.sourceforge.transfile.operations.AbstractConnectionTestBase.WAIT_DURATION;
 import static net.sourceforge.transfile.operations.AbstractConnectionTestBase.waitAWhile;
 import static org.junit.Assert.*;
 
@@ -28,7 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import net.sourceforge.transfile.operations.AbstractConnectionTestBase.ConnectionLogger;
-import net.sourceforge.transfile.operations.AbstractConnectionTestBase.MessageMatcher;
+import net.sourceforge.transfile.operations.Operation.State;
 
 import org.junit.Test;
 
@@ -55,17 +56,17 @@ public abstract class AbstractOperationTestBase {
 		connection2.toggleConnection();
 		waitAWhile();
 		
-		final File sourceFile = new File("Dummy");
+		final File sourceFile = new File("tests/" + this.getClass().getPackage().getName().replaceAll("\\.", "/") + "/data.txt");
 		final Operation operation = this.createOperation(connection1, sourceFile);
 		final OperationLogger operationLogger = new OperationLogger(operation);
-		final StartMessage acceptMessage = new StartMessage(sourceFile);
+		final Message acceptMessage = new StateMessage(sourceFile, State.PROGRESSING);
 		
 		assertEquals(Operation.State.QUEUED, operation.getState());
-		assertEquals(0.0, operation.getProgess(), 0.0);
+		assertEquals(0.0, operation.getProgress(), 0.0);
 		
 		operation.getController().start();
 		connection2.sendMessage(acceptMessage);
-		waitAWhile();
+		waitUntilState(operation, State.DONE, WAIT_DURATION);
 		connection2.toggleConnection();
 		
 		assertEquals(Arrays.asList(
@@ -73,20 +74,40 @@ public abstract class AbstractOperationTestBase {
 				Connection.State.CONNECTED,
 				acceptMessage,
 				Connection.State.DISCONNECTED,
-				new MessageMatcher(DisconnectMessage.class)
+				new DisconnectMessage()
 				), connectionLogger1.getEvents());
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
-				new MessageMatcher(StartMessage.class),
-				new MessageMatcher(DataMessage.class),
+				new StateMessage(sourceFile, Operation.State.PROGRESSING),
+				new DataMessage(sourceFile, (byte) '4'),
+				new DataMessage(sourceFile, (byte) '2'),
 				Connection.State.DISCONNECTED
 		), connectionLogger2.getEvents());
 		assertEquals(Arrays.asList(
 				(Object) Operation.State.PROGRESSING,
+				0.5,
 				1.0,
 				Operation.State.DONE
 		), operationLogger.getEvents());
+	}
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @param operation
+	 * <br>Should not be null
+	 * @param state
+	 * <br>Should not be null
+	 * @param timeout in milliseconds
+	 * <br>Range: {@code [0 .. Long.MAX_VALUE]}
+	 */
+	public static final void waitUntilState(final Operation operation, final State state, final long timeout) {
+		long time = System.currentTimeMillis();
+		
+		while (System.currentTimeMillis() - time < timeout && operation.getState() != state) {
+			Thread.yield();
+		}
 	}
 	
 	/**
@@ -157,7 +178,7 @@ public abstract class AbstractOperationTestBase {
 		 */
 		@Override
 		public final void progressChanged() {
-			this.getEvents().add(this.getOperation().getProgess());
+			this.getEvents().add(this.getOperation().getProgress());
 		}
 		
 		/** 

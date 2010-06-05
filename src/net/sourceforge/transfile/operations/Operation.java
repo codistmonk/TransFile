@@ -59,7 +59,7 @@ public interface Operation {
 	 * @return
 	 * <br>Range: {@code [0.0 .. 1.0]}
 	 */
-	public abstract double getProgess();
+	public abstract double getProgress();
 	
 	/**
 	 * 
@@ -92,6 +92,15 @@ public interface Operation {
 	 * <br>A non-null value
 	 */
 	public abstract Controller getController();
+	
+	/**
+	 * 
+	 * TODO doc
+	 * @return
+	 * <br>A non-null value
+	 * <br>A shared value
+	 */
+	public abstract Connection getConnection();
 	
 	/**
 	 * TODO doc
@@ -135,7 +144,7 @@ public interface Operation {
 	 */
 	public static enum State {
 		
-		CANCELED, DONE, PAUSED, PROGRESSING, QUEUED;
+		CANCELED, DONE, PAUSED, PROGRESSING, QUEUED, REMOVED;
 		
 	}
 	

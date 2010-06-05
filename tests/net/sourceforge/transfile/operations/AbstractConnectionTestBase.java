@@ -96,7 +96,7 @@ public abstract class AbstractConnectionTestBase {
 				// That's why the logger detects the state change before the disconnect message
 				// TODO should this behavior be changed?
 				Connection.State.DISCONNECTED,
-				new MessageMatcher(DisconnectMessage.class)
+				new DisconnectMessage()
 		), connectionLogger2.getEvents());
 	}
 	
@@ -126,44 +126,6 @@ public abstract class AbstractConnectionTestBase {
 		} catch (final InterruptedException exception) {
 			exception.printStackTrace();
 		}
-	}
-	
-	/**
-	 * TODO doc
-	 *
-	 * @author codistmonk (creation 2010-06-05)
-	 *
-	 */
-	public static class MessageMatcher {
-		
-		private final Class<? extends Message> messageClass;
-		
-		/**
-		 * 
-		 * @param messageClass
-		 * <br>Should not be null
-		 * <br>Shared parameter
-		 */
-		public MessageMatcher(final Class<? extends Message> messageClass) {
-			this.messageClass = messageClass;
-		}
-		
-		/**
-		 * This method does not respect the contract for {@link Object#equals(Object)}.
-		 */
-		@Override
-		public final boolean equals(final Object object) {
-			return object != null && this.messageClass.equals(object.getClass());
-		}
-		
-		/**
-		 * This method does not respect the contract for {@link Object#hashCode()}.
-		 */
-		@Override
-		public final int hashCode() {
-			return super.hashCode();
-		}
-		
 	}
 	
 	/**

@@ -86,19 +86,24 @@ public class DummyConnectionTest extends AbstractConnectionTestBase {
 			this.state = State.DISCONNECTED;
 		}
 		
-		@Override
-		public final void addConnectionListener(final Listener listener) {
-			this.listeners.add(listener);
-		}
-		
 		/**
 		 * 
 		 * @return
 		 * <br>A non-null value
 		 * <br>A new value
 		 */
-		public final Listener[] getListeners() {
+		public final synchronized Listener[] getListeners() {
 			return this.listeners.toArray(new Listener[this.listeners.size()]);
+		}
+		
+		@Override
+		public final synchronized void addConnectionListener(final Listener listener) {
+			this.listeners.add(listener);
+		}
+		
+		@Override
+		public final synchronized void removeConnectionListener(final Listener listener) {
+			this.listeners.remove(listener);
 		}
 		
 		@Override
@@ -158,11 +163,6 @@ public class DummyConnectionTest extends AbstractConnectionTestBase {
 					listener.stateChanged();
 				}
 			}
-		}
-		
-		@Override
-		public final void removeConnectionListener(final Listener listener) {
-			this.listeners.remove(listener);
 		}
 		
 	}

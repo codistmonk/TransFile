@@ -27,6 +27,19 @@ package net.sourceforge.transfile.operations;
  */
 public class DisconnectMessage implements ConnectionMessage {
 	
+	@Override
+	public final boolean equals(final Object object) {
+		return object != null && object instanceof DisconnectMessage;
+	}
+	
+	/** 
+	 * {@inheritDoc}
+	 */
+	@Override
+	public final int hashCode() {
+		return super.hashCode();
+	}
+	
 	private static final long serialVersionUID = -6666510657076521550L;
 	
 }

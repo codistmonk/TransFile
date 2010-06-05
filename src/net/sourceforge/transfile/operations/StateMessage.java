@@ -22,6 +22,7 @@ package net.sourceforge.transfile.operations;
 import java.io.File;
 import java.util.Arrays;
 
+import net.sourceforge.transfile.operations.Operation.State;
 import net.sourceforge.transfile.tools.Tools;
 
 /**
@@ -30,22 +31,22 @@ import net.sourceforge.transfile.tools.Tools;
  * @author codistmonk (creation 2010-06-05)
  *
  */
-public class DataMessage extends AbstractOperationMessage {
+public class StateMessage extends AbstractOperationMessage {
 	
-	private final byte[] data;
+	private final State state;
 	
 	/**
 	 * 
 	 * @param sourceFile
 	 * <br>Should not be null
 	 * <br>Shared parameter
-	 * @param data
+	 * @param state
 	 * <br>Should not be null
 	 * <br>Shared parameter
 	 */
-	public DataMessage(final File sourceFile, final byte... data) {
+	public StateMessage(final File sourceFile, final State state) {
 		super(sourceFile);
-		this.data = data;
+		this.state = state;
 	}
 	
 	/**
@@ -54,8 +55,8 @@ public class DataMessage extends AbstractOperationMessage {
 	 * <br>A non-null value
 	 * <br>A shared value
 	 */
-	public final byte[] getData() {
-		return this.data;
+	public final State getState() {
+		return this.state;
 	}
 	
 	@Override
@@ -63,7 +64,7 @@ public class DataMessage extends AbstractOperationMessage {
 		final int prime = 31;
 		int result = 1;
 		
-		result = prime * result + Arrays.hashCode(this.data);
+		result = prime * result + ((this.state == null) ? 0 : this.state.hashCode());
 		
 		return result;
 	}
@@ -74,16 +75,16 @@ public class DataMessage extends AbstractOperationMessage {
 			return true;
 		}
 		
-		final DataMessage that = Tools.cast(this.getClass(), object);
+		final StateMessage that = Tools.cast(this.getClass(), object);
 		
-		return that != null && this.getSourceFile().equals(that.getSourceFile()) && Arrays.equals(this.getData(), that.getData());
+		return that != null && this.getSourceFile().equals(that.getSourceFile()) && this.getState() == that.getState();
 	}
 	
 	@Override
 	public final String toString() {
-		return "DataMessage [data=" + Arrays.toString(this.data) + "]";
+		return "StateMessage [state=" + this.state + "]";
 	}
 	
-	private static final long serialVersionUID = 8990157032564141377L;
+	private static final long serialVersionUID = 8830383854291087890L;
 	
 }
