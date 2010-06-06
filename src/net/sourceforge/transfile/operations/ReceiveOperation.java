@@ -71,58 +71,13 @@ public class ReceiveOperation extends AbstractOperation {
 	 * @author codistmonk (2010-06-06)
 	 *
 	 */
-	private class Controller implements Operation.Controller {
+	private class Controller extends AbstractController {
 		
 		/**
 		 * Package-private default constructor to suppress visibility warnings.
 		 */
 		Controller() {
 			// Do nothing
-		}
-		
-		/** 
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void cancel() {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		/** 
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void pause() {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		/** 
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void remove() {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		/** 
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void retry() {
-			// TODO Auto-generated method stub
-			
-		}
-		
-		/** 
-		 * {@inheritDoc}
-		 */
-		@Override
-		public void start() {
-			// TODO Auto-generated method stub
-			
 		}
 		
 	}

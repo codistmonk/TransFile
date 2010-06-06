@@ -152,7 +152,7 @@ public abstract class AbstractOperationTestBase {
 			this.operation = operation;
 			this.events = new ArrayList<Object>();
 			
-			this.getOperation().addConnectionListener(this);
+			this.getOperation().addOperationListener(this);
 		}
 		
 		/**

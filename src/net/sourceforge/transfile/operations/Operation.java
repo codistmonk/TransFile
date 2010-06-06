@@ -35,7 +35,7 @@ public interface Operation {
 	 * @param listener
 	 * <br>Should not be null
 	 */
-	public abstract void addConnectionListener(Listener listener);
+	public abstract void addOperationListener(Listener listener);
 	
 	/**
 	 * 
@@ -43,7 +43,7 @@ public interface Operation {
 	 * @param listener
 	 * <br>Can be null
 	 */
-	public abstract void removeConnectionListener(Listener listener);
+	public abstract void removeOperationListener(Listener listener);
 	
 	/**
 	 * 

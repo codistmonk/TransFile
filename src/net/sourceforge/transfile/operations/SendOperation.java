@@ -62,82 +62,12 @@ public class SendOperation extends AbstractOperation {
 	 * @author codistmonk (creation 2010-06-05)
 	 *
 	 */
-	private class Controller implements Operation.Controller, Connection.Listener {
+	private class Controller extends AbstractController {
 		
 		private long sentByteCount;
 		
-		private State remoteState;
-		
 		Controller() {
-			SendOperation.this.getConnection().addConnectionListener(this);
 			this.new DataSender().start();
-		}
-		
-		/** 
-		 * {@inheritDoc}
-		 */
-		@Override
-		public final void cancel() {
-			this.updateState(State.CANCELED, State.PAUSED, State.PROGRESSING);
-			this.sendStateMessage();
-		}
-		
-		/** 
-		 * {@inheritDoc}
-		 */
-		@Override
-		public final void pause() {
-			this.updateState(State.PAUSED, State.PROGRESSING);
-			this.sendStateMessage();
-		}
-		
-		/** 
-		 * {@inheritDoc}
-		 */
-		@Override
-		public final void remove() {
-			this.updateState(State.REMOVED, State.CANCELED, State.DONE, State.QUEUED);
-			this.sendStateMessage();
-			SendOperation.this.getConnection().removeConnectionListener(this);
-		}
-		
-		/** 
-		 * {@inheritDoc}
-		 */
-		@Override
-		public final void retry() {
-			this.updateState(State.PROGRESSING, State.CANCELED);
-			this.sendStateMessage();
-		}
-		
-		/** 
-		 * {@inheritDoc}
-		 */
-		@Override
-		public final void start() {
-			this.updateState(State.PROGRESSING, State.DONE, State.PAUSED, State.QUEUED);
-			this.sendStateMessage();
-		}
-		
-		/** 
-		 * {@inheritDoc}
-		 */
-		@Override
-		public final void messageReceived(final Message message) {
-			if (message instanceof OperationMessage && ((OperationMessage) message).getSourceFile().equals(SendOperation.this.getLocalFile())) {
-				if (message instanceof StateMessage) {
-					this.setRemoteState(((StateMessage) message).getState());
-				}
-			}
-		}
-		
-		/** 
-		 * {@inheritDoc}
-		 */
-		@Override
-		public final void stateChanged() {
-			// TODO Auto-generated method stub
-			
 		}
 		
 		/**
@@ -156,46 +86,6 @@ public class SendOperation extends AbstractOperation {
 			if (this.sentByteCount == totalByteCount) {
 				SendOperation.this.setState(State.DONE);
 			}
-		}
-		
-		/**
-		 * 
-		 * @return
-		 * <br>A possibly null value
-		 * <br>A shared value
-		 */
-		final synchronized State getRemoteState() {
-			return this.remoteState;
-		}
-		
-		/**
-		 * 
-		 * @param remoteState
-		 * <br>Can be null
-		 * <br>Shared parameter
-		 */
-		private final synchronized void setRemoteState(final State remoteState) {
-			this.remoteState = remoteState;
-		}
-		
-		private final void sendStateMessage() {
-			final Operation operation = SendOperation.this;
-			
-			operation.getConnection().sendMessage(new StateMessage(operation.getLocalFile(), operation.getState()));
-		}
-		
-		/**
-		 * TODO doc
-		 * 
-		 * @param newState
-		 * <br>Should not be null
-		 * <br>Shared parameter
-		 * @param allowedCurrentStates
-		 * <br>Should not be null
-		 */
-		private final void updateState(final State newState, final State... allowedCurrentStates) {
-			SendOperation.this.checkState(allowedCurrentStates);
-			SendOperation.this.setState(newState);
 		}
 		
 		/**

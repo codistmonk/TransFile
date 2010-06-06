@@ -62,12 +62,12 @@ public abstract class AbstractOperation implements Operation {
 	}
 	
 	@Override
-	public final synchronized void addConnectionListener(final Listener listener) {
+	public final synchronized void addOperationListener(final Listener listener) {
 		this.listeners.add(listener);
 	}
 	
 	@Override
-	public final synchronized void removeConnectionListener(final Listener listener) {
+	public final synchronized void removeOperationListener(final Listener listener) {
 		this.listeners.remove(listener);
 	}
 	
@@ -158,6 +158,149 @@ public abstract class AbstractOperation implements Operation {
 	 */
 	public static final <T> HashSet<T> set(final T... elements) {
 		return new HashSet<T>(Arrays.asList(elements));
+	}
+	
+	/**
+	 * TODO doc
+	 *
+	 * @author codistmonk (creation 2010-06-06)
+	 *
+	 */
+	protected abstract class AbstractController implements Controller {
+		
+		private final Connection.Listener remoteStateUpdater;
+		
+		private State remoteState;
+		
+		public AbstractController() {
+			this.remoteStateUpdater = this.new RemoteStateUpdater();
+			AbstractOperation.this.getConnection().addConnectionListener(this.remoteStateUpdater);
+		}
+		
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public final void cancel() {
+			this.updateState(State.CANCELED, State.PAUSED, State.PROGRESSING);
+			this.sendStateMessage();
+		}
+		
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public final void pause() {
+			this.updateState(State.PAUSED, State.PROGRESSING);
+			this.sendStateMessage();
+		}
+		
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public final void remove() {
+			this.updateState(State.REMOVED, State.CANCELED, State.DONE, State.QUEUED);
+			this.sendStateMessage();
+			AbstractOperation.this.getConnection().removeConnectionListener(this.remoteStateUpdater);
+		}
+		
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public final void retry() {
+			this.updateState(State.PROGRESSING, State.CANCELED);
+			this.sendStateMessage();
+		}
+		
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public final void start() {
+			this.updateState(State.PROGRESSING, State.DONE, State.PAUSED, State.QUEUED);
+			this.sendStateMessage();
+		}
+		
+		public final void sendStateMessage() {
+			final Operation operation = AbstractOperation.this;
+			
+			operation.getConnection().sendMessage(new StateMessage(operation.getLocalFile(), operation.getState()));
+		}
+		
+		/**
+		 * TODO doc
+		 * 
+		 * @param newState
+		 * <br>Should not be null
+		 * <br>Shared parameter
+		 * @param allowedCurrentStates
+		 * <br>Should not be null
+		 */
+		public final void updateState(final State newState, final State... allowedCurrentStates) {
+			AbstractOperation.this.checkState(allowedCurrentStates);
+			AbstractOperation.this.setState(newState);
+		}
+		
+		/**
+		 * 
+		 * @return
+		 * <br>A possibly null value
+		 * <br>A shared value
+		 */
+		public final synchronized State getRemoteState() {
+			return this.remoteState;
+		}
+		
+		/**
+		 * 
+		 * @param remoteState
+		 * <br>Can be null
+		 * <br>Shared parameter
+		 */
+		final synchronized void setRemoteState(final State remoteState) {
+			this.remoteState = remoteState;
+		}
+		
+		/**
+		 * TODO doc
+		 *
+		 * @author codistmonk (creation 2010-06-06)
+		 *
+		 */
+		private class RemoteStateUpdater implements Connection.Listener {
+			
+			/**
+			 * Package-private default constructor to suppress visibility warnings. 
+			 */
+			RemoteStateUpdater() {
+				// Do nothing
+			}
+			
+			/** 
+			 * {@inheritDoc}
+			 */
+			@Override
+			public final void messageReceived(final Message message) {
+				if (message instanceof OperationMessage && ((OperationMessage) message).getSourceFile().equals(AbstractOperation.this.getLocalFile())) {
+					if (message instanceof StateMessage) {
+						AbstractController.this.setRemoteState(((StateMessage) message).getState());
+					}
+				}
+			}
+			
+			/** 
+			 * {@inheritDoc}
+			 */
+			@Override
+			public final void stateChanged() {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		}
+		
 	}
 	
 	/**
