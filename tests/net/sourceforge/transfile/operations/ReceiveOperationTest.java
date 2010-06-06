@@ -37,10 +37,10 @@ import org.junit.Test;
  * @author codistmonk (creation 2010-06-05)
  *
  */
-public class SendOperationTest extends AbstractOperationTestBase {
+public class ReceiveOperationTest extends AbstractOperationTestBase {
 	
 	@Test
-	public final void testSendData() {
+	public final void testReceiveData() {
 		final Connection[] connections = this.createMatchingConnectionPair();
 		final Connection connection1 = connections[0];
 		final Connection connection2 = connections[1];
@@ -64,6 +64,8 @@ public class SendOperationTest extends AbstractOperationTestBase {
 		
 		operation.getController().start();
 		connection2.sendMessage(acceptMessage);
+		connection2.sendMessage(new DataMessage(sourceFile, (byte) '4'));
+		connection2.sendMessage(new DataMessage(sourceFile, (byte) '2'));
 		waitUntilState(operation, State.DONE, WAIT_DURATION);
 		connection2.toggleConnection();
 		
@@ -71,6 +73,8 @@ public class SendOperationTest extends AbstractOperationTestBase {
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
 				acceptMessage,
+				new DataMessage(sourceFile, (byte) '4'),
+				new DataMessage(sourceFile, (byte) '2'),
 				Connection.State.DISCONNECTED,
 				new DisconnectMessage()
 				), connectionRecorder1.getEvents());
@@ -78,8 +82,6 @@ public class SendOperationTest extends AbstractOperationTestBase {
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
 				new StateMessage(sourceFile, Operation.State.PROGRESSING),
-				new DataMessage(sourceFile, (byte) '4'),
-				new DataMessage(sourceFile, (byte) '2'),
 				Connection.State.DISCONNECTED
 		), connectionRecorder2.getEvents());
 		assertEquals(Arrays.asList(
@@ -103,7 +105,7 @@ public class SendOperationTest extends AbstractOperationTestBase {
 	 */
 	@Override
 	public final Operation createOperation(final Connection connection, final File file) {
-		return new SendOperation(connection, file);
+		return new ReceiveOperation(connection, new RequestMessage(file));
 	}
 	
 }

@@ -128,6 +128,8 @@ public abstract class AbstractOperationTestBase {
 	 */
 	public abstract Operation createOperation(Connection connection, File file);
 	
+	public static final File SOURCE_FILE = new File("tests/" + ReceiveOperationTest.class.getPackage().getName().replaceAll("\\.", "/") + "/data.txt");
+	
 	/**
 	 * TODO doc
 	 *
