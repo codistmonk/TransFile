@@ -25,7 +25,26 @@ package net.sourceforge.transfile.operations;
  * @author codistmonk (creation 2010-06-05)
  *
  */
-public interface ReceiveOperation extends Operation {
+public class ReceiveOperation extends AbstractOperation {
+	
+	private final Controller controller;
+	
+	private final RequestMessage requestMessage;
+	
+	/**
+	 * 
+	 * @param connection
+	 * <br>Should not be null
+	 * <br>Shared parameter
+	 * @param requestMessage
+	 * <br>Should not be null
+	 * <br>Shared parameter
+	 */
+	public ReceiveOperation(final Connection connection, final RequestMessage requestMessage) {
+		super(connection, requestMessage.getSourceFile().getName());
+		this.requestMessage = requestMessage;
+		this.controller = this.new Controller();
+	}
 	
 	/**
 	 * 
@@ -33,6 +52,79 @@ public interface ReceiveOperation extends Operation {
 	 * <br>A non-null value
 	 * <br>A shared value
 	 */
-	public abstract Message getRequestMessage();
+	public final RequestMessage getRequestMessage() {
+		return this.requestMessage;
+	}
+
+	/** 
+	 * {@inheritDoc}
+	 */
+	@Override
+	public final Controller getController() {
+		return this.controller;
+	}
+	
+	/**
+	 * 
+	 * TODO doc
+	 *
+	 * @author codistmonk (2010-06-06)
+	 *
+	 */
+	private class Controller implements Operation.Controller {
+		
+		/**
+		 * Package-private default constructor to suppress visibility warnings.
+		 */
+		Controller() {
+			// Do nothing
+		}
+		
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void cancel() {
+			// TODO Auto-generated method stub
+			
+		}
+		
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void pause() {
+			// TODO Auto-generated method stub
+			
+		}
+		
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void remove() {
+			// TODO Auto-generated method stub
+			
+		}
+		
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void retry() {
+			// TODO Auto-generated method stub
+			
+		}
+		
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void start() {
+			// TODO Auto-generated method stub
+			
+		}
+		
+	}
 	
 }

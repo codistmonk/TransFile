@@ -60,8 +60,8 @@ public abstract class AbstractConnectionTestBase {
 		final Connection[] connections = this.createMatchingConnectionPair();
 		final Connection connection1 = connections[0];
 		final Connection connection2 = connections[1];
-		final ConnectionRecorder connectionLogger1 = new ConnectionRecorder(connection1);
-		final ConnectionRecorder connectionLogger2 = new ConnectionRecorder(connection2);
+		final ConnectionRecorder connectionRecorder1 = new ConnectionRecorder(connection1);
+		final ConnectionRecorder connectionRecorder2 = new ConnectionRecorder(connection2);
 		final Message dataMessage1 = new DataMessage(new File("Dummy"), "Hello world!".getBytes());
 		final Message dataMessage2 = new DataMessage(new File("Dummy"), "42".getBytes());
 		
@@ -87,7 +87,7 @@ public abstract class AbstractConnectionTestBase {
 				Connection.State.CONNECTED,
 				dataMessage2,
 				Connection.State.DISCONNECTED
-				), connectionLogger1.getEvents());
+				), connectionRecorder1.getEvents());
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
@@ -97,7 +97,7 @@ public abstract class AbstractConnectionTestBase {
 				// TODO should this behavior be changed?
 				Connection.State.DISCONNECTED,
 				new DisconnectMessage()
-		), connectionLogger2.getEvents());
+		), connectionRecorder2.getEvents());
 	}
 	
 	/**

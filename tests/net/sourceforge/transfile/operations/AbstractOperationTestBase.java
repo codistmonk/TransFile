@@ -19,17 +19,16 @@
 
 package net.sourceforge.transfile.operations;
 
-import static net.sourceforge.transfile.operations.AbstractConnectionTestBase.WAIT_DURATION;
 import static net.sourceforge.transfile.operations.AbstractConnectionTestBase.waitAWhile;
 import static org.junit.Assert.*;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import net.sourceforge.transfile.operations.AbstractConnectionTestBase.ConnectionRecorder;
 import net.sourceforge.transfile.operations.Operation.State;
+import net.sourceforge.transfile.tools.Tools;
 
 import org.junit.Test;
 
@@ -42,12 +41,12 @@ import org.junit.Test;
 public abstract class AbstractOperationTestBase {
 	
 	@Test
-	public final void testFullOperationCycle() {
+	public final void testStartPauseResumeCancelRemove() {
 		final Connection[] connections = this.createMatchingConnectionPair();
 		final Connection connection1 = connections[0];
 		final Connection connection2 = connections[1];
-		final ConnectionRecorder connectionLogger1 = new ConnectionRecorder(connection1);
-		final ConnectionRecorder connectionLogger2 = new ConnectionRecorder(connection2);
+		final ConnectionRecorder connectionRecorder1 = new ConnectionRecorder(connection1);
+		final ConnectionRecorder connectionRecorder2 = new ConnectionRecorder(connection2);
 		
 		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);
 		assertEquals(connection2.getState(), Connection.State.DISCONNECTED);
@@ -58,38 +57,33 @@ public abstract class AbstractOperationTestBase {
 		
 		final File sourceFile = new File("tests/" + this.getClass().getPackage().getName().replaceAll("\\.", "/") + "/data.txt");
 		final Operation operation = this.createOperation(connection1, sourceFile);
-		final OperationRecorder operationLogger = new OperationRecorder(operation);
-		final Message acceptMessage = new StateMessage(sourceFile, State.PROGRESSING);
+		final OperationRecorder operationRecorder = new OperationRecorder(operation);
 		
-		assertEquals(Operation.State.QUEUED, operation.getState());
-		assertEquals(0.0, operation.getProgress(), 0.0);
+		assertEquals(State.QUEUED, operation.getState());
 		
 		operation.getController().start();
-		connection2.sendMessage(acceptMessage);
-		waitUntilState(operation, State.DONE, WAIT_DURATION);
-		connection2.toggleConnection();
 		
-		assertEquals(Arrays.asList(
-				Connection.State.CONNECTING,
-				Connection.State.CONNECTED,
-				acceptMessage,
-				Connection.State.DISCONNECTED,
-				new DisconnectMessage()
-				), connectionLogger1.getEvents());
-		assertEquals(Arrays.asList(
-				Connection.State.CONNECTING,
-				Connection.State.CONNECTED,
-				new StateMessage(sourceFile, Operation.State.PROGRESSING),
-				new DataMessage(sourceFile, (byte) '4'),
-				new DataMessage(sourceFile, (byte) '2'),
-				Connection.State.DISCONNECTED
-		), connectionLogger2.getEvents());
-		assertEquals(Arrays.asList(
-				(Object) Operation.State.PROGRESSING,
-				0.5,
-				1.0,
-				Operation.State.DONE
-		), operationLogger.getEvents());
+		assertEquals(State.PROGRESSING, operation.getState());
+		
+		operation.getController().pause();
+		
+		assertEquals(State.PAUSED, operation.getState());
+		
+		operation.getController().start();
+		
+		assertEquals(State.PROGRESSING, operation.getState());
+		
+		operation.getController().cancel();
+		
+		assertEquals(State.CANCELED, operation.getState());
+		
+		operation.getController().remove();
+		
+		assertEquals(State.REMOVED, operation.getState());
+		
+		Tools.debugPrint("\nconnection1 events:", connectionRecorder1.getEvents());
+		Tools.debugPrint("\nconnection2 events:", connectionRecorder2.getEvents());
+		Tools.debugPrint("\noperation events:", operationRecorder.getEvents());
 	}
 	
 	/**
