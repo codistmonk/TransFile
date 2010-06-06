@@ -52,7 +52,7 @@ public class SendOperation extends AbstractOperation {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public final Controller getController() {
+	public final Operation.Controller getController() {
 		return this.controller;
 	}
 	

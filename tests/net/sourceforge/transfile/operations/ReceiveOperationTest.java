@@ -24,10 +24,12 @@ import static net.sourceforge.transfile.operations.AbstractConnectionTestBase.wa
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 
 import net.sourceforge.transfile.operations.AbstractConnectionTestBase.ConnectionRecorder;
 import net.sourceforge.transfile.operations.Operation.State;
+import net.sourceforge.transfile.tools.Tools;
 
 import org.junit.Test;
 
@@ -55,7 +57,7 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		waitAWhile();
 		
 		final File sourceFile = SOURCE_FILE;
-		final Operation operation = this.createOperation(connection1, sourceFile);
+		final ReceiveOperation operation = this.createOperation(connection1, sourceFile);
 		final OperationRecorder operationRecorder = new OperationRecorder(operation);
 		final Message acceptMessage = new StateMessage(sourceFile, State.PROGRESSING);
 		
@@ -90,6 +92,7 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 				1.0,
 				Operation.State.DONE
 		), operationRecorder.getEvents());
+		assertEquals(operation.getMissingDestinationFileListener().destinationFileRequested().length(), sourceFile.length());
 	}
 	
 	/** 
@@ -104,8 +107,12 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public final Operation createOperation(final Connection connection, final File file) {
-		return new ReceiveOperation(connection, new RequestMessage(file), new DefaultMissingFileHandler(file));
+	public final ReceiveOperation createOperation(final Connection connection, final File file) {
+		try {
+			return new ReceiveOperation(connection, new RequestMessage(file), new TemporaryDestinationFileProvider(file));
+		} catch (final IOException exception) {
+			return Tools.throwUnchecked(exception);
+		}
 	}
 	
 	/**
@@ -114,22 +121,24 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 	 * @author codistmonk (creation 2010-06-05)
 	 *
 	 */
-	private class DefaultMissingFileHandler implements ReceiveOperation.MissingLocaFileListener {
+	private class TemporaryDestinationFileProvider implements ReceiveOperation.MissingDestinationFileListener {
 		
 		private final File file;
 		
 		/**
 		 * 
-		 * @param file
+		 * @param sourceFile
 		 * <br>Can be null
 		 * <br>Shared parameter
+		 * @throws IOException if a temporary destination file cannot be created
 		 */
-		DefaultMissingFileHandler(final File file) {
-			this.file = file;
+		TemporaryDestinationFileProvider(final File sourceFile) throws IOException {
+			this.file = File.createTempFile(sourceFile.getName(), null);
+			this.file.deleteOnExit();
 		}
 		
 		@Override
-		public final File localFileRequested() {
+		public final File destinationFileRequested() {
 			return this.file;
 		}
 		

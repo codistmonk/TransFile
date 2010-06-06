@@ -168,13 +168,12 @@ public abstract class AbstractOperation implements Operation {
 	 */
 	protected abstract class AbstractController implements Controller {
 		
-		private final Connection.Listener remoteStateUpdater;
+		private final Connection.Listener messageHandler;
 		
 		private State remoteState;
 		
 		public AbstractController() {
-			this.remoteStateUpdater = this.new RemoteStateUpdater();
-			AbstractOperation.this.getConnection().addConnectionListener(this.remoteStateUpdater);
+			this.messageHandler = this.new MessageHandler();
 		}
 		
 		/** 
@@ -202,7 +201,7 @@ public abstract class AbstractOperation implements Operation {
 		public final void remove() {
 			this.updateState(State.REMOVED, State.CANCELED, State.DONE, State.QUEUED);
 			this.sendStateMessage();
-			AbstractOperation.this.getConnection().removeConnectionListener(this.remoteStateUpdater);
+			AbstractOperation.this.getConnection().removeConnectionListener(this.messageHandler);
 		}
 		
 		/** 
@@ -225,12 +224,6 @@ public abstract class AbstractOperation implements Operation {
 				this.updateState(State.PROGRESSING, State.DONE, State.PAUSED, State.QUEUED);
 				this.sendStateMessage();
 			}
-		}
-		
-		public final void sendStateMessage() {
-			final Operation operation = AbstractOperation.this;
-			
-			operation.getConnection().sendMessage(new StateMessage(operation.getLocalFile(), operation.getState()));
 		}
 		
 		/**
@@ -273,17 +266,41 @@ public abstract class AbstractOperation implements Operation {
 		
 		/**
 		 * TODO doc
+		 * 
+		 * @param message
+		 * <br>Should not be null
+		 */
+		protected void messageReceived(final OperationMessage message) {
+			// Default implementation, do nothing
+		}
+		
+		/**
+		 * TODO doc
+		 * 
+		 * @return
+		 * <br>Should not be null
+		 * <br>A shared value 
+		 */
+		protected File getSourceFile() {
+			return AbstractOperation.this.getLocalFile();
+		}
+		
+		private final void sendStateMessage() {
+			final Operation operation = AbstractOperation.this;
+			
+			operation.getConnection().sendMessage(new StateMessage(this.getSourceFile(), operation.getState()));
+		}
+		
+		/**
+		 * TODO doc
 		 *
 		 * @author codistmonk (creation 2010-06-06)
 		 *
 		 */
-		private class RemoteStateUpdater implements Connection.Listener {
+		private class MessageHandler implements Connection.Listener {
 			
-			/**
-			 * Package-private default constructor to suppress visibility warnings. 
-			 */
-			RemoteStateUpdater() {
-				// Do nothing
+			MessageHandler() {
+				AbstractOperation.this.getConnection().addConnectionListener(this);
 			}
 			
 			/** 
@@ -291,10 +308,12 @@ public abstract class AbstractOperation implements Operation {
 			 */
 			@Override
 			public final void messageReceived(final Message message) {
-				if (message instanceof OperationMessage && ((OperationMessage) message).getSourceFile().equals(AbstractOperation.this.getLocalFile())) {
+				if (message instanceof OperationMessage && ((OperationMessage) message).getSourceFile().equals(AbstractController.this.getSourceFile())) {
 					if (message instanceof StateMessage) {
 						AbstractController.this.setRemoteState(((StateMessage) message).getState());
 					}
+					
+					AbstractController.this.messageReceived((OperationMessage) message);
 				}
 			}
 			
