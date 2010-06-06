@@ -19,6 +19,8 @@
 
 package net.sourceforge.transfile.operations;
 
+import java.io.File;
+
 /**
  * TODO doc
  *
@@ -31,6 +33,8 @@ public class ReceiveOperation extends AbstractOperation {
 	
 	private final RequestMessage requestMessage;
 	
+	private final MissingLocaFileListener missingLocaFileListener;
+	
 	/**
 	 * 
 	 * @param connection
@@ -39,11 +43,15 @@ public class ReceiveOperation extends AbstractOperation {
 	 * @param requestMessage
 	 * <br>Should not be null
 	 * <br>Shared parameter
+	 * @param missingLocaFileListener
+	 * <br>Should not be null
+	 * <br>Shared parameter
 	 */
-	public ReceiveOperation(final Connection connection, final RequestMessage requestMessage) {
+	public ReceiveOperation(final Connection connection, final RequestMessage requestMessage, final MissingLocaFileListener missingLocaFileListener) {
 		super(connection, requestMessage.getSourceFile().getName());
 		this.requestMessage = requestMessage;
 		this.controller = this.new Controller();
+		this.missingLocaFileListener = missingLocaFileListener;
 	}
 	
 	/**
@@ -66,6 +74,16 @@ public class ReceiveOperation extends AbstractOperation {
 	
 	/**
 	 * 
+	 * @return
+	 * <br>A non-null value
+	 * <br>A shared value
+	 */
+	public final MissingLocaFileListener getMissingLocaFileListener() {
+		return this.missingLocaFileListener;
+	}
+	
+	/**
+	 * 
 	 * TODO doc
 	 *
 	 * @author codistmonk (2010-06-06)
@@ -79,6 +97,33 @@ public class ReceiveOperation extends AbstractOperation {
 		Controller() {
 			// Do nothing
 		}
+		
+		@Override
+		protected final boolean canStart() {
+			if (ReceiveOperation.this.getLocalFile() == null) {
+				ReceiveOperation.this.setLocalFile(ReceiveOperation.this.getMissingLocaFileListener().localFileRequested());
+			}
+			
+			return ReceiveOperation.this.getLocalFile() != null;
+		}
+		
+	}
+	
+	/**
+	 * TODO doc
+	 *
+	 * @author codistmonk (creation 2010-06-06)
+	 *
+	 */
+	public static interface MissingLocaFileListener {
+		
+		/**
+		 * TODO doc
+		 * 
+		 * @return
+		 * <br>A possibly null value
+		 */
+		public abstract File localFileRequested();
 		
 	}
 	

@@ -105,7 +105,34 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 	 */
 	@Override
 	public final Operation createOperation(final Connection connection, final File file) {
-		return new ReceiveOperation(connection, new RequestMessage(file));
+		return new ReceiveOperation(connection, new RequestMessage(file), new DefaultMissingFileHandler(file));
+	}
+	
+	/**
+	 * TODO doc
+	 *
+	 * @author codistmonk (creation 2010-06-05)
+	 *
+	 */
+	private class DefaultMissingFileHandler implements ReceiveOperation.MissingLocaFileListener {
+		
+		private final File file;
+		
+		/**
+		 * 
+		 * @param file
+		 * <br>Can be null
+		 * <br>Shared parameter
+		 */
+		DefaultMissingFileHandler(final File file) {
+			this.file = file;
+		}
+		
+		@Override
+		public final File localFileRequested() {
+			return this.file;
+		}
+		
 	}
 	
 }

@@ -20,7 +20,6 @@
 package net.sourceforge.transfile.operations;
 
 import java.io.File;
-import java.util.Arrays;
 
 import net.sourceforge.transfile.operations.Operation.State;
 import net.sourceforge.transfile.tools.Tools;
@@ -82,7 +81,7 @@ public class StateMessage extends AbstractOperationMessage {
 	
 	@Override
 	public final String toString() {
-		return "StateMessage [state=" + this.state + "]";
+		return "StateMessage [sourceFile=" + this.getSourceFile() + ", state=" + this.getState() + "]";
 	}
 	
 	private static final long serialVersionUID = 8830383854291087890L;

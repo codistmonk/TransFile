@@ -219,8 +219,12 @@ public abstract class AbstractOperation implements Operation {
 		 */
 		@Override
 		public final void start() {
-			this.updateState(State.PROGRESSING, State.DONE, State.PAUSED, State.QUEUED);
-			this.sendStateMessage();
+			checkState(State.DONE, State.PAUSED, State.QUEUED);
+			
+			if (this.canStart()) {
+				this.updateState(State.PROGRESSING, State.DONE, State.PAUSED, State.QUEUED);
+				this.sendStateMessage();
+			}
 		}
 		
 		public final void sendStateMessage() {
@@ -261,6 +265,10 @@ public abstract class AbstractOperation implements Operation {
 		 */
 		final synchronized void setRemoteState(final State remoteState) {
 			this.remoteState = remoteState;
+		}
+		
+		protected boolean canStart() {
+			return true;
 		}
 		
 		/**
