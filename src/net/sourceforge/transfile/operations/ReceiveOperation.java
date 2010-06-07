@@ -158,7 +158,7 @@ public class ReceiveOperation extends AbstractOperation {
 			ReceiveOperation.this.setProgress((double) this.receivedByteCount / totalByteCount);
 			
 			if (this.receivedByteCount == totalByteCount) {
-				ReceiveOperation.this.setState(State.DONE);
+				ReceiveOperation.this.setState(ReceiveOperation.this.getState().getNextStateOnDone());
 			}
 		}
 		

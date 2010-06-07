@@ -80,6 +80,7 @@ public class SendOperationTest extends AbstractOperationTestBase {
 				new StateMessage(sourceFile, Operation.State.PROGRESSING),
 				new DataMessage(sourceFile, (byte) '4'),
 				new DataMessage(sourceFile, (byte) '2'),
+				new StateMessage(sourceFile, Operation.State.DONE),
 				Connection.State.DISCONNECTED
 		), connectionRecorder2.getEvents());
 		assertEquals(Arrays.asList(

@@ -116,8 +116,6 @@ public interface Operation {
 		
 		public abstract void remove();
 		
-		public abstract void retry();
-		
 		public abstract void start();
 		
 	}
@@ -145,6 +143,107 @@ public interface Operation {
 	public static enum State {
 		
 		CANCELED, DONE, PAUSED, PROGRESSING, QUEUED, REMOVED;
+		
+		private State nextStateOnCancel;
+		
+		private State nextStateOnDone;
+		
+		private State nextStateOnPause;
+		
+		private State nextStateOnRemove;
+		
+		private State nextStateOnStart;
+		
+		/**
+		 * 
+		 * @return
+		 * <br>A non-null value
+		 * <br>A shared value
+		 * @throws IllegalStateException if this state cannot handle the requested transition
+		 */
+		public final State getNextStateOnCancel() {
+			return this.checkNotNull(this.nextStateOnCancel);
+		}
+		
+		/**
+		 * 
+		 * @return
+		 * <br>A non-null value
+		 * <br>A shared value
+		 * @throws IllegalStateException if this state cannot handle the requested transition
+		 */
+		public final State getNextStateOnDone() {
+			return this.checkNotNull(this.nextStateOnDone);
+		}
+		
+		/**
+		 * 
+		 * @return
+		 * <br>A non-null value
+		 * <br>A shared value
+		 * @throws IllegalStateException if this state cannot handle the requested transition
+		 */
+		public final State getNextStateOnPause() {
+			return this.checkNotNull(this.nextStateOnPause);
+		}
+		
+		/**
+		 * 
+		 * @return
+		 * <br>A non-null value
+		 * <br>A shared value
+		 * @throws IllegalStateException if this state cannot handle the requested transition
+		 */
+		public final State getNextStateOnRemove() {
+			return this.checkNotNull(this.nextStateOnRemove);
+		}
+		
+		/**
+		 * 
+		 * @return
+		 * <br>A non-null value
+		 * <br>A shared value
+		 * @throws IllegalStateException if this state cannot handle the requested transition
+		 */
+		public final State getNextStateOnStart() {
+			return this.checkNotNull(this.nextStateOnStart);
+		}
+		
+		/**
+		 * TODO doc
+		 * 
+		 * @param nextState
+		 * <br>Can be null
+		 * <br>Shared parameter
+		 * @return
+		 * <br>A non-null value
+		 * <br>A shared value
+		 * @throws IllegalStateException if {@code nextState} is null
+		 */
+		private final State checkNotNull(final State nextState) {
+			if (nextState == null) {
+				throw new IllegalStateException(this.toString());
+			}
+			
+			return nextState;
+		}
+		
+		static {
+			CANCELED.nextStateOnRemove = REMOVED;
+			CANCELED.nextStateOnStart = PROGRESSING;
+			
+			DONE.nextStateOnRemove = REMOVED;
+			
+			PAUSED.nextStateOnCancel = CANCELED;
+			PAUSED.nextStateOnStart = PROGRESSING;
+			
+			PROGRESSING.nextStateOnCancel = CANCELED;
+			PROGRESSING.nextStateOnDone = DONE;
+			PROGRESSING.nextStateOnPause = PAUSED;
+			
+			QUEUED.nextStateOnRemove = REMOVED;
+			QUEUED.nextStateOnStart = PROGRESSING;
+		}
 		
 	}
 	

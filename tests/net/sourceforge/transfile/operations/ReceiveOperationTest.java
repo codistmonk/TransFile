@@ -84,6 +84,7 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
 				new StateMessage(sourceFile, Operation.State.PROGRESSING),
+				new StateMessage(sourceFile, Operation.State.DONE),
 				Connection.State.DISCONNECTED
 		), connectionRecorder2.getEvents());
 		assertEquals(Arrays.asList(

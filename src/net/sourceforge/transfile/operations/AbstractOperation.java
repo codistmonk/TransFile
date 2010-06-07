@@ -174,6 +174,8 @@ public abstract class AbstractOperation implements Operation {
 		
 		public AbstractController() {
 			this.messageHandler = this.new MessageHandler();
+			
+			AbstractOperation.this.addOperationListener(this.new StateMessageSender());
 		}
 		
 		/** 
@@ -181,8 +183,7 @@ public abstract class AbstractOperation implements Operation {
 		 */
 		@Override
 		public final void cancel() {
-			this.updateState(State.CANCELED, State.PAUSED, State.PROGRESSING);
-			this.sendStateMessage();
+			AbstractOperation.this.setState(AbstractOperation.this.getState().getNextStateOnCancel());
 		}
 		
 		/** 
@@ -190,8 +191,7 @@ public abstract class AbstractOperation implements Operation {
 		 */
 		@Override
 		public final void pause() {
-			this.updateState(State.PAUSED, State.PROGRESSING);
-			this.sendStateMessage();
+			AbstractOperation.this.setState(AbstractOperation.this.getState().getNextStateOnPause());
 		}
 		
 		/** 
@@ -199,8 +199,7 @@ public abstract class AbstractOperation implements Operation {
 		 */
 		@Override
 		public final void remove() {
-			this.updateState(State.REMOVED, State.CANCELED, State.DONE, State.QUEUED);
-			this.sendStateMessage();
+			AbstractOperation.this.setState(AbstractOperation.this.getState().getNextStateOnRemove());
 			AbstractOperation.this.getConnection().removeConnectionListener(this.messageHandler);
 		}
 		
@@ -208,36 +207,12 @@ public abstract class AbstractOperation implements Operation {
 		 * {@inheritDoc}
 		 */
 		@Override
-		public final void retry() {
-			this.updateState(State.PROGRESSING, State.CANCELED);
-			this.sendStateMessage();
-		}
-		
-		/** 
-		 * {@inheritDoc}
-		 */
-		@Override
 		public final void start() {
-			checkState(State.DONE, State.PAUSED, State.QUEUED);
+			AbstractOperation.this.checkState(State.DONE, State.PAUSED, State.QUEUED);
 			
 			if (this.canStart()) {
-				this.updateState(State.PROGRESSING, State.DONE, State.PAUSED, State.QUEUED);
-				this.sendStateMessage();
+				AbstractOperation.this.setState(AbstractOperation.this.getState().getNextStateOnStart());
 			}
-		}
-		
-		/**
-		 * TODO doc
-		 * 
-		 * @param newState
-		 * <br>Should not be null
-		 * <br>Shared parameter
-		 * @param allowedCurrentStates
-		 * <br>Should not be null
-		 */
-		public final void updateState(final State newState, final State... allowedCurrentStates) {
-			AbstractOperation.this.checkState(allowedCurrentStates);
-			AbstractOperation.this.setState(newState);
 		}
 		
 		/**
@@ -285,10 +260,34 @@ public abstract class AbstractOperation implements Operation {
 			return AbstractOperation.this.getLocalFile();
 		}
 		
-		private final void sendStateMessage() {
-			final Operation operation = AbstractOperation.this;
+		/**
+		 * TODO doc
+		 *
+		 * @author codistmonk (creation 2010-06-07)
+		 *
+		 */
+		private class StateMessageSender implements Listener {
 			
-			operation.getConnection().sendMessage(new StateMessage(this.getSourceFile(), operation.getState()));
+			/**
+			 * Package-private default constructor to suppress visibility warnings.
+			 */
+			StateMessageSender() {
+				// Do nothing
+			}
+			
+			@Override
+			public final void stateChanged() {
+				final Operation operation = AbstractOperation.this;
+				
+				operation.getConnection().sendMessage(
+						new StateMessage(AbstractController.this.getSourceFile(), operation.getState()));
+			}
+			
+			@Override
+			public final void progressChanged() {
+				// Do nothing
+			}
+			
 		}
 		
 		/**
