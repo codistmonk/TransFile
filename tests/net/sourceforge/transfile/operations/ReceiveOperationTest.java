@@ -58,11 +58,13 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		
 		final File sourceFile = SOURCE_FILE;
 		final ReceiveOperation operation = this.createOperation(connection1, sourceFile);
+		final File destinationFile = operation.getDestinationFileProvider().getDestinationFile();
 		final OperationRecorder operationRecorder = new OperationRecorder(operation);
 		final Message acceptMessage = new StateMessage(sourceFile, State.PROGRESSING);
 		
 		assertEquals(Operation.State.QUEUED, operation.getState());
 		assertEquals(0.0, operation.getProgress(), 0.0);
+		assertEquals(0L, destinationFile.length());
 		
 		operation.getController().start();
 		connection2.sendMessage(acceptMessage);
@@ -93,7 +95,7 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 				1.0,
 				Operation.State.DONE
 		), operationRecorder.getEvents());
-		assertEquals(operation.getMissingDestinationFileListener().destinationFileRequested().length(), sourceFile.length());
+		assertEquals(destinationFile.length(), sourceFile.length());
 	}
 	
 	/** 
@@ -122,7 +124,7 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 	 * @author codistmonk (creation 2010-06-05)
 	 *
 	 */
-	private class TemporaryDestinationFileProvider implements ReceiveOperation.MissingDestinationFileListener {
+	private class TemporaryDestinationFileProvider implements ReceiveOperation.DestinationFileProvider {
 		
 		private final File file;
 		
@@ -139,7 +141,7 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		}
 		
 		@Override
-		public final File destinationFileRequested() {
+		public final File getDestinationFile() {
 			return this.file;
 		}
 		

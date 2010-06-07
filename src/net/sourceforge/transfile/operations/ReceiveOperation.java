@@ -34,7 +34,7 @@ public class ReceiveOperation extends AbstractOperation {
 	
 	private final RequestMessage requestMessage;
 	
-	private final MissingDestinationFileListener missingDestinationFileListener;
+	private final DestinationFileProvider destinationFileProvider;
 	
 	/**
 	 * 
@@ -44,15 +44,15 @@ public class ReceiveOperation extends AbstractOperation {
 	 * @param requestMessage
 	 * <br>Should not be null
 	 * <br>Shared parameter
-	 * @param missingDestinationFileListener
+	 * @param destinationFileProvider
 	 * <br>Should not be null
 	 * <br>Shared parameter
 	 */
-	public ReceiveOperation(final Connection connection, final RequestMessage requestMessage, final MissingDestinationFileListener missingDestinationFileListener) {
+	public ReceiveOperation(final Connection connection, final RequestMessage requestMessage, final DestinationFileProvider destinationFileProvider) {
 		super(connection, requestMessage.getSourceFile().getName());
 		this.requestMessage = requestMessage;
 		this.controller = this.new Controller();
-		this.missingDestinationFileListener = missingDestinationFileListener;
+		this.destinationFileProvider = destinationFileProvider;
 	}
 	
 	/**
@@ -79,8 +79,8 @@ public class ReceiveOperation extends AbstractOperation {
 	 * <br>A non-null value
 	 * <br>A shared value
 	 */
-	public final MissingDestinationFileListener getMissingDestinationFileListener() {
-		return this.missingDestinationFileListener;
+	public final DestinationFileProvider getDestinationFileProvider() {
+		return this.destinationFileProvider;
 	}
 	
 	/**
@@ -104,7 +104,7 @@ public class ReceiveOperation extends AbstractOperation {
 		@Override
 		protected final boolean canStart() {
 			if (ReceiveOperation.this.getLocalFile() == null) {
-				ReceiveOperation.this.setLocalFile(ReceiveOperation.this.getMissingDestinationFileListener().destinationFileRequested());
+				ReceiveOperation.this.setLocalFile(ReceiveOperation.this.getDestinationFileProvider().getDestinationFile());
 			}
 			
 			return ReceiveOperation.this.getLocalFile() != null;
@@ -170,7 +170,7 @@ public class ReceiveOperation extends AbstractOperation {
 	 * @author codistmonk (creation 2010-06-06)
 	 *
 	 */
-	public static interface MissingDestinationFileListener {
+	public static interface DestinationFileProvider {
 		
 		/**
 		 * TODO doc
@@ -178,7 +178,7 @@ public class ReceiveOperation extends AbstractOperation {
 		 * @return
 		 * <br>A possibly null value
 		 */
-		public abstract File destinationFileRequested();
+		public abstract File getDestinationFile();
 		
 	}
 	
