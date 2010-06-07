@@ -27,7 +27,7 @@ import java.io.File;
  * @author codistmonk (creation 2010-06-05)
  *
  */
-public class RequestMessage extends AbstractOperationMessage {
+public class FileOfferMessage extends AbstractOperationMessage {
 	
 	private final long sourceByteCount;
 	
@@ -37,7 +37,7 @@ public class RequestMessage extends AbstractOperationMessage {
 	 * <br>Should not be null
 	 * <br>Shared parameter
 	 */
-	public RequestMessage(final File sourceFile) {
+	public FileOfferMessage(final File sourceFile) {
 		super(sourceFile);
 		this.sourceByteCount = sourceFile.length();
 	}

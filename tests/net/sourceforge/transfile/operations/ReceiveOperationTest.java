@@ -112,7 +112,7 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 	@Override
 	public final ReceiveOperation createOperation(final Connection connection, final File file) {
 		try {
-			return new ReceiveOperation(connection, new RequestMessage(file), new TemporaryDestinationFileProvider(file));
+			return new ReceiveOperation(connection, new FileOfferMessage(file), new TemporaryDestinationFileProvider(file));
 		} catch (final IOException exception) {
 			return Tools.throwUnchecked(exception);
 		}

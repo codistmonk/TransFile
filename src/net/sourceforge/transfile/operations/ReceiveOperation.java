@@ -32,7 +32,7 @@ public class ReceiveOperation extends AbstractOperation {
 	
 	private final Controller controller;
 	
-	private final RequestMessage requestMessage;
+	private final FileOfferMessage fileOffer;
 	
 	private final DestinationFileProvider destinationFileProvider;
 	
@@ -41,28 +41,28 @@ public class ReceiveOperation extends AbstractOperation {
 	 * @param connection
 	 * <br>Should not be null
 	 * <br>Shared parameter
-	 * @param requestMessage
+	 * @param fileOffer
 	 * <br>Should not be null
 	 * <br>Shared parameter
 	 * @param destinationFileProvider
 	 * <br>Should not be null
 	 * <br>Shared parameter
 	 */
-	public ReceiveOperation(final Connection connection, final RequestMessage requestMessage, final DestinationFileProvider destinationFileProvider) {
-		super(connection, requestMessage.getSourceFile().getName());
-		this.requestMessage = requestMessage;
+	public ReceiveOperation(final Connection connection, final FileOfferMessage fileOffer, final DestinationFileProvider destinationFileProvider) {
+		super(connection, fileOffer.getSourceFile().getName());
+		this.fileOffer = fileOffer;
 		this.controller = this.new Controller();
 		this.destinationFileProvider = destinationFileProvider;
 	}
 	
 	/**
 	 * 
-	 * @return the request message used to create this operation
+	 * @return the file offer message used to create this operation
 	 * <br>A non-null value
 	 * <br>A shared value
 	 */
-	public final RequestMessage getRequestMessage() {
-		return this.requestMessage;
+	public final FileOfferMessage getFileOffer() {
+		return this.fileOffer;
 	}
 
 	/** 
@@ -126,7 +126,7 @@ public class ReceiveOperation extends AbstractOperation {
 						
 						output.write(data);
 						
-						this.dataReceived(data.length, ReceiveOperation.this.getRequestMessage().getSourceByteCount());
+						this.dataReceived(data.length, ReceiveOperation.this.getFileOffer().getSourceByteCount());
 					} finally {
 						if (output != null) {
 							output.close();
@@ -141,7 +141,7 @@ public class ReceiveOperation extends AbstractOperation {
 		
 		@Override
 		protected final File getSourceFile() {
-			return ReceiveOperation.this.getRequestMessage().getSourceFile();
+			return ReceiveOperation.this.getFileOffer().getSourceFile();
 		}
 		
 		/**
