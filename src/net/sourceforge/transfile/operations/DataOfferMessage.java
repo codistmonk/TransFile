@@ -30,22 +30,22 @@ import net.sourceforge.transfile.tools.Tools;
  * @author codistmonk (creation 2010-06-05)
  *
  */
-public class DataMessage extends AbstractOperationMessage {
+public class DataOfferMessage extends AbstractOperationMessage {
 	
-	private final byte[] data;
+	private final byte[] bytes;
 	
 	/**
 	 * 
 	 * @param sourceFile
 	 * <br>Should not be null
 	 * <br>Shared parameter
-	 * @param data
+	 * @param bytes
 	 * <br>Should not be null
 	 * <br>Shared parameter
 	 */
-	public DataMessage(final File sourceFile, final byte... data) {
+	public DataOfferMessage(final File sourceFile, final byte... bytes) {
 		super(sourceFile);
-		this.data = data;
+		this.bytes = bytes;
 	}
 	
 	/**
@@ -54,8 +54,8 @@ public class DataMessage extends AbstractOperationMessage {
 	 * <br>A non-null value
 	 * <br>A shared value
 	 */
-	public final byte[] getData() {
-		return this.data;
+	public final byte[] getBytes() {
+		return this.bytes;
 	}
 	
 	@Override
@@ -63,7 +63,7 @@ public class DataMessage extends AbstractOperationMessage {
 		final int prime = 31;
 		int result = 1;
 		
-		result = prime * result + Arrays.hashCode(this.data);
+		result = prime * result + Arrays.hashCode(this.bytes);
 		
 		return result;
 	}
@@ -74,14 +74,14 @@ public class DataMessage extends AbstractOperationMessage {
 			return true;
 		}
 		
-		final DataMessage that = Tools.cast(this.getClass(), object);
+		final DataOfferMessage that = Tools.cast(this.getClass(), object);
 		
-		return that != null && this.getSourceFile().equals(that.getSourceFile()) && Arrays.equals(this.getData(), that.getData());
+		return that != null && this.getSourceFile().equals(that.getSourceFile()) && Arrays.equals(this.getBytes(), that.getBytes());
 	}
 	
 	@Override
 	public final String toString() {
-		return "DataMessage [data=" + Arrays.toString(this.data) + "]";
+		return "DataMessage [data=" + Arrays.toString(this.bytes) + "]";
 	}
 	
 	private static final long serialVersionUID = 8990157032564141377L;

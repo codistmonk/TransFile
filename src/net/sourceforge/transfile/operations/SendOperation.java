@@ -172,7 +172,7 @@ public class SendOperation extends AbstractOperation {
 			 * <br>Shared parameter
 			 */
 			private final void sendData(final byte... data) {
-				SendOperation.this.getConnection().sendMessage(new DataMessage(this.getSourceFile(), data));
+				SendOperation.this.getConnection().sendMessage(new DataOfferMessage(this.getSourceFile(), data));
 				Controller.this.dataSent(data.length, this.getSourceFile().length());
 			}
 			

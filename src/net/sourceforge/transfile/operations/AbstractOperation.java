@@ -242,10 +242,10 @@ public abstract class AbstractOperation implements Operation {
 		/**
 		 * TODO doc
 		 * 
-		 * @param message
+		 * @param operationMessage
 		 * <br>Should not be null
 		 */
-		protected void messageReceived(final OperationMessage message) {
+		protected void operationMessageReceived(final OperationMessage operationMessage) {
 			// Default implementation, do nothing
 		}
 		
@@ -312,7 +312,7 @@ public abstract class AbstractOperation implements Operation {
 						AbstractController.this.setRemoteState(((StateMessage) message).getState());
 					}
 					
-					AbstractController.this.messageReceived((OperationMessage) message);
+					AbstractController.this.operationMessageReceived((OperationMessage) message);
 				}
 			}
 			

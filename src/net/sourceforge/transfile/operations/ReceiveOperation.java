@@ -111,8 +111,8 @@ public class ReceiveOperation extends AbstractOperation {
 		}
 		
 		@Override
-		protected final void messageReceived(final OperationMessage operationMessage) {
-			if (operationMessage instanceof DataMessage) {
+		protected final void operationMessageReceived(final OperationMessage operationMessage) {
+			if (operationMessage instanceof DataOfferMessage) {
 				if (ReceiveOperation.this.getLocalFile() == null) {
 					throw new IllegalStateException("Destination file is null but the following message has been received: " + operationMessage);
 				}
@@ -122,7 +122,7 @@ public class ReceiveOperation extends AbstractOperation {
 					
 					try {
 						output = new FileOutputStream(ReceiveOperation.this.getLocalFile(), true);
-						final byte[] data = ((DataMessage) operationMessage).getData();
+						final byte[] data = ((DataOfferMessage) operationMessage).getBytes();
 						
 						output.write(data);
 						

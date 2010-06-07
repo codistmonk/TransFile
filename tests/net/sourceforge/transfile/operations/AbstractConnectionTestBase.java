@@ -62,8 +62,8 @@ public abstract class AbstractConnectionTestBase {
 		final Connection connection2 = connections[1];
 		final ConnectionRecorder connectionRecorder1 = new ConnectionRecorder(connection1);
 		final ConnectionRecorder connectionRecorder2 = new ConnectionRecorder(connection2);
-		final Message dataMessage1 = new DataMessage(new File("Dummy"), "Hello world!".getBytes());
-		final Message dataMessage2 = new DataMessage(new File("Dummy"), "42".getBytes());
+		final Message dataMessage1 = new DataOfferMessage(new File("Dummy"), "Hello world!".getBytes());
+		final Message dataMessage2 = new DataOfferMessage(new File("Dummy"), "42".getBytes());
 		
 		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);
 		assertEquals(connection2.getState(), Connection.State.DISCONNECTED);
