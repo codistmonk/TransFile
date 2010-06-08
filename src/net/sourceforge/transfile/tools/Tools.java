@@ -195,6 +195,29 @@ public final class Tools {
 	}
 	
 	/**
+	 * 
+	 * @param object1
+	 * <br>Can be null
+	 * @param object2
+	 * <br>Can be null
+	 * @return {@code true} if both objects are the same (using {@code ==}) or equal (using {@code equals()})
+	 */
+	public static final boolean equals(final Object object1, final Object object2) {
+		return object1 == object2 || (object1 != null && object1.equals(object2));
+	}
+	
+	/**
+	 * 
+	 * @param object
+	 * <br>Can be null
+	 * @return {@code 0} if {@code object is null}, otherwise {@code object.hashcode()}
+	 * <br>Range: any integer
+	 */
+	public static final int hashCode(final Object object) {
+		return object == null ? 0 : object.hashCode();
+	}
+	
+	/**
 	 * This method tries to find a setter starting with "set" for the specified property of the object.
 	 * <br>Eg: {@code getSetter(object, "text", String.class)} tries to find a method {@code setText(String)}
 	 *

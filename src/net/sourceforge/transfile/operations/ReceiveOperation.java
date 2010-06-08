@@ -137,6 +137,10 @@ public class ReceiveOperation extends AbstractOperation {
 					exception.printStackTrace();
 				}
 			}
+			
+			if (this.canTransferData()) {
+				ReceiveOperation.this.getConnection().sendMessage(new DataRequestMessage(this.getSourceFile(), this.receivedByteCount, PREFERRED_TRANSFERRED_BYTE_COUNT));
+			}
 		}
 		
 		@Override
@@ -163,6 +167,8 @@ public class ReceiveOperation extends AbstractOperation {
 		}
 		
 	}
+	
+	public static final int PREFERRED_TRANSFERRED_BYTE_COUNT = 1;
 	
 	/**
 	 * TODO doc

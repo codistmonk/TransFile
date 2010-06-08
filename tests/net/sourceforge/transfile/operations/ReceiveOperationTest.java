@@ -21,7 +21,7 @@ package net.sourceforge.transfile.operations;
 
 import static net.sourceforge.transfile.operations.AbstractConnectionTestBase.WAIT_DURATION;
 import static net.sourceforge.transfile.operations.AbstractConnectionTestBase.waitAWhile;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -86,6 +86,8 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
 				new StateMessage(sourceFile, Operation.State.PROGRESSING),
+				new DataRequestMessage(sourceFile, 0L, ReceiveOperation.PREFERRED_TRANSFERRED_BYTE_COUNT),
+				new DataRequestMessage(sourceFile, 1L, ReceiveOperation.PREFERRED_TRANSFERRED_BYTE_COUNT),
 				new StateMessage(sourceFile, Operation.State.DONE),
 				Connection.State.DISCONNECTED
 		), connectionRecorder2.getEvents());

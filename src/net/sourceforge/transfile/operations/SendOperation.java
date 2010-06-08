@@ -21,6 +21,7 @@ package net.sourceforge.transfile.operations;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.Arrays;
 
 /**
  * TODO doc
@@ -64,121 +65,66 @@ public class SendOperation extends AbstractOperation {
 	 */
 	private class Controller extends AbstractController {
 		
-		private long sentByteCount;
-		
+		/**
+		 * Package-private default constructor to suppress visibility warnings.
+		 */
 		Controller() {
-			this.new DataSender().start();
+			// Do nothing
+		}
+		
+		@Override
+		protected final void operationMessageReceived(final OperationMessage operationMessage) {
+			if (operationMessage instanceof DataRequestMessage && this.canTransferData()) {
+				final DataRequestMessage request = (DataRequestMessage) operationMessage;
+				
+				this.dataReceived(request.getFirstByteOffset(), this.getSourceFile().length());
+				
+				if (request.getRequestedByteCount() > 0) {
+					try {
+						FileInputStream input = null;
+						
+						try {
+							input = new FileInputStream(this.getSourceFile());
+							
+							input.skip(request.getFirstByteOffset());
+							
+							final byte[] bytes = new byte[request.getRequestedByteCount()];
+							final int readByteCount = input.read(bytes);
+							
+							if (readByteCount > 0) {
+								SendOperation.this.getConnection().sendMessage(new DataOfferMessage(
+										this.getSourceFile(),
+										request.getFirstByteOffset(),
+										Arrays.copyOfRange(bytes, 0, readByteCount)));
+							}
+						} finally {
+							if (input != null) {
+								input.close();
+							}
+						}
+						
+					} catch (final Exception exception) {
+						// TODO better error handling
+						exception.printStackTrace();
+					}
+				}
+			}
 		}
 		
 		/**
 		 * TODO doc
 		 * 
 		 * @param byteCount
-		 * <br>Range: {@code [0 .. totalByteCount - this.sentByteCount]}
+		 * <br>Range: {@code [0L .. totalByteCount]}
 		 * @param totalByteCount 
-		 * <br>Range: {@code [0 .. Long.MAX_VALUE]}
+		 * <br>Range: {@code [0L .. Long.MAX_VALUE]}
 		 */
-		final void dataSent(final int byteCount, final long totalByteCount) {
-			this.sentByteCount += byteCount;
+		private final void dataReceived(final long byteCount, final long totalByteCount) {
+			SendOperation.this.setProgress((double) byteCount / totalByteCount);
 			
-			SendOperation.this.setProgress((double) this.sentByteCount / totalByteCount);
-			
-			if (this.sentByteCount == totalByteCount) {
+			if (byteCount == totalByteCount) {
 				SendOperation.this.setState(SendOperation.this.getState().getNextStateOnDone());
 			}
-		}
-		
-		/**
-		 * TODO doc
-		 *
-		 * @author codistmonk (creation 2010-06-05)
-		 *
-		 */
-		private class DataSender extends Thread {
-			
-			/**
-			 * Package-private default constructor to suppress visibility warnings.
-			 */
-			DataSender() {
-				// Do nothing
-			}
-			
-			@Override
-			public final void run() {
-				try {
-					FileInputStream input = null;
-					
-					try {
-						Operation.State localState = this.getLocalState();
-						Operation.State remoteState = this.getRemoteState();
-						long firstByteOffset = 0;
-						
-						while (localState != Operation.State.REMOVED && !this.isInterrupted()) {
-							if (localState == remoteState && localState == Operation.State.PROGRESSING && this.getSourceFile() != null) {
-								if (input == null) {
-									input = new FileInputStream(this.getSourceFile());
-								}
-								
-								final int c = input.read();
-								
-								if (c != -1) {
-									this.sendData(firstByteOffset++, (byte) c);
-								}
-							}
-							
-							yield();
-							
-							localState = this.getLocalState();
-							remoteState = this.getRemoteState();
-						}
-					} finally {
-						if (input != null) {
-							input.close();
-						}
-					}
-				} catch (final Exception exception) {
-					exception.printStackTrace();
-				}
-			}
-			
-			private final File getSourceFile() {
-				return SendOperation.this.getLocalFile();
-			}
-			
-			/**
-			 * 
-			 * @return
-			 * <br>A non-null value
-			 * <br>A shared value
-			 */
-			private final Operation.State getLocalState() {
-				return SendOperation.this.getState();
-			}
-			
-			/**
-			 * 
-			 * @return
-			 * <br>A non-null value
-			 * <br>A shared value
-			 */
-			private final Operation.State getRemoteState() {
-				return Controller.this.getRemoteState();
-			}
-			
-			/**
-			 * TODO doc
-			 * 
-			 * @param firstByteOffset
-			 * <br>Range: {@code [0L .. Long.MAX_VALUE]}
-			 * @param data
-			 * <br>Should not be null
-			 * <br>Shared parameter
-			 */
-			private final void sendData(final long firstByteOffset, final byte... data) {
-				SendOperation.this.getConnection().sendMessage(new DataOfferMessage(this.getSourceFile(), firstByteOffset, data));
-				Controller.this.dataSent(data.length, this.getSourceFile().length());
-			}
-			
 		}
 		
 	}

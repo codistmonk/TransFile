@@ -57,20 +57,29 @@ public class SendOperationTest extends AbstractOperationTestBase {
 		final File sourceFile = SOURCE_FILE;
 		final Operation operation = this.createOperation(connection1, sourceFile);
 		final OperationRecorder operationRecorder = new OperationRecorder(operation);
-		final Message acceptMessage = new StateMessage(sourceFile, State.PROGRESSING);
+		final Message accept = new StateMessage(sourceFile, State.PROGRESSING);
+		final Message dataRequest1 = new DataRequestMessage(sourceFile, 0L, ReceiveOperation.PREFERRED_TRANSFERRED_BYTE_COUNT);
+		final Message dataRequest2 = new DataRequestMessage(sourceFile, 1L, ReceiveOperation.PREFERRED_TRANSFERRED_BYTE_COUNT);
+		final Message done = new DataRequestMessage(sourceFile, 2L, ReceiveOperation.PREFERRED_TRANSFERRED_BYTE_COUNT);
 		
 		assertEquals(Operation.State.QUEUED, operation.getState());
 		assertEquals(0.0, operation.getProgress(), 0.0);
 		
 		operation.getController().start();
-		connection2.sendMessage(acceptMessage);
+		connection2.sendMessage(accept);
+		connection2.sendMessage(dataRequest1);
+		connection2.sendMessage(dataRequest2);
+		connection2.sendMessage(done);
 		waitUntilState(operation, State.DONE, WAIT_DURATION);
 		connection2.toggleConnection();
 		
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
-				acceptMessage,
+				accept,
+				dataRequest1,
+				dataRequest2,
+				done,
 				Connection.State.DISCONNECTED,
 				new DisconnectMessage()
 				), connectionRecorder1.getEvents());
@@ -85,6 +94,7 @@ public class SendOperationTest extends AbstractOperationTestBase {
 		), connectionRecorder2.getEvents());
 		assertEquals(Arrays.asList(
 				(Object) Operation.State.PROGRESSING,
+				0.0,
 				0.5,
 				1.0,
 				Operation.State.DONE

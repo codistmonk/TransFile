@@ -21,6 +21,8 @@ package net.sourceforge.transfile.operations;
 
 import java.io.File;
 
+import net.sourceforge.transfile.tools.Tools;
+
 /**
  * TODO doc
  *
@@ -53,6 +55,31 @@ public class DataRequestMessage extends AbstractDataMessage {
 	 */
 	public final int getRequestedByteCount() {
 		return this.requestedByteCount;
+	}
+	
+	@Override
+	public final boolean equals(final Object object) {
+		final DataRequestMessage that = Tools.cast(this.getClass(), object);
+		
+		return
+			this == that ||
+			that != null &&
+			this.getSourceFile().equals(that.getSourceFile()) &&
+			this.getFirstByteOffset() == that.getFirstByteOffset() &&
+			this.getRequestedByteCount() == that.getRequestedByteCount();
+	}
+	
+	@Override
+	public final int hashCode() {
+		return (int) (this.getSourceFile().hashCode() + this.getFirstByteOffset() + this.getRequestedByteCount());
+	}
+	
+	@Override
+	public final String toString() {
+		return "DataRequestMessage [sourceFile="
+				+ this.getSourceFile() + ", firstByteOffset="
+				+ this.getFirstByteOffset() + ", requestByteCount="
+				+ this.getRequestedByteCount() + "]";
 	}
 	
 	private static final long serialVersionUID = -4068725267652068795L;

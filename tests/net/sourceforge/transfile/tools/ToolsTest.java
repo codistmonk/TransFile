@@ -64,7 +64,26 @@ public class ToolsTest {
 		
 		assertNull(Tools.cast(A.class, new D()));
 	}
-
+	
+	@Test
+	public final void testEquals() {
+		final Object object = "42";
+		
+		assertTrue(Tools.equals(null, null));
+		assertFalse(Tools.equals(object, null));
+		assertTrue(Tools.equals(object, object));
+		assertTrue(Tools.equals(new Integer(6 * 7).toString(), object));
+		assertFalse(Tools.equals(object, 42));
+	}
+	
+	@Test
+	public final void testHashcode() {
+		final Object object = "42";
+		
+		assertEquals(0, Tools.hashCode(null));
+		assertEquals(object.hashCode(), Tools.hashCode(object));
+	}
+	
 	@Test
 	public final void testToUpperCamelCase() {
 		assertEquals("Hello, world!", Tools.toUpperCamelCase("hello, world!"));

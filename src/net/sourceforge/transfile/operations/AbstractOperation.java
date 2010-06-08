@@ -225,6 +225,10 @@ public abstract class AbstractOperation implements Operation {
 			return this.remoteState;
 		}
 		
+		public final boolean canTransferData() {
+			return AbstractOperation.this.getState() == this.getRemoteState() && AbstractOperation.this.getState() == State.PROGRESSING;
+		}
+		
 		/**
 		 * 
 		 * @param remoteState
