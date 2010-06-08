@@ -111,6 +111,7 @@ public class SendOperation extends AbstractOperation {
 					try {
 						Operation.State localState = this.getLocalState();
 						Operation.State remoteState = this.getRemoteState();
+						long firstByteOffset = 0;
 						
 						while (localState != Operation.State.REMOVED && !this.isInterrupted()) {
 							if (localState == remoteState && localState == Operation.State.PROGRESSING && this.getSourceFile() != null) {
@@ -121,7 +122,7 @@ public class SendOperation extends AbstractOperation {
 								final int c = input.read();
 								
 								if (c != -1) {
-									this.sendData((byte) c);
+									this.sendData(firstByteOffset++, (byte) c);
 								}
 							}
 							
@@ -167,12 +168,14 @@ public class SendOperation extends AbstractOperation {
 			/**
 			 * TODO doc
 			 * 
+			 * @param firstByteOffset
+			 * <br>Range: {@code [0L .. Long.MAX_VALUE]}
 			 * @param data
 			 * <br>Should not be null
 			 * <br>Shared parameter
 			 */
-			private final void sendData(final byte... data) {
-				SendOperation.this.getConnection().sendMessage(new DataOfferMessage(this.getSourceFile(), data));
+			private final void sendData(final long firstByteOffset, final byte... data) {
+				SendOperation.this.getConnection().sendMessage(new DataOfferMessage(this.getSourceFile(), firstByteOffset, data));
 				Controller.this.dataSent(data.length, this.getSourceFile().length());
 			}
 			

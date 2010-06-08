@@ -68,8 +68,8 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		
 		operation.getController().start();
 		connection2.sendMessage(acceptMessage);
-		connection2.sendMessage(new DataOfferMessage(sourceFile, (byte) '4'));
-		connection2.sendMessage(new DataOfferMessage(sourceFile, (byte) '2'));
+		connection2.sendMessage(new DataOfferMessage(sourceFile, 0L, (byte) '4'));
+		connection2.sendMessage(new DataOfferMessage(sourceFile, 1L, (byte) '2'));
 		waitUntilState(operation, State.DONE, WAIT_DURATION);
 		connection2.toggleConnection();
 		
@@ -77,8 +77,8 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
 				acceptMessage,
-				new DataOfferMessage(sourceFile, (byte) '4'),
-				new DataOfferMessage(sourceFile, (byte) '2'),
+				new DataOfferMessage(sourceFile, 0L, (byte) '4'),
+				new DataOfferMessage(sourceFile, 1L, (byte) '2'),
 				Connection.State.DISCONNECTED,
 				new DisconnectMessage()
 				), connectionRecorder1.getEvents());

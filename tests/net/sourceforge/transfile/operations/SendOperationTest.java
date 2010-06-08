@@ -78,8 +78,8 @@ public class SendOperationTest extends AbstractOperationTestBase {
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
 				new StateMessage(sourceFile, Operation.State.PROGRESSING),
-				new DataOfferMessage(sourceFile, (byte) '4'),
-				new DataOfferMessage(sourceFile, (byte) '2'),
+				new DataOfferMessage(sourceFile, 0L, (byte) '4'),
+				new DataOfferMessage(sourceFile, 1L, (byte) '2'),
 				new StateMessage(sourceFile, Operation.State.DONE),
 				Connection.State.DISCONNECTED
 		), connectionRecorder2.getEvents());

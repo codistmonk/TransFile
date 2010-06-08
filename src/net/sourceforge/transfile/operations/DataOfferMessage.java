@@ -30,7 +30,7 @@ import net.sourceforge.transfile.tools.Tools;
  * @author codistmonk (creation 2010-06-05)
  *
  */
-public class DataOfferMessage extends AbstractOperationMessage {
+public class DataOfferMessage extends AbstractDataMessage {
 	
 	private final byte[] bytes;
 	
@@ -39,12 +39,14 @@ public class DataOfferMessage extends AbstractOperationMessage {
 	 * @param sourceFile
 	 * <br>Should not be null
 	 * <br>Shared parameter
+	 * @param firstByteOffset
+	 * <br>Range: {@code [0L .. Long.MAX_VALUE]}
 	 * @param bytes
 	 * <br>Should not be null
 	 * <br>Shared parameter
 	 */
-	public DataOfferMessage(final File sourceFile, final byte... bytes) {
-		super(sourceFile);
+	public DataOfferMessage(final File sourceFile, final long firstByteOffset, final byte... bytes) {
+		super(sourceFile, firstByteOffset);
 		this.bytes = bytes;
 	}
 	
@@ -60,28 +62,19 @@ public class DataOfferMessage extends AbstractOperationMessage {
 	
 	@Override
 	public final int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		
-		result = prime * result + Arrays.hashCode(this.bytes);
-		
-		return result;
+		return (int) this.getFirstByteOffset() + Arrays.hashCode(this.bytes);
 	}
 	
 	@Override
 	public final boolean equals(final Object object) {
-		if (this == object) {
-			return true;
-		}
-		
 		final DataOfferMessage that = Tools.cast(this.getClass(), object);
 		
-		return that != null && this.getSourceFile().equals(that.getSourceFile()) && Arrays.equals(this.getBytes(), that.getBytes());
+		return this == that || that != null && this.getSourceFile().equals(that.getSourceFile()) && this.getFirstByteOffset() == that.getFirstByteOffset() && Arrays.equals(this.getBytes(), that.getBytes());
 	}
 	
 	@Override
 	public final String toString() {
-		return "DataMessage [data=" + Arrays.toString(this.bytes) + "]";
+		return "DataMessage [firstByteOffset=" + this.getFirstByteOffset() + ", data=" + Arrays.toString(this.bytes) + "]";
 	}
 	
 	private static final long serialVersionUID = 8990157032564141377L;

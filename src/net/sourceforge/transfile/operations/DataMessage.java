@@ -19,38 +19,20 @@
 
 package net.sourceforge.transfile.operations;
 
-import java.io.File;
-
 /**
  * TODO doc
  *
- * @author codistmonk (creation 2010-06-05)
+ * @author codistmonk (creation 2010-06-08)
  *
  */
-public class FileOfferMessage extends AbstractOperationMessage {
-	
-	private final long sourceByteCount;
+public interface DataMessage extends OperationMessage {
 	
 	/**
-	 * 
-	 * @param sourceFile
-	 * <br>Should not be null
-	 * <br>Shared parameter
-	 */
-	public FileOfferMessage(final File sourceFile) {
-		super(sourceFile);
-		this.sourceByteCount = sourceFile.length();
-	}
-	
-	/**
+	 * TODO doc
 	 * 
 	 * @return
 	 * <br>Range: {@code [0L .. Long.MAX_VALUE]}
 	 */
-	public final long getSourceByteCount() {
-		return this.sourceByteCount;
-	}
-	
-	private static final long serialVersionUID = 1615168356494289103L;
+	public abstract long getFirstByteOffset();
 	
 }
