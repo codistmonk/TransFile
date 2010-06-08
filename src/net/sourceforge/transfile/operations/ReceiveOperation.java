@@ -103,7 +103,19 @@ public class ReceiveOperation extends AbstractOperation {
 		 * Package-private default constructor to suppress visibility warnings.
 		 */
 		Controller() {
-			// Do nothing
+			ReceiveOperation.this.addOperationListener(new Listener() {
+				
+				@Override
+				public void stateChanged() {
+					Controller.this.requestData();
+				}
+				
+				@Override
+				public final void progressChanged() {
+					// Do nothing
+				}
+				
+			});
 		}
 		
 		@Override
@@ -117,7 +129,7 @@ public class ReceiveOperation extends AbstractOperation {
 		
 		@Override
 		protected final void operationMessageReceived(final OperationMessage operationMessage) {
-			if (operationMessage instanceof DataOfferMessage) {
+			if (operationMessage instanceof DataOfferMessage && this.canTransferData()) {
 				if (ReceiveOperation.this.getLocalFile() == null) {
 					throw new IllegalStateException("Destination file is null but the following message has been received: " + operationMessage);
 				}
@@ -143,14 +155,18 @@ public class ReceiveOperation extends AbstractOperation {
 				}
 			}
 			
-			if (this.canTransferData()) {
-				ReceiveOperation.this.getConnection().sendMessage(new DataRequestMessage(this.getSourceFile(), this.receivedByteCount, PREFERRED_TRANSFERRED_BYTE_COUNT));
-			}
+			this.requestData();
 		}
 		
 		@Override
 		protected final File getSourceFile() {
 			return ReceiveOperation.this.getFileOffer().getSourceFile();
+		}
+		
+		final void requestData() {
+			if (this.canTransferData()) {
+				ReceiveOperation.this.getConnection().sendMessage(new DataRequestMessage(this.getSourceFile(), this.receivedByteCount, PREFERRED_TRANSFERRED_BYTE_COUNT));
+			}
 		}
 		
 		/**
