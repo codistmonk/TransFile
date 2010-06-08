@@ -21,6 +21,8 @@ package net.sourceforge.transfile.operations.messages;
 
 import java.io.File;
 
+import net.sourceforge.transfile.tools.Tools;
+
 /**
  * TODO doc
  *
@@ -49,6 +51,25 @@ public class FileOfferMessage extends AbstractOperationMessage {
 	 */
 	public final long getSourceByteCount() {
 		return this.sourceByteCount;
+	}
+	
+	@Override
+	public final boolean equals(final Object object) {
+		final FileOfferMessage that = Tools.cast(this.getClass(), object);
+		
+		return this == that || that != null && this.getSourceFile().equals(that.getSourceFile()) && this.getSourceByteCount() == that.getSourceByteCount();
+	}
+	
+	@Override
+	public final int hashCode() {
+		return (int) (this.getSourceFile().hashCode() + this.getSourceByteCount());
+	}
+	
+	@Override
+	public final String toString() {
+		return "FileOfferMessage [sourceFile="
+				+ this.getSourceFile() + ", sourceByteCount="
+				+ this.getSourceByteCount() + "]";
 	}
 	
 	private static final long serialVersionUID = 1615168356494289103L;

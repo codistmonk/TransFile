@@ -132,7 +132,7 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 	 * @author codistmonk (creation 2010-06-05)
 	 *
 	 */
-	private class TemporaryDestinationFileProvider implements ReceiveOperation.DestinationFileProvider {
+	public static class TemporaryDestinationFileProvider implements ReceiveOperation.DestinationFileProvider {
 		
 		private final File file;
 		

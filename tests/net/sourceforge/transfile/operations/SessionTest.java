@@ -19,55 +19,41 @@
 
 package net.sourceforge.transfile.operations;
 
+import static net.sourceforge.transfile.operations.AbstractConnectionTestBase.waitAWhile;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import net.sourceforge.transfile.operations.messages.DataOfferMessage;
+import net.sourceforge.transfile.operations.AbstractConnectionTestBase.ConnectionRecorder;
 import net.sourceforge.transfile.operations.messages.DisconnectMessage;
-import net.sourceforge.transfile.operations.messages.Message;
+import net.sourceforge.transfile.operations.messages.FileOfferMessage;
+import net.sourceforge.transfile.tools.Tools;
 
 import org.junit.Test;
+
 
 /**
  * TODO doc
  *
- * @author codistmonk (creation 2010-06-05)
+ * @author Martin Riedel
  *
  */
-public abstract class AbstractConnectionTestBase {
+public class SessionTest {
 	
 	@Test
-	public final void testToggleUnmatchedConnection() {
-		final Connection connection = this.createUnmatchedConnection();
-		final ConnectionRecorder connectionLogger = new ConnectionRecorder(connection);
-		
-		assertEquals(connection.getState(), Connection.State.DISCONNECTED);
-		
-		connection.toggleConnection();
-		waitAWhile();
-		connection.toggleConnection();
-		waitAWhile();
-		
-		assertEquals(connection.getState(), Connection.State.DISCONNECTED);
-		assertEquals(Arrays.asList(
-				Connection.State.CONNECTING,
-				Connection.State.DISCONNECTED
-				), connectionLogger.getEvents());
-	}
-	
-	@Test
-	public final void testConnectionAndDataTransfer() {
-		final Connection[] connections = this.createMatchingConnectionPair();
+	public final void testOfferFile() throws IOException {
+		final Connection[] connections = new DummyConnectionTest().createMatchingConnectionPair();
 		final Connection connection1 = connections[0];
 		final Connection connection2 = connections[1];
 		final ConnectionRecorder connectionRecorder1 = new ConnectionRecorder(connection1);
 		final ConnectionRecorder connectionRecorder2 = new ConnectionRecorder(connection2);
-		final Message dataMessage1 = new DataOfferMessage(new File("dummy"), 0L, "Hello world!".getBytes());
-		final Message dataMessage2 = new DataOfferMessage(new File("dummy"), 0L, "42".getBytes());
+		final File sourceFile = AbstractOperationTestBase.SOURCE_FILE;
+		final Session session = new Session(connection1, new ReceiveOperationTest.TemporaryDestinationFileProvider(sourceFile));
+		final SessionRecorder sessionRecorder = new SessionRecorder(session);
 		
 		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);
 		assertEquals(connection2.getState(), Connection.State.DISCONNECTED);
@@ -79,82 +65,54 @@ public abstract class AbstractConnectionTestBase {
 		assertEquals(connection1.getState(), Connection.State.CONNECTED);
 		assertEquals(connection2.getState(), Connection.State.CONNECTED);
 		
-		connection1.sendMessage(dataMessage1);
-		connection2.sendMessage(dataMessage2);
+		session.offerFile(sourceFile);
 		connection1.toggleConnection();
-		waitAWhile();
 		
 		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);
 		assertEquals(connection2.getState(), Connection.State.DISCONNECTED);
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
-				dataMessage2,
 				Connection.State.DISCONNECTED
 				), connectionRecorder1.getEvents());
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
-				dataMessage1,
-				// The state is changed as soon as the disconnect message is received
-				// That's why the logger detects the state change before the disconnect message
-				// TODO should this behavior be changed?
+				new FileOfferMessage(sourceFile),
 				Connection.State.DISCONNECTED,
 				new DisconnectMessage()
 		), connectionRecorder2.getEvents());
-	}
-	
-	/**
-	 * TODO doc
-	 * 
-	 * @return
-	 * <br>A non-null value
-	 * <br>A new value
-	 */
-	public abstract Connection createUnmatchedConnection();
-	
-	/**
-	 * TODO doc
-	 * 
-	 * @return
-	 * <br>A non-null value
-	 * <br>A new value
-	 */
-	public abstract Connection[] createMatchingConnectionPair();
-	
-	public static final long WAIT_DURATION = 200L;
-	
-	public static final void waitAWhile() {
-		try {
-			Thread.sleep(WAIT_DURATION);
-		} catch (final InterruptedException exception) {
-			exception.printStackTrace();
-		}
-	}
-	
-	/**
-	 * TODO doc
-	 *
-	 * @author codistmonk (creation 2010-06-05)
-	 *
-	 */
-	public static class ConnectionRecorder implements Connection.Listener {
+		assertTrue(sessionRecorder.getEvents().size() == 1);
 		
-		private final Connection connection;
+		final SendOperation sendOperation = Tools.cast(SendOperation.class, sessionRecorder.getEvents().get(0));
+		
+		assertNotNull(sendOperation);
+		assertEquals(sourceFile, sendOperation.getLocalFile());
+	}
+	
+	/**
+	 * TODO doc
+	 *
+	 * @author codistmonk (creation 2010-06-08)
+	 *
+	 */
+	public static class SessionRecorder implements Session.Listener {
+		
+		private final Session session;
 		
 		private final List<Object> events;
 		
 		/**
 		 * 
-		 * @param connection
+		 * @param session
 		 * <br>Should not be null
 		 * <br>Shared parameter
 		 */
-		public ConnectionRecorder(final Connection connection) {
-			this.connection = connection;
+		public SessionRecorder(final Session session) {
+			this.session = session;
 			this.events = new ArrayList<Object>();
 			
-			this.getConnection().addConnectionListener(this);
+			this.getSession().addSessionListener(this);
 		}
 		
 		/**
@@ -163,8 +121,8 @@ public abstract class AbstractConnectionTestBase {
 		 * <br>A non-null value
 		 * <br>A shared value
 		 */
-		public final Connection getConnection() {
-			return this.connection;
+		public final Session getSession() {
+			return this.session;
 		}
 		
 		/**
@@ -177,20 +135,14 @@ public abstract class AbstractConnectionTestBase {
 			return this.events;
 		}
 		
-		/** 
-		 * {@inheritDoc}
-		 */
 		@Override
-		public final void messageReceived(final Message message) {
-			this.getEvents().add(message);
+		public final void receiveOperationAdded(final ReceiveOperation receiveOperation) {
+			this.getEvents().add(receiveOperation);
 		}
 		
-		/** 
-		 * {@inheritDoc}
-		 */
 		@Override
-		public final void stateChanged() {
-			this.getEvents().add(this.getConnection().getState());
+		public final void sendOperationAdded(final SendOperation sendOperation) {
+			this.getEvents().add(sendOperation);
 		}
 		
 	}

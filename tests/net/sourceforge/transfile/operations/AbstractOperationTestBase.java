@@ -55,7 +55,7 @@ public abstract class AbstractOperationTestBase {
 		connection2.toggleConnection();
 		waitAWhile();
 		
-		final File sourceFile = new File("tests/" + this.getClass().getPackage().getName().replaceAll("\\.", "/") + "/data.txt");
+		final File sourceFile = SOURCE_FILE;
 		final Operation operation = this.createOperation(connection1, sourceFile);
 		final OperationRecorder operationRecorder = new OperationRecorder(operation);
 		
