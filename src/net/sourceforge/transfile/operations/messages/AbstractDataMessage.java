@@ -17,7 +17,9 @@
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.transfile.operations;
+package net.sourceforge.transfile.operations.messages;
+
+import java.io.File;
 
 /**
  * TODO doc
@@ -25,14 +27,26 @@ package net.sourceforge.transfile.operations;
  * @author codistmonk (creation 2010-06-08)
  *
  */
-public interface DataMessage extends OperationMessage {
+@SuppressWarnings("serial")
+public abstract class AbstractDataMessage extends AbstractOperationMessage implements DataMessage {
+	
+	private final long firstByteOffset;
 	
 	/**
-	 * TODO doc
-	 * 
-	 * @return
+	 * @param sourceFile
+	 * <br>Should not be null
+	 * <br>Shared parameter
+	 * @param firstByteOffset
 	 * <br>Range: {@code [0L .. Long.MAX_VALUE]}
 	 */
-	public abstract long getFirstByteOffset();
+	public AbstractDataMessage(final File sourceFile, final long firstByteOffset) {
+		super(sourceFile);
+		this.firstByteOffset = firstByteOffset;
+	}
+	
+	@Override
+	public final long getFirstByteOffset() {
+		return this.firstByteOffset;
+	}
 	
 }

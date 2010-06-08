@@ -17,7 +17,7 @@
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.transfile.operations;
+package net.sourceforge.transfile.operations.messages;
 
 import java.io.File;
 

@@ -23,6 +23,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Arrays;
 
+import net.sourceforge.transfile.operations.messages.DataOfferMessage;
+import net.sourceforge.transfile.operations.messages.DataRequestMessage;
+import net.sourceforge.transfile.operations.messages.OperationMessage;
+
 /**
  * TODO doc
  *

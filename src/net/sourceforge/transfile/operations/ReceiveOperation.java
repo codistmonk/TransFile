@@ -22,6 +22,11 @@ package net.sourceforge.transfile.operations;
 import java.io.File;
 import java.io.FileOutputStream;
 
+import net.sourceforge.transfile.operations.messages.DataOfferMessage;
+import net.sourceforge.transfile.operations.messages.DataRequestMessage;
+import net.sourceforge.transfile.operations.messages.FileOfferMessage;
+import net.sourceforge.transfile.operations.messages.OperationMessage;
+
 /**
  * TODO doc
  *

@@ -28,6 +28,11 @@ import java.util.Arrays;
 
 import net.sourceforge.transfile.operations.AbstractConnectionTestBase.ConnectionRecorder;
 import net.sourceforge.transfile.operations.Operation.State;
+import net.sourceforge.transfile.operations.messages.DataOfferMessage;
+import net.sourceforge.transfile.operations.messages.DataRequestMessage;
+import net.sourceforge.transfile.operations.messages.DisconnectMessage;
+import net.sourceforge.transfile.operations.messages.Message;
+import net.sourceforge.transfile.operations.messages.StateMessage;
 
 import org.junit.Test;
 

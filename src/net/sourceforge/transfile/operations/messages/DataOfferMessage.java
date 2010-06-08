@@ -17,11 +17,11 @@
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.transfile.operations;
+package net.sourceforge.transfile.operations.messages;
 
 import java.io.File;
+import java.util.Arrays;
 
-import net.sourceforge.transfile.operations.Operation.State;
 import net.sourceforge.transfile.tools.Tools;
 
 /**
@@ -30,22 +30,24 @@ import net.sourceforge.transfile.tools.Tools;
  * @author codistmonk (creation 2010-06-05)
  *
  */
-public class StateMessage extends AbstractOperationMessage {
+public class DataOfferMessage extends AbstractDataMessage {
 	
-	private final State state;
+	private final byte[] bytes;
 	
 	/**
 	 * 
 	 * @param sourceFile
 	 * <br>Should not be null
 	 * <br>Shared parameter
-	 * @param state
+	 * @param firstByteOffset
+	 * <br>Range: {@code [0L .. Long.MAX_VALUE]}
+	 * @param bytes
 	 * <br>Should not be null
 	 * <br>Shared parameter
 	 */
-	public StateMessage(final File sourceFile, final State state) {
-		super(sourceFile);
-		this.state = state;
+	public DataOfferMessage(final File sourceFile, final long firstByteOffset, final byte... bytes) {
+		super(sourceFile, firstByteOffset);
+		this.bytes = bytes;
 	}
 	
 	/**
@@ -54,36 +56,27 @@ public class StateMessage extends AbstractOperationMessage {
 	 * <br>A non-null value
 	 * <br>A shared value
 	 */
-	public final State getState() {
-		return this.state;
+	public final byte[] getBytes() {
+		return this.bytes;
 	}
 	
 	@Override
 	public final int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		
-		result = prime * result + ((this.state == null) ? 0 : this.state.hashCode());
-		
-		return result;
+		return (int) this.getFirstByteOffset() + Arrays.hashCode(this.bytes);
 	}
 	
 	@Override
 	public final boolean equals(final Object object) {
-		if (this == object) {
-			return true;
-		}
+		final DataOfferMessage that = Tools.cast(this.getClass(), object);
 		
-		final StateMessage that = Tools.cast(this.getClass(), object);
-		
-		return that != null && this.getSourceFile().equals(that.getSourceFile()) && this.getState() == that.getState();
+		return this == that || that != null && this.getSourceFile().equals(that.getSourceFile()) && this.getFirstByteOffset() == that.getFirstByteOffset() && Arrays.equals(this.getBytes(), that.getBytes());
 	}
 	
 	@Override
 	public final String toString() {
-		return "StateMessage [sourceFile=" + this.getSourceFile() + ", state=" + this.getState() + "]";
+		return "DataMessage [firstByteOffset=" + this.getFirstByteOffset() + ", data=" + Arrays.toString(this.bytes) + "]";
 	}
 	
-	private static final long serialVersionUID = 8830383854291087890L;
+	private static final long serialVersionUID = 8990157032564141377L;
 	
 }

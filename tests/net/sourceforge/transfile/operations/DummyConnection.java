@@ -1,5 +1,8 @@
 package net.sourceforge.transfile.operations;
 
+import net.sourceforge.transfile.operations.messages.DisconnectMessage;
+import net.sourceforge.transfile.operations.messages.Message;
+
 /**
  * TODO doc
  *

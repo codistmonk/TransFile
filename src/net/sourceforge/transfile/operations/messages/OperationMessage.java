@@ -17,9 +17,9 @@
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.transfile.operations;
+package net.sourceforge.transfile.operations.messages;
 
-import java.io.Serializable;
+import java.io.File;
 
 /**
  * TODO doc
@@ -27,6 +27,14 @@ import java.io.Serializable;
  * @author codistmonk (creation 2010-06-05)
  *
  */
-public interface Message extends Serializable {
-	// Nothing
+public interface OperationMessage extends Message {
+	
+	/**
+	 * 
+	 * @return the source file (from the sender machine) identifying the operation
+	 * <br>A non-null value
+	 * <br>A shared value
+	 */
+	public abstract File getSourceFile();
+	
 }

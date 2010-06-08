@@ -17,14 +17,22 @@
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.transfile.operations;
+package net.sourceforge.transfile.operations.messages;
 
 /**
  * TODO doc
  *
- * @author codistmonk (creation 2010-06-05)
+ * @author codistmonk (creation 2010-06-08)
  *
  */
-public interface ConnectionMessage extends Message {
-	// Nothing
+public interface DataMessage extends OperationMessage {
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @return
+	 * <br>Range: {@code [0L .. Long.MAX_VALUE]}
+	 */
+	public abstract long getFirstByteOffset();
+	
 }

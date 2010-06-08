@@ -8,6 +8,9 @@ import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.sourceforge.transfile.operations.messages.Message;
+import net.sourceforge.transfile.operations.messages.OperationMessage;
+import net.sourceforge.transfile.operations.messages.StateMessage;
 import net.sourceforge.transfile.tools.Tools;
 
 /**

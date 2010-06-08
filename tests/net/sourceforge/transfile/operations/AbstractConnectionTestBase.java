@@ -26,6 +26,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import net.sourceforge.transfile.operations.messages.DataOfferMessage;
+import net.sourceforge.transfile.operations.messages.DisconnectMessage;
+import net.sourceforge.transfile.operations.messages.Message;
+
 import org.junit.Test;
 
 /**

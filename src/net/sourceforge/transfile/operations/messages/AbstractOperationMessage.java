@@ -17,7 +17,7 @@
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.transfile.operations;
+package net.sourceforge.transfile.operations.messages;
 
 import java.io.File;
 
@@ -27,9 +27,10 @@ import java.io.File;
  * @author codistmonk (creation 2010-06-05)
  *
  */
-public class FileOfferMessage extends AbstractOperationMessage {
+@SuppressWarnings("serial")
+public abstract class AbstractOperationMessage implements OperationMessage {
 	
-	private final long sourceByteCount;
+	private final File sourceFile;
 	
 	/**
 	 * 
@@ -37,20 +38,16 @@ public class FileOfferMessage extends AbstractOperationMessage {
 	 * <br>Should not be null
 	 * <br>Shared parameter
 	 */
-	public FileOfferMessage(final File sourceFile) {
-		super(sourceFile);
-		this.sourceByteCount = sourceFile.length();
+	public AbstractOperationMessage(final File sourceFile) {
+		this.sourceFile = sourceFile;
 	}
 	
-	/**
-	 * 
-	 * @return
-	 * <br>Range: {@code [0L .. Long.MAX_VALUE]}
+	/** 
+	 * {@inheritDoc}
 	 */
-	public final long getSourceByteCount() {
-		return this.sourceByteCount;
+	@Override
+	public final File getSourceFile() {
+		return this.sourceFile;
 	}
-	
-	private static final long serialVersionUID = 1615168356494289103L;
 	
 }

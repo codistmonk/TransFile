@@ -17,7 +17,9 @@
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.transfile.operations;
+package net.sourceforge.transfile.operations.messages;
+
+import java.io.File;
 
 /**
  * TODO doc
@@ -25,21 +27,30 @@ package net.sourceforge.transfile.operations;
  * @author codistmonk (creation 2010-06-05)
  *
  */
-public class DisconnectMessage implements ConnectionMessage {
+public class FileOfferMessage extends AbstractOperationMessage {
 	
-	@Override
-	public final boolean equals(final Object object) {
-		return object != null && object instanceof DisconnectMessage;
-	}
+	private final long sourceByteCount;
 	
-	/** 
-	 * {@inheritDoc}
+	/**
+	 * 
+	 * @param sourceFile
+	 * <br>Should not be null
+	 * <br>Shared parameter
 	 */
-	@Override
-	public final int hashCode() {
-		return super.hashCode();
+	public FileOfferMessage(final File sourceFile) {
+		super(sourceFile);
+		this.sourceByteCount = sourceFile.length();
 	}
 	
-	private static final long serialVersionUID = -6666510657076521550L;
+	/**
+	 * 
+	 * @return
+	 * <br>Range: {@code [0L .. Long.MAX_VALUE]}
+	 */
+	public final long getSourceByteCount() {
+		return this.sourceByteCount;
+	}
+	
+	private static final long serialVersionUID = 1615168356494289103L;
 	
 }

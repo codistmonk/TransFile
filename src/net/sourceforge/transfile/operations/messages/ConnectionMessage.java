@@ -17,9 +17,7 @@
  * along with TransFile.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.sourceforge.transfile.operations;
-
-import java.io.File;
+package net.sourceforge.transfile.operations.messages;
 
 /**
  * TODO doc
@@ -27,27 +25,6 @@ import java.io.File;
  * @author codistmonk (creation 2010-06-05)
  *
  */
-@SuppressWarnings("serial")
-public abstract class AbstractOperationMessage implements OperationMessage {
-	
-	private final File sourceFile;
-	
-	/**
-	 * 
-	 * @param sourceFile
-	 * <br>Should not be null
-	 * <br>Shared parameter
-	 */
-	public AbstractOperationMessage(final File sourceFile) {
-		this.sourceFile = sourceFile;
-	}
-	
-	/** 
-	 * {@inheritDoc}
-	 */
-	@Override
-	public final File getSourceFile() {
-		return this.sourceFile;
-	}
-	
+public interface ConnectionMessage extends Message {
+	// Nothing
 }
