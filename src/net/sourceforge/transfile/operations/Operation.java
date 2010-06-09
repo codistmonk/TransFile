@@ -112,6 +112,8 @@ public interface Operation {
 		
 		public abstract void cancel();
 		
+		public abstract void done();
+		
 		public abstract void pause();
 		
 		public abstract void remove();

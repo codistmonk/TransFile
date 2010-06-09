@@ -60,17 +60,13 @@ public abstract class AbstractConnection implements Connection {
 		return this.localPeer;
 	}
 	
-	@Override
-	public final String getRemotePeer() {
-		return this.remotePeer;
-	}
-	
 	/**
 	 * 
 	 * @param localPeer
 	 * <br>Should not be null
 	 * <br>Shared parameter
 	 */
+	@Override
 	public final void setLocalPeer(final String localPeer) {
 		if (this.getState() != State.DISCONNECTED) {
 			throw new IllegalStateException(this.getState().toString());
@@ -79,12 +75,18 @@ public abstract class AbstractConnection implements Connection {
 		this.localPeer = localPeer;
 	}
 	
+	@Override
+	public final String getRemotePeer() {
+		return this.remotePeer;
+	}
+	
 	/**
 	 * 
 	 * @param remotePeer
 	 * <br>Should not be null
 	 * <br>Shared parameter
 	 */
+	@Override
 	public final void setRemotePeer(final String remotePeer) {
 		if (this.getState() != State.DISCONNECTED) {
 			throw new IllegalStateException(this.getState().toString());

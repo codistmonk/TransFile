@@ -193,6 +193,14 @@ public abstract class AbstractOperation implements Operation {
 		 * {@inheritDoc}
 		 */
 		@Override
+		public final void done() {
+			AbstractOperation.this.setState(AbstractOperation.this.getState().getNextStateOnDone());
+		}
+		
+		/** 
+		 * {@inheritDoc}
+		 */
+		@Override
 		public final void pause() {
 			AbstractOperation.this.setState(AbstractOperation.this.getState().getNextStateOnPause());
 		}
@@ -211,7 +219,7 @@ public abstract class AbstractOperation implements Operation {
 		 */
 		@Override
 		public final void start() {
-			AbstractOperation.this.checkState(State.DONE, State.PAUSED, State.QUEUED);
+			AbstractOperation.this.checkState(State.CANCELED, State.PAUSED, State.QUEUED);
 			
 			if (this.canStart()) {
 				AbstractOperation.this.setState(AbstractOperation.this.getState().getNextStateOnStart());

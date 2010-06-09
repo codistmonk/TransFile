@@ -30,50 +30,66 @@ import net.sourceforge.transfile.operations.messages.Message;
 public interface Connection {
 	
 	/**
-	 * 
 	 * TODO doc
+	 * 
 	 * @param listener
 	 * <br>Should not be null
 	 */
 	public abstract void addConnectionListener(Listener listener);
 	
 	/**
-	 * 
 	 * TODO doc
+	 * 
 	 * @param listener
 	 * <br>Can be null
 	 */
 	public abstract void removeConnectionListener(Listener listener);
 	
 	/**
-	 * 
 	 * TODO doc
+	 * 
 	 * @return
 	 * <br>A non-null value
 	 */
 	public abstract String getLocalPeer();
 	
 	/**
-	 * 
 	 * TODO doc
+	 * 
+	 * @param localPeer
+	 * <br>Should not be null
+	 */
+	public abstract void setLocalPeer(String localPeer);
+	
+	/**
+	 * TODO doc
+	 * 
 	 * @return
 	 * <br>A non-null value
 	 */
 	public abstract String getRemotePeer();
 	
+	/**
+	 * TODO doc
+	 * 
+	 * @param remotePeer
+	 * <br>Should not be null
+	 */
+	public abstract void setRemotePeer(String remotePeer);
+	
 	public abstract void toggleConnection();
 	
 	/**
-	 * 
 	 * TODO doc
+	 * 
 	 * @return
 	 * <br>A non-null value
 	 */
 	public abstract State getState();
 	
 	/**
-	 * 
 	 * TODO doc
+	 * 
 	 * @param message
 	 * <br>Should not be null
 	 */

@@ -127,7 +127,7 @@ public class SendOperation extends AbstractOperation {
 			SendOperation.this.setProgress((double) byteCount / totalByteCount);
 			
 			if (byteCount == totalByteCount) {
-				SendOperation.this.setState(SendOperation.this.getState().getNextStateOnDone());
+				this.done();
 			}
 		}
 		
