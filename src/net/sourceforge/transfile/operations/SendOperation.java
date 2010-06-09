@@ -21,6 +21,7 @@ package net.sourceforge.transfile.operations;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Arrays;
 
 import net.sourceforge.transfile.operations.messages.DataOfferMessage;
@@ -85,32 +86,58 @@ public class SendOperation extends AbstractOperation {
 				
 				if (request.getRequestedByteCount() > 0) {
 					try {
-						FileInputStream input = null;
-						
-						try {
-							input = new FileInputStream(this.getSourceFile());
-							
-							input.skip(request.getFirstByteOffset());
-							
-							final byte[] bytes = new byte[request.getRequestedByteCount()];
-							final int readByteCount = input.read(bytes);
-							
-							if (readByteCount > 0) {
-								SendOperation.this.getConnection().sendMessage(new DataOfferMessage(
-										this.getSourceFile(),
-										request.getFirstByteOffset(),
-										Arrays.copyOfRange(bytes, 0, readByteCount)));
-							}
-						} finally {
-							if (input != null) {
-								input.close();
-							}
-						}
-						
+						this.reply(request);
 					} catch (final Exception exception) {
 						// TODO better error handling
 						exception.printStackTrace();
 					}
+				}
+			}
+		}
+		
+		/**
+		 * TODO doc
+		 * 
+		 * @param request
+		 * <br>Should not be null
+		 * @throws IOException if the source file doesn't exist or cannot be read
+		 */
+		private final void reply(final DataRequestMessage request) throws IOException {
+			final byte[] buffer = new byte[request.getRequestedByteCount()];
+			final int readByteCount = this.readBytes(request.getFirstByteOffset(), buffer);
+			
+			if (readByteCount > 0) {
+				SendOperation.this.getConnection().sendMessage(new DataOfferMessage(
+						this.getSourceFile(),
+						request.getFirstByteOffset(),
+						Arrays.copyOfRange(buffer, 0, readByteCount)));
+			}
+		}
+		
+		/**
+		 * TODO doc
+		 * 
+		 * @param firstByteOffset
+		 * <br>Range: {@code [0L .. Long.MAX_VALUE]}
+		 * @param buffer
+		 * <br>Should not be null
+		 * <br>Input-output parameter
+		 * @return the total number of bytes read into the buffer, or {@code -1} if there is no more data because the end of the file has been reached
+		 * <br>Range: {@code [-1 .. buffer.length]}
+		 * @throws IOException if the source file doesn't exist or cannot be read
+		 */
+		private final int readBytes(final long firstByteOffset, final byte[] buffer) throws IOException {
+			FileInputStream input = null;
+			
+			try {
+				input = new FileInputStream(this.getSourceFile());
+				
+				input.skip(firstByteOffset);
+				
+				return input.read(buffer);
+			} finally {
+				if (input != null) {
+					input.close();
 				}
 			}
 		}
