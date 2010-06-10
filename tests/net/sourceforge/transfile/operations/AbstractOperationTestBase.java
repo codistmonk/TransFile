@@ -24,11 +24,13 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import net.sourceforge.transfile.operations.AbstractConnectionTestBase.ConnectionRecorder;
 import net.sourceforge.transfile.operations.Operation.State;
-import net.sourceforge.transfile.tools.Tools;
+import net.sourceforge.transfile.operations.messages.DisconnectMessage;
+import net.sourceforge.transfile.operations.messages.StateMessage;
 
 import org.junit.Test;
 
@@ -78,12 +80,33 @@ public abstract class AbstractOperationTestBase {
 		assertEquals(State.CANCELED, operation.getState());
 		
 		operation.getController().remove();
+		connection1.toggleConnection();
+		waitAWhile();
 		
 		assertEquals(State.REMOVED, operation.getState());
-		
-		Tools.debugPrint("\nconnection1 events:", connectionRecorder1.getEvents());
-		Tools.debugPrint("\nconnection2 events:", connectionRecorder2.getEvents());
-		Tools.debugPrint("\noperation events:", operationRecorder.getEvents());
+		assertEquals(Arrays.asList(
+				Connection.State.CONNECTING,
+				Connection.State.CONNECTED,
+				Connection.State.DISCONNECTED
+		), connectionRecorder1.getEvents());
+		assertEquals(Arrays.asList(
+				Connection.State.CONNECTING,
+				Connection.State.CONNECTED,
+				new StateMessage(sourceFile, State.PROGRESSING),
+				new StateMessage(sourceFile, State.PAUSED),
+				new StateMessage(sourceFile, State.PROGRESSING),
+				new StateMessage(sourceFile, State.CANCELED),
+				new StateMessage(sourceFile, State.REMOVED),
+				Connection.State.DISCONNECTED,
+				new DisconnectMessage()
+		), connectionRecorder2.getEvents());
+		assertEquals(Arrays.asList(
+				State.PROGRESSING,
+				State.PAUSED,
+				State.PROGRESSING,
+				State.CANCELED,
+				State.REMOVED
+		), operationRecorder.getEvents());
 	}
 	
 	/**

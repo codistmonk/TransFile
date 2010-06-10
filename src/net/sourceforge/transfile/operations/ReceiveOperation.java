@@ -107,7 +107,9 @@ public class ReceiveOperation extends AbstractOperation {
 				
 				@Override
 				public void stateChanged() {
-					Controller.this.requestData();
+					if (Controller.this.canTransferData()) {
+						Controller.this.requestData();
+					}
 				}
 				
 				@Override
@@ -155,7 +157,9 @@ public class ReceiveOperation extends AbstractOperation {
 				}
 			}
 			
-			this.requestData();
+			if (this.canTransferData()) {
+				this.requestData();
+			}
 		}
 		
 		@Override
@@ -183,6 +187,7 @@ public class ReceiveOperation extends AbstractOperation {
 			ReceiveOperation.this.setProgress((double) this.receivedByteCount / totalByteCount);
 			
 			if (this.receivedByteCount == totalByteCount) {
+				ReceiveOperation.this.getConnection().sendMessage(new DataRequestMessage(this.getSourceFile(), this.receivedByteCount, PREFERRED_TRANSFERRED_BYTE_COUNT));
 				this.done();
 			}
 		}

@@ -143,12 +143,83 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 				new StateMessage(sourceFile, Operation.State.PROGRESSING),
 				new DataRequestMessage(sourceFile, 0L, ReceiveOperation.PREFERRED_TRANSFERRED_BYTE_COUNT),
 				new DataRequestMessage(sourceFile, 1L, ReceiveOperation.PREFERRED_TRANSFERRED_BYTE_COUNT),
+				new DataRequestMessage(sourceFile, 2L, ReceiveOperation.PREFERRED_TRANSFERRED_BYTE_COUNT),
 				new StateMessage(sourceFile, Operation.State.DONE),
 				Connection.State.DISCONNECTED
 		), connectionRecorder2.getEvents());
 		assertEquals(Arrays.asList(
 				(Object) Operation.State.PROGRESSING,
 				0.5,
+				1.0,
+				Operation.State.DONE
+		), operationRecorder.getEvents());
+		assertEquals(destinationFile.length(), sourceFile.length());
+	}
+	
+	@Test
+	public final void testReceiveDataWithPause() {
+		final Connection[] connections = this.createMatchingConnectionPair();
+		final Connection connection1 = connections[0];
+		final Connection connection2 = connections[1];
+		final ConnectionRecorder connectionRecorder1 = new ConnectionRecorder(connection1);
+		final ConnectionRecorder connectionRecorder2 = new ConnectionRecorder(connection2);
+		
+		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);
+		assertEquals(connection2.getState(), Connection.State.DISCONNECTED);
+		
+		connection1.toggleConnection();
+		connection2.toggleConnection();
+		waitAWhile();
+		
+		final File sourceFile = SOURCE_FILE;
+		final ReceiveOperation operation = this.createOperation(connection1, sourceFile);
+		final File destinationFile = operation.getDestinationFileProvider().getDestinationFile();
+		final OperationRecorder operationRecorder = new OperationRecorder(operation);
+		final Message acceptMessage = new StateMessage(sourceFile, State.PROGRESSING);
+		
+		assertEquals(Operation.State.QUEUED, operation.getState());
+		assertEquals(0.0, operation.getProgress(), 0.0);
+		assertEquals(0L, destinationFile.length());
+		
+		operation.getController().start();
+		connection2.sendMessage(acceptMessage);
+		connection2.sendMessage(new DataOfferMessage(sourceFile, 0L, (byte) '4'));
+		connection2.sendMessage(new StateMessage(sourceFile, State.PAUSED));
+		connection2.sendMessage(new StateMessage(sourceFile, State.PROGRESSING));
+		operation.getController().start();
+		connection2.sendMessage(new DataOfferMessage(sourceFile, 1L, (byte) '2'));
+		waitUntilState(operation, State.DONE, WAIT_DURATION);
+		connection2.toggleConnection();
+		
+		assertEquals(Arrays.asList(
+				Connection.State.CONNECTING,
+				Connection.State.CONNECTED,
+				acceptMessage,
+				new DataOfferMessage(sourceFile, 0L, (byte) '4'),
+				new StateMessage(sourceFile, Operation.State.PAUSED),
+				new StateMessage(sourceFile, Operation.State.PROGRESSING),
+				new DataOfferMessage(sourceFile, 1L, (byte) '2'),
+				Connection.State.DISCONNECTED,
+				new DisconnectMessage()
+		), connectionRecorder1.getEvents());
+		assertEquals(Arrays.asList(
+				Connection.State.CONNECTING,
+				Connection.State.CONNECTED,
+				new StateMessage(sourceFile, Operation.State.PROGRESSING),
+				new DataRequestMessage(sourceFile, 0L, ReceiveOperation.PREFERRED_TRANSFERRED_BYTE_COUNT),
+				new DataRequestMessage(sourceFile, 1L, ReceiveOperation.PREFERRED_TRANSFERRED_BYTE_COUNT),
+				new StateMessage(sourceFile, Operation.State.PAUSED),
+				new StateMessage(sourceFile, Operation.State.PROGRESSING),
+				new DataRequestMessage(sourceFile, 1L, ReceiveOperation.PREFERRED_TRANSFERRED_BYTE_COUNT),
+				new DataRequestMessage(sourceFile, 2L, ReceiveOperation.PREFERRED_TRANSFERRED_BYTE_COUNT),
+				new StateMessage(sourceFile, Operation.State.DONE),
+				Connection.State.DISCONNECTED
+		), connectionRecorder2.getEvents());
+		assertEquals(Arrays.asList(
+				(Object) Operation.State.PROGRESSING,
+				0.5,
+				Operation.State.PAUSED,
+				Operation.State.PROGRESSING,
 				1.0,
 				Operation.State.DONE
 		), operationRecorder.getEvents());

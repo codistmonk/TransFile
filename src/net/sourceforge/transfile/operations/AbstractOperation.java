@@ -248,6 +248,10 @@ public abstract class AbstractOperation implements Operation {
 		 */
 		final synchronized void setRemoteState(final State remoteState) {
 			this.remoteState = remoteState;
+			
+			if (this.getRemoteState() == State.PAUSED || this.getRemoteState() == State.CANCELED) {
+				AbstractOperation.this.setState(this.getRemoteState());
+			}
 		}
 		
 		protected boolean canStart() {
