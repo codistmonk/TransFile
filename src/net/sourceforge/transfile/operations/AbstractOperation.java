@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -139,31 +138,6 @@ public abstract class AbstractOperation implements Operation {
 	}
 	
 	/**
-	 * 
-	 * @param states
-	 * <br>Should not be null
-	 * @throws IllegalStateException if the current state is not in {@code states}
-	 */
-	public final void checkState(final State... states) {
-		if (!set(states).contains(this.getState())) {
-			throw new IllegalStateException("This section should have been executed in state " + Arrays.toString(states) + " but was executed in state " + this.getState());
-		}
-	}
-	
-	/**
-	 * 
-	 * @param <T> the common type of the elements
-	 * @param elements
-	 * <br>Should not be null
-	 * @return
-	 * <br>A non-null value
-	 * <br>A new value
-	 */
-	public static final <T> HashSet<T> set(final T... elements) {
-		return new HashSet<T>(Arrays.asList(elements));
-	}
-	
-	/**
 	 * TODO doc
 	 *
 	 * @author codistmonk (creation 2010-06-06)
@@ -186,7 +160,7 @@ public abstract class AbstractOperation implements Operation {
 		 */
 		@Override
 		public final void cancel() {
-			AbstractOperation.this.setState(AbstractOperation.this.getState().getNextStateOnCancel());
+			AbstractOperation.this.setState(State.CANCELED);
 		}
 		
 		/** 
@@ -194,7 +168,7 @@ public abstract class AbstractOperation implements Operation {
 		 */
 		@Override
 		public final void done() {
-			AbstractOperation.this.setState(AbstractOperation.this.getState().getNextStateOnDone());
+			AbstractOperation.this.setState(State.DONE);
 		}
 		
 		/** 
@@ -202,7 +176,7 @@ public abstract class AbstractOperation implements Operation {
 		 */
 		@Override
 		public final void pause() {
-			AbstractOperation.this.setState(AbstractOperation.this.getState().getNextStateOnPause());
+			AbstractOperation.this.setState(State.PAUSED);
 		}
 		
 		/** 
@@ -210,7 +184,7 @@ public abstract class AbstractOperation implements Operation {
 		 */
 		@Override
 		public final void remove() {
-			AbstractOperation.this.setState(AbstractOperation.this.getState().getNextStateOnRemove());
+			AbstractOperation.this.setState(State.REMOVED);
 			AbstractOperation.this.getConnection().removeConnectionListener(this.messageHandler);
 		}
 		
@@ -219,10 +193,8 @@ public abstract class AbstractOperation implements Operation {
 		 */
 		@Override
 		public final void start() {
-			AbstractOperation.this.checkState(State.CANCELED, State.PAUSED, State.QUEUED);
-			
 			if (this.canStart()) {
-				AbstractOperation.this.setState(AbstractOperation.this.getState().getNextStateOnStart());
+				AbstractOperation.this.setState(State.PROGRESSING);
 			}
 		}
 		
