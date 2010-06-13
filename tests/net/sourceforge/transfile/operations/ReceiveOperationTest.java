@@ -269,7 +269,7 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		}
 		
 		@Override
-		public final File getDestinationFile(final String name) {
+		public final File getDestinationFile(final String fileName) {
 			return this.file;
 		}
 		

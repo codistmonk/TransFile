@@ -511,13 +511,13 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		}
 		
 		@Override
-		public final File getDestinationFile(final String name) {
+		public final File getDestinationFile(final String fileName) {
 			final JFileChooser fileChooser = new JFileChooser();
 			
 			fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			
 			if (JFileChooser.APPROVE_OPTION == fileChooser.showOpenDialog(SwingGUI.this) && fileChooser.getSelectedFile() != null) {
-				return new File(fileChooser.getSelectedFile(), name);
+				return new File(fileChooser.getSelectedFile(), fileName);
 			}
 			
 			return null;

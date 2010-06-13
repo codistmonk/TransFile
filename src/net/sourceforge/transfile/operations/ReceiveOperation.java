@@ -210,12 +210,12 @@ public class ReceiveOperation extends AbstractOperation {
 		/**
 		 * TODO doc
 		 * 
-		 * @param name
+		 * @param fileName
 		 * <br>Should not be null
 		 * @return
 		 * <br>A possibly null value
 		 */
-		public abstract File getDestinationFile(String name);
+		public abstract File getDestinationFile(String fileName);
 		
 	}
 	
