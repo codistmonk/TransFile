@@ -122,11 +122,14 @@ public class ReceiveOperation extends AbstractOperation {
 		
 		@Override
 		protected final boolean canStart() {
-			if (ReceiveOperation.this.getLocalFile() == null) {
-				ReceiveOperation.this.setLocalFile(ReceiveOperation.this.getDestinationFileProvider().getDestinationFile());
+			final ReceiveOperation receiveOperation = ReceiveOperation.this;
+			
+			if (receiveOperation.getLocalFile() == null) {
+				receiveOperation.setLocalFile(
+						receiveOperation.getDestinationFileProvider().getDestinationFile(receiveOperation.getFileName()));
 			}
 			
-			return ReceiveOperation.this.getLocalFile() != null;
+			return receiveOperation.getLocalFile() != null;
 		}
 		
 		@Override
@@ -207,10 +210,12 @@ public class ReceiveOperation extends AbstractOperation {
 		/**
 		 * TODO doc
 		 * 
+		 * @param name
+		 * <br>Should not be null
 		 * @return
 		 * <br>A possibly null value
 		 */
-		public abstract File getDestinationFile();
+		public abstract File getDestinationFile(String name);
 		
 	}
 	

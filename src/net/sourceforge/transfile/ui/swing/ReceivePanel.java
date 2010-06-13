@@ -19,23 +19,14 @@
 
 package net.sourceforge.transfile.ui.swing;
 
-import static net.sourceforge.transfile.i18n.Translator.Helpers.translate;
-import static net.sourceforge.transfile.ui.swing.GUITools.scrollable;
-import static net.sourceforge.transfile.ui.swing.GUITools.titleBorder;
-
-import java.awt.BorderLayout;
-
-import javax.swing.JPanel;
-
 /**
  * 
  * 
  * @author Martin Riedel
+ * @author codistmonk (modifications since 2010-05-12)
  *
  */
-class ReceivePanel extends TopLevelPanel {
-	
-	private final OperationListComponent operationListComponent;
+class ReceivePanel extends AbstractOperationListPanel {
 	
 	/**
 	 * 
@@ -45,74 +36,12 @@ class ReceivePanel extends TopLevelPanel {
 	 */
 	public ReceivePanel(final SwingGUI window) {
 		super(window);
-		this.operationListComponent = new OperationListComponent();
 		
 		this.setup();
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void onQuit() {
-		// do nothing
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void onInit() {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void onHide() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void onShow() {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	/** 
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void loadState() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	/** 
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void saveState() {
-		// TODO Auto-generated method stub
-		
-	}	
-	
 	private final void setup() {
-		this.setLayout(new BorderLayout());
-		
-		final JPanel titledPanel = titleBorder("receive_list_title", scrollable(this.operationListComponent));
-		
-		translate(titledPanel.getBorder());
-		
-		this.add(titledPanel, BorderLayout.CENTER);
-		
-		this.setVisible(true);
+		this.setup("receive_list_title");
 	}
 	
 	private static final long serialVersionUID = -3454758528985441231L;

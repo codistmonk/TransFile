@@ -64,7 +64,7 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		
 		final File sourceFile = SOURCE_FILE;
 		final ReceiveOperation operation = this.createOperation(connection1, sourceFile);
-		final File destinationFile = operation.getDestinationFileProvider().getDestinationFile();
+		final File destinationFile = operation.getDestinationFileProvider().getDestinationFile("");
 		final OperationRecorder operationRecorder = new OperationRecorder(operation);
 		final Message acceptMessage = new StateMessage(sourceFile, State.PROGRESSING);
 		
@@ -113,7 +113,7 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		
 		final File sourceFile = SOURCE_FILE;
 		final ReceiveOperation operation = this.createOperation(connection1, sourceFile);
-		final File destinationFile = operation.getDestinationFileProvider().getDestinationFile();
+		final File destinationFile = operation.getDestinationFileProvider().getDestinationFile("");
 		final OperationRecorder operationRecorder = new OperationRecorder(operation);
 		final Message acceptMessage = new StateMessage(sourceFile, State.PROGRESSING);
 		
@@ -173,7 +173,7 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		
 		final File sourceFile = SOURCE_FILE;
 		final ReceiveOperation operation = this.createOperation(connection1, sourceFile);
-		final File destinationFile = operation.getDestinationFileProvider().getDestinationFile();
+		final File destinationFile = operation.getDestinationFileProvider().getDestinationFile("");
 		final OperationRecorder operationRecorder = new OperationRecorder(operation);
 		final Message acceptMessage = new StateMessage(sourceFile, State.PROGRESSING);
 		
@@ -254,7 +254,7 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 	 */
 	public static class TemporaryDestinationFileProvider implements ReceiveOperation.DestinationFileProvider {
 		
-		private final File file;
+		private File file;
 		
 		/**
 		 * 
@@ -269,7 +269,7 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		}
 		
 		@Override
-		public final File getDestinationFile() {
+		public final File getDestinationFile(final String name) {
 			return this.file;
 		}
 		

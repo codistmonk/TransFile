@@ -24,6 +24,10 @@ import java.awt.Dimension;
 
 import javax.swing.JSplitPane;
 
+import net.sourceforge.transfile.operations.ReceiveOperation;
+import net.sourceforge.transfile.operations.SendOperation;
+import net.sourceforge.transfile.operations.Session;
+
 /**
  * TODO doc
  *
@@ -47,8 +51,30 @@ public class TransferPanel extends TopLevelPanel {
 		this.receivePanel = new ReceivePanel(window);
 		
 		this.setup();
+		
+		this.getWindow().getSession().addSessionListener(this.new NewOperationHandler());
 	}
 	
+	/**
+	 * 
+	 * @return
+	 * <br>A non-null value
+	 * <br>A shared value
+	 */
+	public final SendPanel getSendPanel() {
+		return this.sendPanel;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 * <br>A non-null value
+	 * <br>A shared value
+	 */
+	public final ReceivePanel getReceivePanel() {
+		return this.receivePanel;
+	}
+
 	/** 
 	 * {@inheritDoc}
 	 */
@@ -109,6 +135,34 @@ public class TransferPanel extends TopLevelPanel {
 				this.sendPanel,
 				this.receivePanel
 		));
+	}
+	
+	/**
+	 * TODO doc
+	 *
+	 * @author codistmonk (2010-06-13)
+	 *
+	 */
+	private class NewOperationHandler implements Session.Listener {
+		
+		/**
+		 * Package-private default constructor to suppress visibility warnings.
+		 */
+		NewOperationHandler() {
+			// Do nothing
+		}
+		
+		@Override
+		public final void sendOperationAdded(final SendOperation sendOperation) {
+			TransferPanel.this.getSendPanel().addOperation(sendOperation);
+			
+		}
+		
+		@Override
+		public final void receiveOperationAdded(final ReceiveOperation receiveOperation) {
+			TransferPanel.this.getReceivePanel().addOperation(receiveOperation);
+		}
+		
 	}
 	
 	private static final long serialVersionUID = 741764422630681769L;

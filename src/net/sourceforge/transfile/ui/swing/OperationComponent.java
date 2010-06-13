@@ -18,6 +18,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
+import net.sourceforge.transfile.operations.Operation;
 import net.sourceforge.transfile.tools.Tools;
 
 /**
@@ -29,20 +30,20 @@ public class OperationComponent extends JPanel {
 	
 	private final SelectionModel selectionModel;
 	
-	private final String fileName;
+	private final Operation operation;
 	
 	/**
 	 * 
 	 * @param selectionModel 
 	 * <br>Can be null
 	 * <br>Shared parameter
-	 * @param fileName
+	 * @param operation
 	 * <br>Should not be null
 	 * <br>Shared parameter
 	 */
-	public OperationComponent(final SelectionModel selectionModel, final String fileName) {
+	public OperationComponent(final SelectionModel selectionModel, final Operation operation) {
 		this.selectionModel = selectionModel;
-		this.fileName = fileName;
+		this.operation = operation;
 		
 		this.addMouseListener(new MouseAdapter() {
 			
@@ -54,6 +55,16 @@ public class OperationComponent extends JPanel {
 		});
 		
 		this.setup();
+	}
+	
+	/**
+	 * 
+	 * @return
+	 * <br>A non-null value
+	 * <br>A shared value
+	 */
+	public final Operation getOperation() {
+		return this.operation;
 	}
 	
 	@Override
@@ -154,7 +165,7 @@ public class OperationComponent extends JPanel {
 	private final JProgressBar createProgressBar() {
 		final JProgressBar result = new JProgressBar();
 		
-		result.setString(this.fileName + " (queued)");
+		result.setString(this.getOperation().getFileName() + " (queued)");
 		result.setStringPainted(true);
 		
 		return result;

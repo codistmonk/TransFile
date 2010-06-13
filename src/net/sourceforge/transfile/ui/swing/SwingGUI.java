@@ -33,6 +33,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -41,6 +42,7 @@ import java.util.Set;
 import java.util.logging.Level;
 
 import javax.swing.BoxLayout;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -52,6 +54,9 @@ import javax.swing.UIManager;
 import net.sourceforge.transfile.backend.BackendEventHandler;
 import net.sourceforge.transfile.backend.ControllableBackend;
 import net.sourceforge.transfile.i18n.Translator;
+import net.sourceforge.transfile.operations.DummyConnection;
+import net.sourceforge.transfile.operations.ReceiveOperation;
+import net.sourceforge.transfile.operations.Session;
 import net.sourceforge.transfile.settings.Settings;
 import net.sourceforge.transfile.settings.exceptions.IllegalConfigValueException;
 import net.sourceforge.transfile.ui.UserInterface;
@@ -101,6 +106,10 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	 */
 	private final boolean onMacOSX;
 	
+	/**
+	 * Object managing the creation of operations.
+	 */
+	private final Session session;
 	
 	/**
 	 * Constructs a SwingGUI instance
@@ -114,7 +123,34 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		// check whether the application is running on Mac OS X and store the result
 		this.onMacOSX = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
 		
-		setStartupLocale();
+		this.session = new Session(new DummyConnection(), new ReceiveOperation.DestinationFileProvider() {
+			
+			@Override
+			public final File getDestinationFile(final String name) {
+				final JFileChooser fileChooser = new JFileChooser();
+				
+				fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				
+				if (JFileChooser.APPROVE_OPTION == fileChooser.showOpenDialog(SwingGUI.this) && fileChooser.getSelectedFile() != null) {
+					return new File(fileChooser.getSelectedFile(), name);
+				}
+				
+				return null;
+			}
+			
+		});
+		
+		this.setStartupLocale();
+	}
+	
+	/**
+	 * 
+	 * @return
+	 * <br>A non-null value
+	 * <br>A shared value
+	 */
+	public final Session getSession() {
+		return this.session;
 	}
 
 	/**

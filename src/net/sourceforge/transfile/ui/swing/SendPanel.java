@@ -21,10 +21,7 @@ package net.sourceforge.transfile.ui.swing;
 
 import static net.sourceforge.transfile.i18n.Translator.Helpers.translate;
 import static net.sourceforge.transfile.ui.swing.GUITools.rollover;
-import static net.sourceforge.transfile.ui.swing.GUITools.scrollable;
-import static net.sourceforge.transfile.ui.swing.GUITools.titleBorder;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.dnd.DropTarget;
@@ -40,18 +37,15 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
-import javax.swing.JPanel;
 
 /**
  * 
  * 
  * @author Martin Riedel
- * @author codistmonk (modifications since 2010-05-20)
+ * @author codistmonk (modifications since 2010-05-21)
  *
  */
-public class SendPanel extends TopLevelPanel {
-	
-	private final OperationListComponent operationListComponent;
+public class SendPanel extends AbstractOperationListPanel {
 	
 	/**
 	 * 
@@ -61,108 +55,34 @@ public class SendPanel extends TopLevelPanel {
 	 */
 	public SendPanel(final SwingGUI window) {
 		super(window);
-		this.operationListComponent = this.createOperationListComponent();
 		
 		this.setup();
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
-	protected void onQuit() {
-		// do nothing
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void onInit() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void onHide() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void onShow() {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void loadState() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void saveState() {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	/**
-	 * 
-	 * TODO doc
-	 * @param file
-	 * <br>Should not be null
-	 */
-	final void addOperation(final File file) {
-		if (file.isFile()) {
-			this.operationListComponent.add(new OperationComponent(this.operationListComponent.getSelectionModel(), file.getName()), this.operationListComponent.getComponentCount() - 2);
-			
-			// Update scroll pane
-			this.operationListComponent.revalidate();
-			
-			this.repaint();
-		}
-	}
-	
-	private final void setup() {
-		this.setLayout(new BorderLayout());
-		
-		final JPanel titledPanel = titleBorder("send_list_title", scrollable(this.operationListComponent));
-		
-		translate(titledPanel.getBorder());
-		
-		this.add(titledPanel, BorderLayout.CENTER);
-		
-		this.new FileDropHandler(this);
-		
-		this.setVisible(true);
-	}
-	
-	/**
-	 * 
-	 * TODO doc
-	 * @return
-	 * <br>A non-null value
-	 * <br>A new value
-	 */
-	private final OperationListComponent createOperationListComponent() {
-		final OperationListComponent result = new OperationListComponent();
+	protected final OperationListComponent createOperationListComponent() {
+		final OperationListComponent result = super.createOperationListComponent();
 		
 		result.add(this.createAddButton(), 0);
 		
 		return result;
+	}
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @param file
+	 * <br>Should not be null
+	 * <br>Shared parameter
+	 */
+	final void offerFile(final File file) {
+		this.getWindow().getSession().offerFile(file);
+	}
+	
+	private final void setup() {
+		this.setup("send_list_title");
+		
+		this.new FileDropHandler(this);
 	}
 	
 	/**
@@ -201,8 +121,8 @@ public class SendPanel extends TopLevelPanel {
 			
 			fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 			
-			if (JFileChooser.APPROVE_OPTION == fileChooser.showOpenDialog(SendPanel.this)) {
-				SendPanel.this.addOperation(fileChooser.getSelectedFile());
+			if (JFileChooser.APPROVE_OPTION == fileChooser.showOpenDialog(SendPanel.this) && fileChooser.getSelectedFile() != null) {
+				SendPanel.this.offerFile(fileChooser.getSelectedFile());
 			}
 		}
 		
@@ -236,7 +156,7 @@ public class SendPanel extends TopLevelPanel {
 			this.componentToHighlight.setBorder(null);
 			
 			for (final File file : GUITools.getFiles(event)) {
-				SendPanel.this.addOperation(file);
+				SendPanel.this.offerFile(file);
 			}
 		}
 		
