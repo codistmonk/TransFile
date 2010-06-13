@@ -123,22 +123,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		// check whether the application is running on Mac OS X and store the result
 		this.onMacOSX = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
 		
-		this.session = new Session(new DummyConnection(), new ReceiveOperation.DestinationFileProvider() {
-			
-			@Override
-			public final File getDestinationFile(final String name) {
-				final JFileChooser fileChooser = new JFileChooser();
-				
-				fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-				
-				if (JFileChooser.APPROVE_OPTION == fileChooser.showOpenDialog(SwingGUI.this) && fileChooser.getSelectedFile() != null) {
-					return new File(fileChooser.getSelectedFile(), name);
-				}
-				
-				return null;
-			}
-			
-		});
+		this.session = new Session(new DummyConnection(), this.new DestinationFileProvider());
 		
 		this.setStartupLocale();
 	}
@@ -510,6 +495,36 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		JOptionPane.showMessageDialog(this, errorMessage, translate("Error"), JOptionPane.ERROR_MESSAGE);
 	}
 	
+	/**
+	 * TODO doc
+	 *
+	 * @author codistmonk (creation 2010-06-13)
+	 *
+	 */
+	private class DestinationFileProvider implements ReceiveOperation.DestinationFileProvider {
+		
+		/**
+		 * Package-private default constructor to suppress visibility warnings.
+		 */
+		public DestinationFileProvider() {
+			// Do nothing
+		}
+		
+		@Override
+		public final File getDestinationFile(final String name) {
+			final JFileChooser fileChooser = new JFileChooser();
+			
+			fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			
+			if (JFileChooser.APPROVE_OPTION == fileChooser.showOpenDialog(SwingGUI.this) && fileChooser.getSelectedFile() != null) {
+				return new File(fileChooser.getSelectedFile(), name);
+			}
+			
+			return null;
+		}
+		
+	}
+
 	/**
 	 * Listens for when the user closes the window
 	 * 
