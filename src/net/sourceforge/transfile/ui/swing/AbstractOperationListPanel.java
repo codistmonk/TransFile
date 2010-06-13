@@ -35,7 +35,7 @@ import net.sourceforge.transfile.operations.Operation;
  * @author codistmonk (creation 2010-06-13)
  *
  */
-public class AbstractOperationListPanel extends TopLevelPanel {
+public abstract class AbstractOperationListPanel extends TopLevelPanel {
 	
 	private OperationListComponent operationListComponent;
 	
