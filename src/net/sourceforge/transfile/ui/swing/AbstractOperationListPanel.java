@@ -28,6 +28,7 @@ import java.awt.BorderLayout;
 import javax.swing.JPanel;
 
 import net.sourceforge.transfile.operations.Operation;
+import net.sourceforge.transfile.tools.Tools;
 
 /**
  * TODO doc
@@ -61,7 +62,7 @@ public abstract class AbstractOperationListPanel extends TopLevelPanel {
 		
 		final OperationComponent operationComponent = new OperationComponent(this.getOperationListComponent().getSelectionModel(), operation);
 		
-		this.getOperationListComponent().add(operationComponent, this.getOperationListComponent().getComponentCount() - 2);
+		this.getOperationListComponent().add(operationComponent, this.getOperationListComponent().getComponentCount() - this.getInsertionIndexFromBottom());
 		
 		// Update scroll pane
 		this.getOperationListComponent().revalidate();
@@ -93,6 +94,16 @@ public abstract class AbstractOperationListPanel extends TopLevelPanel {
 		this.add(titledPanel, BorderLayout.CENTER);
 		
 		this.setVisible(true);
+	}
+	
+	/**
+	 * 
+	 * TODO doc
+	 * @return
+	 * <br>Range: {@code [0 .. this.getOperationListComponent().getComponentCount()]}
+	 */
+	protected int getInsertionIndexFromBottom() {
+		return 1;
 	}
 	
 	/**

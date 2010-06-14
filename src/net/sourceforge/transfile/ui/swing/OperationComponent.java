@@ -20,7 +20,6 @@ import javax.swing.SwingUtilities;
 
 import net.sourceforge.transfile.operations.Operation;
 import net.sourceforge.transfile.operations.Operation.Controller;
-import net.sourceforge.transfile.operations.Operation.State;
 
 /**
  * 

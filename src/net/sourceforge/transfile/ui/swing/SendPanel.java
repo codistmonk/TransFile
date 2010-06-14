@@ -68,6 +68,11 @@ public class SendPanel extends AbstractOperationListPanel {
 		return result;
 	}
 	
+	@Override
+	protected final int getInsertionIndexFromBottom() {
+		return 2;
+	}
+	
 	/**
 	 * TODO doc
 	 * 
