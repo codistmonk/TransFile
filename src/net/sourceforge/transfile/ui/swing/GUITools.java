@@ -199,7 +199,10 @@ public final class GUITools {
         button.setRolloverSelectedIcon(getIconOrNull(imageName + "_rollover_selected.png"));
         
         if (!borderPainted) {
-        	button.setPreferredSize(new Dimension(button.getIcon().getIconWidth(), button.getIcon().getIconHeight()));
+        	if (button.getIcon() != null) {
+        		button.setPreferredSize(new Dimension(button.getIcon().getIconWidth(), button.getIcon().getIconHeight()));
+        	}
+        	
         	button.setBorderPainted(false);
         }
         

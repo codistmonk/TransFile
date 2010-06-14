@@ -20,7 +20,6 @@
 package net.sourceforge.transfile.operations;
 
 import static net.sourceforge.transfile.operations.AbstractConnectionTestBase.WAIT_DURATION;
-import static net.sourceforge.transfile.operations.AbstractConnectionTestBase.waitAWhile;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
@@ -57,7 +56,7 @@ public class SendOperationTest extends AbstractOperationTestBase {
 		
 		connection1.connect();
 		connection2.connect();
-		waitAWhile();
+		this.waitUntilConnectionAreReady(connections);
 		
 		final File sourceFile = SOURCE_FILE;
 		final Operation operation = this.createOperation(connection1, sourceFile);
@@ -71,12 +70,18 @@ public class SendOperationTest extends AbstractOperationTestBase {
 		assertEquals(0.0, operation.getProgress(), 0.0);
 		
 		operation.getController().start();
+		this.waitUntilConnectionAreReady(connections);
 		connection2.sendMessage(accept);
+		this.waitUntilConnectionAreReady(connections);
 		connection2.sendMessage(dataRequest1);
+		this.waitUntilConnectionAreReady(connections);
 		connection2.sendMessage(dataRequest2);
+		this.waitUntilConnectionAreReady(connections);
 		connection2.sendMessage(done);
 		waitUntilState(operation, State.DONE, WAIT_DURATION);
+		this.waitUntilConnectionAreReady(connections);
 		connection2.disconnect();
+		this.waitUntilConnectionAreReady(connections);
 		
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
@@ -120,6 +125,11 @@ public class SendOperationTest extends AbstractOperationTestBase {
 	@Override
 	public final Operation createOperation(final Connection connection, final File file) {
 		return new SendOperation(connection, file);
+	}
+	
+	@Override
+	public final void waitUntilConnectionAreReady(final Connection... connections) {
+		new DummyConnectionTest().waitUntilConnectionAreReady(connections);
 	}
 	
 }

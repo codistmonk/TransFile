@@ -20,7 +20,6 @@
 package net.sourceforge.transfile.operations;
 
 import static net.sourceforge.transfile.operations.AbstractConnectionTestBase.WAIT_DURATION;
-import static net.sourceforge.transfile.operations.AbstractConnectionTestBase.waitAWhile;
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -75,7 +74,7 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		
 		connection1.connect();
 		connection2.connect();
-		waitAWhile();
+		this.waitUntilConnectionAreReady(connections);
 		
 		final File sourceFile = SOURCE_FILE;
 		final ReceiveOperation operation = this.createOperation(connection1, sourceFile);
@@ -89,8 +88,11 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		
 		// TODO test changing the order of the following 2 instructions
 		operation.getController().start();
+		this.waitUntilConnectionAreReady(connections);
 		connection2.sendMessage(acceptMessage);
+		this.waitUntilConnectionAreReady(connections);
 		connection2.disconnect();
+		this.waitUntilConnectionAreReady(connections);
 		
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
@@ -124,7 +126,7 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		
 		connection1.connect();
 		connection2.connect();
-		waitAWhile();
+		this.waitUntilConnectionAreReady(connections);
 		
 		final File sourceFile = SOURCE_FILE;
 		final ReceiveOperation operation = this.createOperation(connection1, sourceFile);
@@ -137,11 +139,16 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		assertEquals(0L, destinationFile.length());
 		
 		operation.getController().start();
+		this.waitUntilConnectionAreReady(connections);
 		connection2.sendMessage(acceptMessage);
+		this.waitUntilConnectionAreReady(connections);
 		connection2.sendMessage(new DataOfferMessage(sourceFile, 0L, (byte) '4'));
+		this.waitUntilConnectionAreReady(connections);
 		connection2.sendMessage(new DataOfferMessage(sourceFile, 1L, (byte) '2'));
 		waitUntilState(operation, State.DONE, WAIT_DURATION);
+		this.waitUntilConnectionAreReady(connections);
 		connection2.disconnect();
+		this.waitUntilConnectionAreReady(connections);
 		
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
@@ -184,7 +191,7 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		
 		connection1.connect();
 		connection2.connect();
-		waitAWhile();
+		this.waitUntilConnectionAreReady(connections);
 		
 		final File sourceFile = SOURCE_FILE;
 		final ReceiveOperation operation = this.createOperation(connection1, sourceFile);
@@ -197,14 +204,22 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		assertEquals(0L, destinationFile.length());
 		
 		operation.getController().start();
+		this.waitUntilConnectionAreReady(connections);
 		connection2.sendMessage(acceptMessage);
+		this.waitUntilConnectionAreReady(connections);
 		connection2.sendMessage(new DataOfferMessage(sourceFile, 0L, (byte) '4'));
+		this.waitUntilConnectionAreReady(connections);
 		connection2.sendMessage(new StateMessage(sourceFile, State.PAUSED));
+		this.waitUntilConnectionAreReady(connections);
 		connection2.sendMessage(new StateMessage(sourceFile, State.PROGRESSING));
+		this.waitUntilConnectionAreReady(connections);
 		operation.getController().start();
+		this.waitUntilConnectionAreReady(connections);
 		connection2.sendMessage(new DataOfferMessage(sourceFile, 1L, (byte) '2'));
 		waitUntilState(operation, State.DONE, WAIT_DURATION);
+		this.waitUntilConnectionAreReady(connections);
 		connection2.disconnect();
+		this.waitUntilConnectionAreReady(connections);
 		
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
@@ -259,6 +274,11 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		} catch (final IOException exception) {
 			return Tools.throwUnchecked(exception);
 		}
+	}
+	
+	@Override
+	public final void waitUntilConnectionAreReady(final Connection... connections) {
+		new DummyConnectionTest().waitUntilConnectionAreReady(connections);
 	}
 	
 	/**

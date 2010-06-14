@@ -57,6 +57,8 @@ public abstract class AbstractOperationListPanel extends TopLevelPanel {
 	 * <br>Shared parameter
 	 */
 	public final void addOperation(final Operation operation) {
+		GUITools.checkAWT();
+		
 		final OperationComponent operationComponent = new OperationComponent(this.getOperationListComponent().getSelectionModel(), operation);
 		
 		this.getOperationListComponent().add(operationComponent, this.getOperationListComponent().getComponentCount() - 2);

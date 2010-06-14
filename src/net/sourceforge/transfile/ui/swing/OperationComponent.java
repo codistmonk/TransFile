@@ -16,9 +16,11 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
+import javax.swing.SwingUtilities;
 
 import net.sourceforge.transfile.operations.Operation;
-import net.sourceforge.transfile.tools.Tools;
+import net.sourceforge.transfile.operations.Operation.Controller;
+import net.sourceforge.transfile.operations.Operation.State;
 
 /**
  * 
@@ -113,6 +115,19 @@ public class OperationComponent extends JPanel {
 		return this.selectionModel != null && this.selectionModel.getSelection() == this;
 	}
 	
+	final void remove() {
+		final JComponent parent = (JComponent) this.getParent();
+		
+		if (parent != null) {
+			parent.remove(this);
+			
+			// Update scroll pane
+			parent.revalidate();
+			
+			parent.getRootPane().repaint();
+		}
+	}
+	
 	private final void setup() {
 		final GridBagConstraints constraints = new GridBagConstraints();
 		
@@ -136,7 +151,7 @@ public class OperationComponent extends JPanel {
 			constraints.ipady = VERTICAL_PADDING;
 			constraints.fill = GridBagConstraints.NONE;
 			
-			GUITools.add(this, createStartButton(), constraints);
+			GUITools.add(this, this.createStartPauseRetryButton(), constraints);
 		}
 		{
 			constraints.gridx = 2;
@@ -147,7 +162,7 @@ public class OperationComponent extends JPanel {
 			constraints.ipady = VERTICAL_PADDING;
 			constraints.fill = GridBagConstraints.NONE;
 			
-			GUITools.add(this, this.createRemoveButton(), constraints);
+			GUITools.add(this, this.createCancelRemoveButton(), constraints);
 		}
 		
 		this.setMaximumSize(new Dimension(Integer.MAX_VALUE, MAXIMUM_HEIGHT));
@@ -167,6 +182,66 @@ public class OperationComponent extends JPanel {
 		result.setString(this.getOperation().getFileName() + " (queued)");
 		result.setStringPainted(true);
 		
+		this.getOperation().addOperationListener(new AbstractOperationListener() {
+			
+			@Override
+			protected final void doStateChanged() {
+				super.doStateChanged();
+				
+				final Operation operation = OperationComponent.this.getOperation();
+				
+				switch (operation.getState()) {
+				case CANCELED:
+				case DONE:
+				case PAUSED:
+				case PROGRESSING:
+					this.setProgressingString(operation);
+					break;
+				case QUEUED:
+					result.setString(operation.getFileName() + " (queued)");
+					break;
+				case REMOVED:
+					break;
+				}
+				
+			}
+			
+			@Override
+			protected final void doProgressChanged() {
+				super.doProgressChanged();
+				
+				final Operation operation = OperationComponent.this.getOperation();
+				
+				if (operation.getState() == State.PROGRESSING) {
+					this.setProgressingString(operation);
+					result.setValue(this.getProgressPercentage(operation));
+				}
+			}
+			
+			/**
+			 * TODO doc
+			 * 
+			 * @param operation
+			 * <br>Should not be null
+			 */
+			private final void setProgressingString(final Operation operation) {
+				result.setString(operation.getFileName() + " (" + this.getProgressPercentage(operation) + "%)");
+			}
+			
+			/**
+			 * TODO doc
+			 * 
+			 * @param operation
+			 * <br>Should not be null
+			 * @return
+			 * <br>Range: {@code [0 .. 100]}
+			 */
+			private final int getProgressPercentage(final Operation operation) {
+				return (int) (operation.getProgress() * 100.0);
+			}
+			
+		});
+		
 		return result;
 	}
 	
@@ -177,8 +252,32 @@ public class OperationComponent extends JPanel {
 	 * <br>A non-null value
 	 * <br>A new value
 	 */
-	private final JButton createRemoveButton() {
-		return rollover(new JButton(this.new RemoveAction()), "remove", false);
+	private final JButton createCancelRemoveButton() {
+		final JButton result = rollover(new JButton(this.new CancelRemoveAction()), "remove", false);
+		
+		this.getOperation().addOperationListener(new AbstractOperationListener() {
+			
+			@Override
+			protected final void doStateChanged() {
+				super.doStateChanged();
+				
+				switch (OperationComponent.this.getOperation().getState()) {
+				case PAUSED:
+				case PROGRESSING:
+					rollover(result, "cancel", false);
+					break;
+				case CANCELED:
+				case DONE:
+				case QUEUED:
+				case REMOVED:
+					rollover(result, "remove", false);
+					break;
+				}
+			}
+			
+		});
+		
+		return result;
 	}
 	
 	/**
@@ -188,8 +287,97 @@ public class OperationComponent extends JPanel {
 	 * <br>A non-null value
 	 * <br>A new value
 	 */
-	private final JButton createStartButton() {
-		return rollover(new JButton(this.new StartAction()), "start", false);
+	private final JButton createStartPauseRetryButton() {
+		final JButton result = rollover(new JButton(this.new StartPauseAction()), "start", false);
+		
+		this.getOperation().addOperationListener(new AbstractOperationListener() {
+			
+			@Override
+			protected final void doStateChanged() {
+				super.doStateChanged();
+				
+				switch (OperationComponent.this.getOperation().getState()) {
+				case PAUSED:
+				case QUEUED:
+					rollover(result, "start", false);
+					break;
+				case PROGRESSING:
+					rollover(result, "pause", false);
+					break;
+				case CANCELED:
+					rollover(result, "retry", false);
+					break;
+				case DONE:
+					rollover(result, "done", false);
+					break;
+				case REMOVED:
+					break;
+				}
+			}
+			
+		});
+		
+		return result;
+	}
+	
+	/**
+	 * 
+	 * TODO doc
+	 *
+	 * @author codistmonk (creation 2010-06-14)
+	 *
+	 */
+	private class AbstractOperationListener implements Operation.Listener {
+		
+		/**
+		 * Protected default constructor to suppress visibility warnings.
+		 */
+		protected AbstractOperationListener() {
+			// Do nothing
+		}
+		
+		@Override
+		public final void progressChanged() {
+			SwingUtilities.invokeLater(new Runnable() {
+				
+				@Override
+				public final void run() {
+					AbstractOperationListener.this.doProgressChanged();
+				}
+				
+			});
+		}
+		
+		@Override
+		public final void stateChanged() {
+			SwingUtilities.invokeLater(new Runnable() {
+				
+				@Override
+				public final void run() {
+					AbstractOperationListener.this.doStateChanged();
+				}
+				
+			});
+		}
+		
+		/**
+		 * Executed in the AWT Event Dispatching Thread.
+		 * 
+		 * @throws IllegalStateException if the current thread is not the AWT Event Dispatching Thread
+		 */
+		protected void doProgressChanged() {
+			GUITools.checkAWT();
+		}
+		
+		/**
+		 * Executed in the AWT Event Dispatching Thread.
+		 * 
+		 * @throws IllegalStateException if the current thread is not the AWT Event Dispatching Thread
+		 */
+		protected void doStateChanged() {
+			GUITools.checkAWT();
+		}
+		
 	}
 	
 	/**
@@ -197,20 +385,33 @@ public class OperationComponent extends JPanel {
 	 * @author codistmonk (creation 2010-05-20)
 	 *
 	 */
-	private class StartAction extends AbstractAction {
+	private class StartPauseAction extends AbstractAction {
 		
-		StartAction() {
+		StartPauseAction() {
 			super("");
 		}
 		
 		@Override
 		public final void actionPerformed(final ActionEvent event) {
-			try {
-				Tools.debugPrint();
-				OperationComponent.this.getOperation().getController().start();
-				Tools.debugPrint();
-			} catch (final Throwable exception) {
-				exception.printStackTrace();
+			final Operation operation = OperationComponent.this.getOperation();
+			final Controller controller = operation.getController();
+			
+			switch (operation.getState()) {
+			case PAUSED:
+			case QUEUED:
+			case CANCELED:
+				try {
+					controller.start();
+				} catch (final Throwable exception) {
+					exception.printStackTrace();
+				}
+				break;
+			case PROGRESSING:
+				controller.pause();
+				break;
+			case DONE:
+			case REMOVED:
+				break;
 			}
 		}
 		
@@ -223,26 +424,32 @@ public class OperationComponent extends JPanel {
 	 * @author codistmonk (creation 2010-05-20)
 	 *
 	 */
-	private class RemoveAction extends AbstractAction {
+	private class CancelRemoveAction extends AbstractAction {
 		
 		/**
 		 * Package-private constructor to suppress visibility warnings.
 		 */
-		RemoveAction() {
+		CancelRemoveAction() {
 			// Do nothing
 		}
 		
 		@Override
 		public final void actionPerformed(final ActionEvent event) {
-			final JComponent parent = (JComponent) OperationComponent.this.getParent();
+			final Operation operation = OperationComponent.this.getOperation();
+			final Controller controller = operation.getController();
 			
-			if (parent != null) {
-				parent.remove(OperationComponent.this);
-				
-				// Update scroll pane
-				parent.revalidate();
-				
-				parent.getRootPane().repaint();
+			switch (operation.getState()) {
+			case PAUSED:
+			case PROGRESSING:
+				controller.cancel();
+				break;
+			case CANCELED:
+			case DONE:
+			case QUEUED:
+			case REMOVED:
+				controller.remove();
+				OperationComponent.this.remove();
+				break;
 			}
 		}
 		

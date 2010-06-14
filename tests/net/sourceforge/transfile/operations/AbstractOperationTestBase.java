@@ -19,7 +19,6 @@
 
 package net.sourceforge.transfile.operations;
 
-import static net.sourceforge.transfile.operations.AbstractConnectionTestBase.waitAWhile;
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -55,7 +54,7 @@ public abstract class AbstractOperationTestBase {
 		
 		connection1.connect();
 		connection2.connect();
-		waitAWhile();
+		this.waitUntilConnectionAreReady(connections);
 		
 		final File sourceFile = SOURCE_FILE;
 		final Operation operation = this.createOperation(connection1, sourceFile);
@@ -64,24 +63,29 @@ public abstract class AbstractOperationTestBase {
 		assertEquals(State.QUEUED, operation.getState());
 		
 		operation.getController().start();
+		this.waitUntilConnectionAreReady(connections);
 		
 		assertEquals(State.PROGRESSING, operation.getState());
 		
 		operation.getController().pause();
+		this.waitUntilConnectionAreReady(connections);
 		
 		assertEquals(State.PAUSED, operation.getState());
 		
 		operation.getController().start();
+		this.waitUntilConnectionAreReady(connections);
 		
 		assertEquals(State.PROGRESSING, operation.getState());
 		
 		operation.getController().cancel();
+		this.waitUntilConnectionAreReady(connections);
 		
 		assertEquals(State.CANCELED, operation.getState());
 		
 		operation.getController().remove();
+		this.waitUntilConnectionAreReady(connections);
 		connection1.disconnect();
-		waitAWhile();
+		this.waitUntilConnectionAreReady(connections);
 		
 		assertEquals(State.REMOVED, operation.getState());
 		assertEquals(Arrays.asList(
@@ -150,6 +154,14 @@ public abstract class AbstractOperationTestBase {
 	 * <br>A new value
 	 */
 	public abstract Operation createOperation(Connection connection, File file);
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @param connections
+	 * <br>Should not be null
+	 */
+	public abstract void waitUntilConnectionAreReady(Connection... connections);
 	
 	public static final File SOURCE_FILE = new File("tests/" + ReceiveOperationTest.class.getPackage().getName().replaceAll("\\.", "/") + "/data.txt");
 	

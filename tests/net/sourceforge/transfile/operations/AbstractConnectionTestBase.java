@@ -48,9 +48,9 @@ public abstract class AbstractConnectionTestBase {
 		assertEquals(Connection.State.DISCONNECTED, connection.getState());
 		
 		connection.connect();
-		waitAWhile();
+		this.waitUntilConnectionAreReady(connection);
 		connection.disconnect();
-		waitAWhile();
+		this.waitUntilConnectionAreReady(connection);
 		
 		assertEquals(Connection.State.DISCONNECTED, connection.getState());
 		assertEquals(Arrays.asList(
@@ -74,15 +74,17 @@ public abstract class AbstractConnectionTestBase {
 		
 		connection1.connect();
 		connection2.connect();
-		waitAWhile();
+		this.waitUntilConnectionAreReady(connections);
 		
 		assertEquals(Connection.State.CONNECTED, connection1.getState());
 		assertEquals(Connection.State.CONNECTED, connection2.getState());
 		
 		connection1.sendMessage(dataMessage1);
+		this.waitUntilConnectionAreReady(connections);
 		connection2.sendMessage(dataMessage2);
+		this.waitUntilConnectionAreReady(connections);
 		connection1.disconnect();
-		waitAWhile();
+		this.waitUntilConnectionAreReady(connections);
 		
 		assertEquals(Connection.State.DISCONNECTED, connection1.getState());
 		assertEquals(Connection.State.DISCONNECTED, connection2.getState());
@@ -122,9 +124,20 @@ public abstract class AbstractConnectionTestBase {
 	 */
 	public abstract Connection[] createMatchingConnectionPair();
 	
-	public static final long WAIT_DURATION = 200L;
+	/**
+	 * TODO doc
+	 * 
+	 * @param connections
+	 * <br>Should not be null
+	 */
+	public abstract void waitUntilConnectionAreReady(Connection... connections);
 	
-	public static final void waitAWhile() {
+	/**
+	 * Duration in milliseconds.
+	 */
+	public static final long WAIT_DURATION = 400L;
+	
+	private static final void waitAWhile() {
 		try {
 			Thread.sleep(WAIT_DURATION);
 		} catch (final InterruptedException exception) {

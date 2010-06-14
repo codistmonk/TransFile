@@ -19,7 +19,6 @@
 
 package net.sourceforge.transfile.operations;
 
-import static net.sourceforge.transfile.operations.AbstractConnectionTestBase.waitAWhile;
 import static org.junit.Assert.*;
 
 import java.io.File;
@@ -60,13 +59,15 @@ public class SessionTest {
 		
 		connection1.connect();
 		connection2.connect();
-		waitAWhile();
+		this.waitUntilConnectionAreReady(connections);
 		
 		assertEquals(connection1.getState(), Connection.State.CONNECTED);
 		assertEquals(connection2.getState(), Connection.State.CONNECTED);
 		
 		session.offerFile(sourceFile);
+		this.waitUntilConnectionAreReady(connections);
 		connection1.disconnect();
+		this.waitUntilConnectionAreReady(connections);
 		
 		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);
 		assertEquals(connection2.getState(), Connection.State.DISCONNECTED);
@@ -88,6 +89,16 @@ public class SessionTest {
 		
 		assertNotNull(sendOperation);
 		assertEquals(sourceFile, sendOperation.getLocalFile());
+	}
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @param connections
+	 * <br>Should not be null
+	 */
+	public final void waitUntilConnectionAreReady(final Connection... connections) {
+		new DummyConnectionTest().waitUntilConnectionAreReady(connections);
 	}
 	
 	/**

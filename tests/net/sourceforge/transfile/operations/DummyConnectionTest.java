@@ -21,6 +21,8 @@ package net.sourceforge.transfile.operations;
 
 import static net.sourceforge.transfile.tools.Tools.array;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * TODO doc
  *
@@ -29,9 +31,6 @@ import static net.sourceforge.transfile.tools.Tools.array;
  */
 public class DummyConnectionTest extends AbstractConnectionTestBase {
 	
-	/** 
-	 * {@inheritDoc}
-	 */
 	@Override
 	public final Connection[] createMatchingConnectionPair() {
 		final DummyConnection connection1 = new DummyConnection();
@@ -43,12 +42,18 @@ public class DummyConnectionTest extends AbstractConnectionTestBase {
 		return array(connection1, connection2);
 	}
 	
-	/** 
-	 * {@inheritDoc}
-	 */
 	@Override
 	public final Connection createUnmatchedConnection() {
 		return new DummyConnection();
+	}
+	
+	@Override
+	public final void waitUntilConnectionAreReady(final Connection... connections) {
+		try {
+			DummyConnection.EXECUTOR.awaitTermination(WAIT_DURATION, TimeUnit.MILLISECONDS);
+		} catch (final InterruptedException exception) {
+			exception.printStackTrace();
+		}
 	}
 	
 }

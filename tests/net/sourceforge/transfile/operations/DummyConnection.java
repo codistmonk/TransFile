@@ -1,7 +1,12 @@
 package net.sourceforge.transfile.operations;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import net.sourceforge.transfile.operations.messages.DisconnectMessage;
 import net.sourceforge.transfile.operations.messages.Message;
+import net.sourceforge.transfile.tools.Tools;
 
 /**
  * TODO doc
@@ -66,11 +71,18 @@ public class DummyConnection extends AbstractConnection {
 			return;
 		}
 		
-		if (this.getRemoteConnection() != null) {
-			for (final Listener listener : this.getRemoteConnection().getListeners()) {
-				listener.messageReceived(message);
+		EXECUTOR.execute(new Runnable() {
+			
+			@Override
+			public void run() {
+				if (DummyConnection.this.getRemoteConnection() != null) {
+					for (final Listener listener : DummyConnection.this.getRemoteConnection().getListeners()) {
+						listener.messageReceived(message);
+					}
+				}
 			}
-		}
+			
+		});
 	}
 	
 	/** 
@@ -108,5 +120,7 @@ public class DummyConnection extends AbstractConnection {
 			break;
 		}
 	}
+	
+	static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(1);
 	
 }

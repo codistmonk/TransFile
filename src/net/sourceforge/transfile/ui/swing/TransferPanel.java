@@ -23,6 +23,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 
 import javax.swing.JSplitPane;
+import javax.swing.SwingUtilities;
 
 import net.sourceforge.transfile.operations.ReceiveOperation;
 import net.sourceforge.transfile.operations.SendOperation;
@@ -154,13 +155,26 @@ public class TransferPanel extends TopLevelPanel {
 		
 		@Override
 		public final void sendOperationAdded(final SendOperation sendOperation) {
-			TransferPanel.this.getSendPanel().addOperation(sendOperation);
-			
+			SwingUtilities.invokeLater(new Runnable() {
+				
+				@Override
+				public final void run() {
+					TransferPanel.this.getSendPanel().addOperation(sendOperation);
+				}
+				
+			});
 		}
 		
 		@Override
 		public final void receiveOperationAdded(final ReceiveOperation receiveOperation) {
-			TransferPanel.this.getReceivePanel().addOperation(receiveOperation);
+			SwingUtilities.invokeLater(new Runnable() {
+				
+				@Override
+				public final void run() {
+					TransferPanel.this.getReceivePanel().addOperation(receiveOperation);
+				}
+				
+			});
 		}
 		
 	}

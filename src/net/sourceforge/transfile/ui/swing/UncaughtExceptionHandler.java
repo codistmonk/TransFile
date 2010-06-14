@@ -79,6 +79,7 @@ class UncaughtExceptionHandler implements java.lang.Thread.UncaughtExceptionHand
 	 * <br />Never null
 	 */
 	protected void handleUncaughtException(final Throwable exception) {
+		exception.printStackTrace();
 		getLoggerForThisMethod().log(Level.SEVERE, "unexpected error / uncaught exception", exception);
 		this.statusService.postStatusMessage(exception.getCause() == null ? translate(new StatusMessage("status_unexpected_error"), exception.getClass().getSimpleName())
 																	 : translate(new StatusMessage("status_unexpected_error_with_cause"), exception.getClass().getSimpleName(), exception.getCause().getClass().getSimpleName()));
