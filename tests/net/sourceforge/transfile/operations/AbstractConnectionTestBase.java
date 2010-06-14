@@ -137,14 +137,6 @@ public abstract class AbstractConnectionTestBase {
 	 */
 	public static final long WAIT_DURATION = 400L;
 	
-	private static final void waitAWhile() {
-		try {
-			Thread.sleep(WAIT_DURATION);
-		} catch (final InterruptedException exception) {
-			exception.printStackTrace();
-		}
-	}
-	
 	/**
 	 * TODO doc
 	 *

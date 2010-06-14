@@ -212,10 +212,9 @@ public class OperationComponent extends JPanel {
 				
 				final Operation operation = OperationComponent.this.getOperation();
 				
-				if (operation.getState() == State.PROGRESSING) {
-					this.setProgressingString(operation);
-					result.setValue(this.getProgressPercentage(operation));
-				}
+				result.setValue(this.getProgressPercentage(operation));
+				
+				this.setProgressingString(operation);
 			}
 			
 			/**
