@@ -330,6 +330,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		// "Transfer" panel
 		
 		this.transferPanel = new TransferPanel(this);
+		this.panels.add(this.transferPanel);
 		pane.add(this.transferPanel);
 		
 		// "Status" panel
