@@ -62,6 +62,10 @@ public class DummyConnection extends AbstractConnection {
 	 */
 	@Override
 	public final void sendMessage(final Message message) {
+		if (this.getState() != State.CONNECTED) {
+			return;
+		}
+		
 		if (this.getRemoteConnection() != null) {
 			for (final Listener listener : this.getRemoteConnection().getListeners()) {
 				listener.messageReceived(message);

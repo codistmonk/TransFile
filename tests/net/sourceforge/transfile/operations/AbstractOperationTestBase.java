@@ -50,8 +50,8 @@ public abstract class AbstractOperationTestBase {
 		final ConnectionRecorder connectionRecorder1 = new ConnectionRecorder(connection1);
 		final ConnectionRecorder connectionRecorder2 = new ConnectionRecorder(connection2);
 		
-		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);
-		assertEquals(connection2.getState(), Connection.State.DISCONNECTED);
+		assertEquals(Connection.State.DISCONNECTED, connection1.getState());
+		assertEquals(Connection.State.DISCONNECTED, connection2.getState());
 		
 		connection1.connect();
 		connection2.connect();

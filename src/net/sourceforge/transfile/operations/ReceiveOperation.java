@@ -160,7 +160,7 @@ public class ReceiveOperation extends AbstractOperation {
 				}
 			}
 			
-			if (this.canTransferData()) {
+			if (!(operationMessage instanceof DataRequestMessage) && this.canTransferData()) {
 				this.requestData();
 			}
 		}

@@ -45,14 +45,14 @@ public abstract class AbstractConnectionTestBase {
 		final Connection connection = this.createUnmatchedConnection();
 		final ConnectionRecorder connectionLogger = new ConnectionRecorder(connection);
 		
-		assertEquals(connection.getState(), Connection.State.DISCONNECTED);
+		assertEquals(Connection.State.DISCONNECTED, connection.getState());
 		
 		connection.connect();
 		waitAWhile();
 		connection.disconnect();
 		waitAWhile();
 		
-		assertEquals(connection.getState(), Connection.State.DISCONNECTED);
+		assertEquals(Connection.State.DISCONNECTED, connection.getState());
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
 				Connection.State.DISCONNECTED
@@ -69,23 +69,23 @@ public abstract class AbstractConnectionTestBase {
 		final Message dataMessage1 = new DataOfferMessage(new File("dummy"), 0L, "Hello world!".getBytes());
 		final Message dataMessage2 = new DataOfferMessage(new File("dummy"), 0L, "42".getBytes());
 		
-		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);
-		assertEquals(connection2.getState(), Connection.State.DISCONNECTED);
+		assertEquals(Connection.State.DISCONNECTED, connection1.getState());
+		assertEquals(Connection.State.DISCONNECTED, connection2.getState());
 		
 		connection1.connect();
 		connection2.connect();
 		waitAWhile();
 		
-		assertEquals(connection1.getState(), Connection.State.CONNECTED);
-		assertEquals(connection2.getState(), Connection.State.CONNECTED);
+		assertEquals(Connection.State.CONNECTED, connection1.getState());
+		assertEquals(Connection.State.CONNECTED, connection2.getState());
 		
 		connection1.sendMessage(dataMessage1);
 		connection2.sendMessage(dataMessage2);
 		connection1.disconnect();
 		waitAWhile();
 		
-		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);
-		assertEquals(connection2.getState(), Connection.State.DISCONNECTED);
+		assertEquals(Connection.State.DISCONNECTED, connection1.getState());
+		assertEquals(Connection.State.DISCONNECTED, connection2.getState());
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,

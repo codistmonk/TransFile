@@ -14,7 +14,6 @@ import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 
@@ -206,9 +205,13 @@ public class OperationComponent extends JPanel {
 		
 		@Override
 		public final void actionPerformed(final ActionEvent event) {
-			// TODO
-			Tools.debugPrint("TODO");
-			JOptionPane.showMessageDialog(OperationComponent.this, "Not implemented");
+			try {
+				Tools.debugPrint();
+				OperationComponent.this.getOperation().getController().start();
+				Tools.debugPrint();
+			} catch (final Throwable exception) {
+				exception.printStackTrace();
+			}
 		}
 		
 		private static final long serialVersionUID = 2945622216824469468L;

@@ -48,6 +48,21 @@ import org.junit.Test;
 public class ReceiveOperationTest extends AbstractOperationTestBase {
 	
 	@Test
+	public final void testReceiveRequestMessage() {
+		final DummyConnection connection = new DummyConnection();
+		
+		connection.setRemoteConnection(connection);
+		connection.connect();
+		
+		assertEquals(Connection.State.CONNECTED, connection.getState());
+		
+		final ReceiveOperation operation = this.createOperation(connection, SOURCE_FILE);
+		
+		operation.getController().start();
+		// Should terminate normally
+	}
+	
+	@Test
 	public final void testRequestData() {
 		final Connection[] connections = this.createMatchingConnectionPair();
 		final Connection connection1 = connections[0];
@@ -55,8 +70,8 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		final ConnectionRecorder connectionRecorder1 = new ConnectionRecorder(connection1);
 		final ConnectionRecorder connectionRecorder2 = new ConnectionRecorder(connection2);
 		
-		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);
-		assertEquals(connection2.getState(), Connection.State.DISCONNECTED);
+		assertEquals(Connection.State.DISCONNECTED, connection1.getState());
+		assertEquals(Connection.State.DISCONNECTED, connection2.getState());
 		
 		connection1.connect();
 		connection2.connect();
@@ -104,8 +119,8 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		final ConnectionRecorder connectionRecorder1 = new ConnectionRecorder(connection1);
 		final ConnectionRecorder connectionRecorder2 = new ConnectionRecorder(connection2);
 		
-		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);
-		assertEquals(connection2.getState(), Connection.State.DISCONNECTED);
+		assertEquals(Connection.State.DISCONNECTED, connection1.getState());
+		assertEquals(Connection.State.DISCONNECTED, connection2.getState());
 		
 		connection1.connect();
 		connection2.connect();
@@ -164,8 +179,8 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		final ConnectionRecorder connectionRecorder1 = new ConnectionRecorder(connection1);
 		final ConnectionRecorder connectionRecorder2 = new ConnectionRecorder(connection2);
 		
-		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);
-		assertEquals(connection2.getState(), Connection.State.DISCONNECTED);
+		assertEquals(Connection.State.DISCONNECTED, connection1.getState());
+		assertEquals(Connection.State.DISCONNECTED, connection2.getState());
 		
 		connection1.connect();
 		connection2.connect();
