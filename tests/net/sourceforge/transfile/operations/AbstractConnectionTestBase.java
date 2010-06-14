@@ -47,9 +47,9 @@ public abstract class AbstractConnectionTestBase {
 		
 		assertEquals(connection.getState(), Connection.State.DISCONNECTED);
 		
-		connection.toggleConnection();
+		connection.connect();
 		waitAWhile();
-		connection.toggleConnection();
+		connection.disconnect();
 		waitAWhile();
 		
 		assertEquals(connection.getState(), Connection.State.DISCONNECTED);
@@ -72,8 +72,8 @@ public abstract class AbstractConnectionTestBase {
 		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);
 		assertEquals(connection2.getState(), Connection.State.DISCONNECTED);
 		
-		connection1.toggleConnection();
-		connection2.toggleConnection();
+		connection1.connect();
+		connection2.connect();
 		waitAWhile();
 		
 		assertEquals(connection1.getState(), Connection.State.CONNECTED);
@@ -81,7 +81,7 @@ public abstract class AbstractConnectionTestBase {
 		
 		connection1.sendMessage(dataMessage1);
 		connection2.sendMessage(dataMessage2);
-		connection1.toggleConnection();
+		connection1.disconnect();
 		waitAWhile();
 		
 		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);

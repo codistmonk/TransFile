@@ -58,15 +58,15 @@ public class SessionTest {
 		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);
 		assertEquals(connection2.getState(), Connection.State.DISCONNECTED);
 		
-		connection1.toggleConnection();
-		connection2.toggleConnection();
+		connection1.connect();
+		connection2.connect();
 		waitAWhile();
 		
 		assertEquals(connection1.getState(), Connection.State.CONNECTED);
 		assertEquals(connection2.getState(), Connection.State.CONNECTED);
 		
 		session.offerFile(sourceFile);
-		connection1.toggleConnection();
+		connection1.disconnect();
 		
 		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);
 		assertEquals(connection2.getState(), Connection.State.DISCONNECTED);

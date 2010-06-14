@@ -73,7 +73,7 @@ public class DummyConnection extends AbstractConnection {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public final void toggleConnection() {
+	public final void connect() {
 		switch (this.getState()) {
 		case DISCONNECTED:
 			this.setState(State.CONNECTING);
@@ -82,12 +82,25 @@ public class DummyConnection extends AbstractConnection {
 				this.getRemoteConnection().setState(State.CONNECTED);
 			}
 			break;
+		default:
+			break;
+		}
+	}
+	
+	/** 
+	 * {@inheritDoc}
+	 */
+	@Override
+	public final void disconnect() {
+		switch (this.getState()) {
 		case CONNECTING:
 			this.setState(State.DISCONNECTED);
 			break;
 		case CONNECTED:
 			this.sendMessage(new DisconnectMessage());
 			this.setState(State.DISCONNECTED);
+			break;
+		default:
 			break;
 		}
 	}

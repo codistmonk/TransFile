@@ -53,8 +53,8 @@ public abstract class AbstractOperationTestBase {
 		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);
 		assertEquals(connection2.getState(), Connection.State.DISCONNECTED);
 		
-		connection1.toggleConnection();
-		connection2.toggleConnection();
+		connection1.connect();
+		connection2.connect();
 		waitAWhile();
 		
 		final File sourceFile = SOURCE_FILE;
@@ -80,7 +80,7 @@ public abstract class AbstractOperationTestBase {
 		assertEquals(State.CANCELED, operation.getState());
 		
 		operation.getController().remove();
-		connection1.toggleConnection();
+		connection1.disconnect();
 		waitAWhile();
 		
 		assertEquals(State.REMOVED, operation.getState());

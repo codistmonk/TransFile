@@ -77,7 +77,17 @@ public interface Connection {
 	 */
 	public abstract void setRemotePeer(String remotePeer);
 	
-	public abstract void toggleConnection();
+	/**
+	 * Non-blocking operation.
+	 * TODO doc
+	 */
+	public abstract void connect();
+	
+	/**
+	 * Non-blocking operation.
+	 * TODO doc
+	 */
+	public abstract void disconnect();
 	
 	/**
 	 * TODO doc

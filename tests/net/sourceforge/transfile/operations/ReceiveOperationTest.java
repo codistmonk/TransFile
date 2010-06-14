@@ -58,8 +58,8 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);
 		assertEquals(connection2.getState(), Connection.State.DISCONNECTED);
 		
-		connection1.toggleConnection();
-		connection2.toggleConnection();
+		connection1.connect();
+		connection2.connect();
 		waitAWhile();
 		
 		final File sourceFile = SOURCE_FILE;
@@ -73,9 +73,9 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		assertEquals(0L, destinationFile.length());
 		
 		// TODO test changing the order of the following 2 instructions
-		connection2.sendMessage(acceptMessage);
 		operation.getController().start();
-		connection2.toggleConnection();
+		connection2.sendMessage(acceptMessage);
+		connection2.disconnect();
 		
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
@@ -107,8 +107,8 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);
 		assertEquals(connection2.getState(), Connection.State.DISCONNECTED);
 		
-		connection1.toggleConnection();
-		connection2.toggleConnection();
+		connection1.connect();
+		connection2.connect();
 		waitAWhile();
 		
 		final File sourceFile = SOURCE_FILE;
@@ -126,7 +126,7 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		connection2.sendMessage(new DataOfferMessage(sourceFile, 0L, (byte) '4'));
 		connection2.sendMessage(new DataOfferMessage(sourceFile, 1L, (byte) '2'));
 		waitUntilState(operation, State.DONE, WAIT_DURATION);
-		connection2.toggleConnection();
+		connection2.disconnect();
 		
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
@@ -167,8 +167,8 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);
 		assertEquals(connection2.getState(), Connection.State.DISCONNECTED);
 		
-		connection1.toggleConnection();
-		connection2.toggleConnection();
+		connection1.connect();
+		connection2.connect();
 		waitAWhile();
 		
 		final File sourceFile = SOURCE_FILE;
@@ -189,7 +189,7 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		operation.getController().start();
 		connection2.sendMessage(new DataOfferMessage(sourceFile, 1L, (byte) '2'));
 		waitUntilState(operation, State.DONE, WAIT_DURATION);
-		connection2.toggleConnection();
+		connection2.disconnect();
 		
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,

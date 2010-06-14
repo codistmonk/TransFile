@@ -55,8 +55,8 @@ public class SendOperationTest extends AbstractOperationTestBase {
 		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);
 		assertEquals(connection2.getState(), Connection.State.DISCONNECTED);
 		
-		connection1.toggleConnection();
-		connection2.toggleConnection();
+		connection1.connect();
+		connection2.connect();
 		waitAWhile();
 		
 		final File sourceFile = SOURCE_FILE;
@@ -76,7 +76,7 @@ public class SendOperationTest extends AbstractOperationTestBase {
 		connection2.sendMessage(dataRequest2);
 		connection2.sendMessage(done);
 		waitUntilState(operation, State.DONE, WAIT_DURATION);
-		connection2.toggleConnection();
+		connection2.disconnect();
 		
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
