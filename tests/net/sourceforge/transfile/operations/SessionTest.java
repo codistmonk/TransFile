@@ -54,23 +54,23 @@ public class SessionTest {
 		final Session session = new Session(connection1, new ReceiveOperationTest.TemporaryDestinationFileProvider(sourceFile));
 		final SessionRecorder sessionRecorder = new SessionRecorder(session);
 		
-		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);
-		assertEquals(connection2.getState(), Connection.State.DISCONNECTED);
+		assertEquals(Connection.State.DISCONNECTED, connection1.getState());
+		assertEquals(Connection.State.DISCONNECTED, connection2.getState());
 		
 		connection1.connect();
 		connection2.connect();
 		this.waitUntilConnectionAreReady(connections);
 		
-		assertEquals(connection1.getState(), Connection.State.CONNECTED);
-		assertEquals(connection2.getState(), Connection.State.CONNECTED);
+		assertEquals(Connection.State.CONNECTED, connection1.getState());
+		assertEquals(Connection.State.CONNECTED, connection2.getState());
 		
 		session.offerFile(sourceFile);
 		this.waitUntilConnectionAreReady(connections);
 		connection1.disconnect();
 		this.waitUntilConnectionAreReady(connections);
 		
-		assertEquals(connection1.getState(), Connection.State.DISCONNECTED);
-		assertEquals(connection2.getState(), Connection.State.DISCONNECTED);
+		assertEquals(Connection.State.DISCONNECTED, connection1.getState());
+		assertEquals(Connection.State.DISCONNECTED, connection2.getState());
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,

@@ -2,15 +2,11 @@ package net.sourceforge.transfile.operations;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import net.sourceforge.transfile.operations.messages.Message;
 import net.sourceforge.transfile.operations.messages.OperationMessage;
 import net.sourceforge.transfile.operations.messages.StateMessage;
-import net.sourceforge.transfile.tools.Tools;
 
 /**
  * TODO doc
@@ -104,16 +100,12 @@ public abstract class AbstractOperation implements Operation {
 	 * <br>Range: {@code [0.0 .. 1.0]}
 	 */
 	public final synchronized void setProgress(final double progress) {
-		try {
-			logEntry(progress);
-			
+		if (this.getProgress() != progress) {
 			this.progress = progress;
 			
 			for (final Listener listener : this.getListeners()) {
 				listener.progressChanged();
 			}
-		} finally {
-			logReturn(null);
 		}
 	}
 	
@@ -124,16 +116,12 @@ public abstract class AbstractOperation implements Operation {
 	 * <br>Shared parameter
 	 */
 	public final synchronized void setState(final State state) {
-		try {
-			logEntry(state);
-			
+		if (this.getState() != state) {
 			this.state = state;
 			
 			for (final Listener listener : this.getListeners()) {
 				listener.stateChanged();
 			}
-		} finally {
-			logReturn(null);
 		}
 	}
 	
@@ -318,36 +306,6 @@ public abstract class AbstractOperation implements Operation {
 			
 		}
 		
-	}
-	
-	/**
-	 * TODO doc
-	 * 
-	 * @param parameters
-	 * <br>Should not be null
-	 */
-	public static final void logEntry(final Object... parameters) {
-		final Class<?> callerClass = Tools.getCallerClass();
-		final String callerMethodName = Tools.getCallerMethodName();
-		final String methodQualifiedName = callerClass.getName() + "." + callerMethodName;
-		final Logger logger = Logger.getLogger(methodQualifiedName);
-		
-		logger.log(Level.FINEST, "Entering " + methodQualifiedName + " in thread " + Thread.currentThread() + " with parameters " + Arrays.toString(parameters));
-	}
-	
-	/**
-	 * TODO doc
-	 * 
-	 * @param returnedValue
-	 * <br>Can be null
-	 */
-	public static final void logReturn(final Object returnedValue) {
-		final Class<?> callerClass = Tools.getCallerClass();
-		final String callerMethodName = Tools.getCallerMethodName();
-		final String methodQualifiedName = callerClass.getName() + "." + callerMethodName;
-		final Logger logger = Logger.getLogger(methodQualifiedName);
-		
-		logger.log(Level.FINEST, "Exiting " + methodQualifiedName + " in thread " + Thread.currentThread() + " with return value " + returnedValue);
 	}
 	
 }

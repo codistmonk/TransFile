@@ -42,6 +42,19 @@ import org.junit.Test;
 public abstract class AbstractOperationTestBase {
 	
 	@Test
+	public final void testNoInfiniteLoop() {
+		final DummyConnection connection = DummyConnection.createDummyConnectionConnectedToItself();
+		
+		assertEquals(Connection.State.CONNECTED, connection.getState());
+		
+		final Operation operation = this.createOperation(connection, SOURCE_FILE);
+		
+		operation.getController().start();
+		operation.getController().pause();
+		// Should terminate normally
+	}
+	
+	@Test
 	public final void testStartPauseResumeCancelRemove() {
 		final Connection[] connections = this.createMatchingConnectionPair();
 		final Connection connection1 = connections[0];

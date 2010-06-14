@@ -104,7 +104,6 @@ public class SendOperationTest extends AbstractOperationTestBase {
 		), connectionRecorder2.getEvents());
 		assertEquals(Arrays.asList(
 				(Object) Operation.State.PROGRESSING,
-				0.0,
 				0.5,
 				1.0,
 				Operation.State.DONE

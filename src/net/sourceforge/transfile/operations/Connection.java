@@ -113,14 +113,18 @@ public interface Connection {
 	 */
 	public static interface Listener {
 		
+		/**
+		 * TODO doc
+		 * 
+		 */
 		public abstract void stateChanged();
 		
 		/**
-		 * 
 		 * TODO doc
+		 * 
 		 * @param message
-		 * <br>A non-null value
-		 * <br>A possibly shared value
+		 * <br>Should not be null
+		 * <br>Maybe shared parameter
 		 */
 		public abstract void messageReceived(Message message);
 		

@@ -28,7 +28,6 @@ import java.awt.BorderLayout;
 import javax.swing.JPanel;
 
 import net.sourceforge.transfile.operations.Operation;
-import net.sourceforge.transfile.tools.Tools;
 
 /**
  * TODO doc

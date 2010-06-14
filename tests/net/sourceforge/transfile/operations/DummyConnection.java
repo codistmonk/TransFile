@@ -73,11 +73,7 @@ public class DummyConnection extends AbstractConnection {
 			
 			@Override
 			public void run() {
-				if (DummyConnection.this.getRemoteConnection() != null) {
-					for (final Listener listener : DummyConnection.this.getRemoteConnection().getListeners()) {
-						listener.messageReceived(message);
-					}
-				}
+				DummyConnection.this.doSendMessage(message);
 			}
 			
 		});
@@ -91,6 +87,7 @@ public class DummyConnection extends AbstractConnection {
 		switch (this.getState()) {
 		case DISCONNECTED:
 			this.setState(State.CONNECTING);
+			
 			if (this.getRemoteConnection() != null && this.getRemoteConnection().getState() == State.CONNECTING) {
 				this.setState(State.CONNECTED);
 				this.getRemoteConnection().setState(State.CONNECTED);
@@ -119,6 +116,35 @@ public class DummyConnection extends AbstractConnection {
 		}
 	}
 	
-	static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(1);
+	/**
+	 * TODO doc
+	 * 
+	 * @param message
+	 * <br>Should not be null
+	 * <br>Maybe shared parameter
+	 */
+	final void doSendMessage(final Message message) {
+		if (DummyConnection.this.getRemoteConnection() != null) {
+			for (final Listener listener : DummyConnection.this.getRemoteConnection().getListeners()) {
+				listener.messageReceived(message);
+			}
+		}
+	}
+	
+	static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
+	
+	/**
+	 * @return
+	 * <br>A non-null value
+	 * <br>A new value
+	 */
+	public static final DummyConnection createDummyConnectionConnectedToItself() {
+		final DummyConnection result = new DummyConnection();
+		
+		result.setRemoteConnection(result);
+		result.connect();
+		
+		return result;
+	}
 	
 }

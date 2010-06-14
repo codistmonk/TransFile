@@ -123,7 +123,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		// check whether the application is running on Mac OS X and store the result
 		this.onMacOSX = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
 		
-		this.session = new Session(createDummyConnection(), this.new DestinationFileProvider());
+		this.session = new Session(DummyConnection.createDummyConnectionConnectedToItself(), this.new DestinationFileProvider());
 		
 		this.setStartupLocale();
 	}
@@ -568,22 +568,6 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		if (menu.getSubElements() != null && menu.getSubElements().length > 0) {
 			menuBar.add(menu);
 		}
-	}
-	
-	/**
-	 * Creates and returns an instance of {@link DummyConnection} connected to itself.
-	 * 
-	 * @return
-	 * <br>A non-null value
-	 * <br>A new value
-	 */
-	private static final DummyConnection createDummyConnection() {
-		final DummyConnection result = new DummyConnection();
-		
-		result.setRemoteConnection(result);
-		result.connect();
-		
-		return result;
 	}
 	
 }
