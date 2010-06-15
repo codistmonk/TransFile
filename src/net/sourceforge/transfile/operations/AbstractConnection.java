@@ -3,6 +3,9 @@ package net.sourceforge.transfile.operations;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import net.sourceforge.transfile.operations.messages.DisconnectMessage;
+import net.sourceforge.transfile.operations.messages.Message;
+
 /**
  * TODO doc
  *
@@ -17,9 +20,13 @@ public abstract class AbstractConnection implements Connection {
 	
 	private String remotePeer;
 	
-	private Exception connectError;
+	private Exception connectionError;
 	
 	private State state;
+	
+	public AbstractConnection() {
+		this(DEFAULT_LOCAL_PEER, DEFAULT_REMOTE_PEER);
+	}
 	
 	/**
 	 * 
@@ -98,23 +105,40 @@ public abstract class AbstractConnection implements Connection {
 	}
 	
 	@Override
-	public final Exception getConnectError() {
-		return this.connectError;
+	public final Exception getConnectionError() {
+		return this.connectionError;
 	}
 	
 	/**
 	 * TODO doc
 	 * 
-	 * @param connectError
+	 * @param connectionError
 	 * <br>Can be null
 	 * <br>Shared parameter
 	 */
-	protected final void setConnectError(final Exception connectError) {
-		this.connectError = connectError;
+	protected final void setConnectionError(final Exception connectionError) {
+		this.connectionError = connectionError;
 	}
-
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @param message
+	 * <br>Should not be null
+	 * <br>Maybe shared parameter
+	 */
+	protected final void dispatchMessage(final Message message) {
+		if (message instanceof DisconnectMessage) {
+			this.setState(State.DISCONNECTED);
+		}
+		
+		for (final Listener listener : this.getListeners()) {
+			listener.messageReceived(message);
+		}
+	}
+	
 	@Override
-	public final State getState() {
+	public final synchronized State getState() {
 		return this.state;
 	}
 	
@@ -126,12 +150,74 @@ public abstract class AbstractConnection implements Connection {
 	 */
 	public final void setState(State state) {
 		if (this.getState() != state) {
-			this.state = state;
+			synchronized (this) {
+				this.state = state;
+			}
 			
 			for (final Listener listener : this.getListeners()) {
 				listener.stateChanged();
 			}
 		}
+	}
+	
+	public static final String DEFAULT_LOCAL_PEER = getPeer("transfile", "0.0.0.0", "12345");
+	
+	public static final String DEFAULT_REMOTE_PEER = getPeer("transfile", "0.0.0.0", "54321");
+	
+	/**
+	 * Converts a string {@code "protocol://host:port"} into an array { {@code "protocol"}, {@code "host"}, {@code "port"} },
+	 * and a string {@code "host:port"} into an array { {@code ""}, {@code "host"}, {@code "port"} }.
+	 * 
+	 * @param peer
+	 * <br>Should not be null
+	 * @return
+	 * <br>A new value
+	 * <br>A non-null value
+	 */
+	public static final String[] getProtocolHostPort(final String peer) {
+		final String[] result = ((peer.contains("://") ? "" : ":") + peer).split(":");
+		
+		if (result[1].startsWith("//")) {
+			result[1] = result[1].substring("//".length());
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @param peer
+	 * <br>Should not be null
+	 * @return
+	 * <br>Range: any integer
+	 */
+	public static final int getPort(final String peer) {
+		return Integer.parseInt(getProtocolHostPort(peer)[2]);
+	}
+	
+	/**
+	 * Converts an array { {@code "protocol"}, {@code "host"}, {@code "port"} } into a string "protocol://host:port",
+	 * and an array { {@code "host"}, {@code "port"} } into a string {@code "host:port"}.
+	 * 
+	 * @param protocolHostPort
+	 * <br>Should not be null
+	 * @return
+	 * <br>A new value
+	 * <br>A non-null value
+	 */
+	public static final String getPeer(final String... protocolHostPort) {
+		final StringBuilder result = new StringBuilder(protocolHostPort[0]);
+		
+		result.append(protocolHostPort.length == 3 ? "://" : ":");
+		result.append(protocolHostPort[1]);
+		
+		if (protocolHostPort.length == 3) {
+			result.append(":");
+			result.append(protocolHostPort[2]);
+		}
+		
+		return result.toString();
 	}
 	
 }

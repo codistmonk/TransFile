@@ -98,7 +98,7 @@ public class SessionTest {
 	 * <br>Should not be null
 	 */
 	public final void waitUntilConnectionAreReady(final Connection... connections) {
-		new DummyConnectionTest().waitUntilConnectionAreReady(connections);
+		new DummyConnectionTest().waitUntilConnectionsAreReady(connections);
 	}
 	
 	/**

@@ -20,22 +20,6 @@ public class DummyConnection extends AbstractConnection {
 		super("", "");
 		
 		this.setLocalPeer(this.toString());
-		
-		this.addConnectionListener(new Listener() {
-			
-			@Override
-			public final void stateChanged() {
-				// Do nothing
-			}
-			
-			@Override
-			public final void messageReceived(final Message message) {
-				if (message instanceof DisconnectMessage) {
-					DummyConnection.this.setState(State.DISCONNECTED);
-				}
-			}
-			
-		});
 	}
 	
 	/**
@@ -124,10 +108,8 @@ public class DummyConnection extends AbstractConnection {
 	 * <br>Maybe shared parameter
 	 */
 	final void doSendMessage(final Message message) {
-		if (DummyConnection.this.getRemoteConnection() != null) {
-			for (final Listener listener : DummyConnection.this.getRemoteConnection().getListeners()) {
-				listener.messageReceived(message);
-			}
+		if (this.getRemoteConnection() != null) {
+			this.getRemoteConnection().dispatchMessage(message);
 		}
 	}
 	

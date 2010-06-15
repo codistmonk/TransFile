@@ -96,7 +96,7 @@ public interface Connection {
 	 * <br>A possibly null value
 	 * <br>A shared value
 	 */
-	public abstract Exception getConnectError();
+	public abstract Exception getConnectionError();
 	
 	/**
 	 * TODO doc

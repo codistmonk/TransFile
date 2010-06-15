@@ -22,6 +22,7 @@ package net.sourceforge.transfile.operations;
 import static org.junit.Assert.assertTrue;
 import static net.sourceforge.transfile.tools.Tools.array;
 
+import java.util.concurrent.Executor;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -50,11 +51,24 @@ public class DummyConnectionTest extends AbstractConnectionTestBase {
 	}
 	
 	@Override
-	public final void waitUntilConnectionAreReady(final Connection... connections) {
+	public final void waitUntilConnectionsAreReady(final Connection... connections) {
+		waitUntilExecutorIsReady(DummyConnection.EXECUTOR, WAIT_DURATION);
+	}
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @param executor
+	 * <br>Should not be null
+	 * <br>Input-output
+	 * @param timeout in milliseconds
+	 * <br>Range: {@code [0 .. Long.MAX_VALUE]}
+	 */
+	public static final void waitUntilExecutorIsReady(final Executor executor, final long timeout) {
 		try {
 			final Semaphore semaphore = new Semaphore(0);
 			
-			DummyConnection.EXECUTOR.execute(new Runnable() {
+			executor.execute(new Runnable() {
 				
 				@Override
 				public final void run() {
@@ -63,7 +77,7 @@ public class DummyConnectionTest extends AbstractConnectionTestBase {
 				
 			});
 			
-			assertTrue(semaphore.tryAcquire(WAIT_DURATION, TimeUnit.MILLISECONDS));
+			assertTrue(semaphore.tryAcquire(timeout, TimeUnit.MILLISECONDS));
 		} catch (final InterruptedException exception) {
 			exception.printStackTrace();
 		}

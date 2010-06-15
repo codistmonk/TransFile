@@ -48,9 +48,9 @@ public abstract class AbstractConnectionTestBase {
 		assertEquals(Connection.State.DISCONNECTED, connection.getState());
 		
 		connection.connect();
-		this.waitUntilConnectionAreReady(connection);
+		this.waitUntilConnectionsAreReady(connection);
 		connection.disconnect();
-		this.waitUntilConnectionAreReady(connection);
+		this.waitUntilConnectionsAreReady(connection);
 		
 		assertEquals(Connection.State.DISCONNECTED, connection.getState());
 		assertEquals(Arrays.asList(
@@ -74,17 +74,17 @@ public abstract class AbstractConnectionTestBase {
 		
 		connection1.connect();
 		connection2.connect();
-		this.waitUntilConnectionAreReady(connections);
+		this.waitUntilConnectionsAreReady(connections);
 		
 		assertEquals(Connection.State.CONNECTED, connection1.getState());
 		assertEquals(Connection.State.CONNECTED, connection2.getState());
 		
 		connection1.sendMessage(dataMessage1);
-		this.waitUntilConnectionAreReady(connections);
+		this.waitUntilConnectionsAreReady(connections);
 		connection2.sendMessage(dataMessage2);
-		this.waitUntilConnectionAreReady(connections);
+		this.waitUntilConnectionsAreReady(connections);
 		connection1.disconnect();
-		this.waitUntilConnectionAreReady(connections);
+		this.waitUntilConnectionsAreReady(connections);
 		
 		assertEquals(Connection.State.DISCONNECTED, connection1.getState());
 		assertEquals(Connection.State.DISCONNECTED, connection2.getState());
@@ -130,7 +130,7 @@ public abstract class AbstractConnectionTestBase {
 	 * @param connections
 	 * <br>Should not be null
 	 */
-	public abstract void waitUntilConnectionAreReady(Connection... connections);
+	public abstract void waitUntilConnectionsAreReady(Connection... connections);
 	
 	/**
 	 * Duration in milliseconds.
