@@ -30,6 +30,7 @@ import net.sourceforge.transfile.operations.AbstractConnectionTestBase.Connectio
 import net.sourceforge.transfile.operations.Operation.State;
 import net.sourceforge.transfile.operations.messages.DisconnectMessage;
 import net.sourceforge.transfile.operations.messages.StateMessage;
+import net.sourceforge.transfile.tools.Tools;
 
 import org.junit.Test;
 
@@ -41,16 +42,28 @@ import org.junit.Test;
  */
 public abstract class AbstractOperationTestBase {
 	
-	@Test
+	@Test(timeout = 10000)
 	public final void testNoInfiniteLoop() {
 		final DummyConnection connection = DummyConnection.createDummyConnectionConnectedToItself();
 		
+		this.waitUntilConnectionAreReady(connection);
+		
 		assertEquals(Connection.State.CONNECTED, connection.getState());
 		
-		final Operation operation = this.createOperation(connection, SOURCE_FILE);
-		
-		operation.getController().start();
-		operation.getController().pause();
+		{
+			final Operation operation = this.createOperation(connection, SOURCE_FILE);
+			Tools.debugPrint(operation);
+			
+			operation.getController().start();
+			operation.getController().pause();
+		}
+		{
+			final Operation operation = this.createOperation(connection, SOURCE_FILE);
+			Tools.debugPrint(operation);
+			
+			operation.getController().pause();
+			operation.getController().start();
+		}
 		// Should terminate normally
 	}
 	

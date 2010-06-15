@@ -99,9 +99,11 @@ public abstract class AbstractOperation implements Operation {
 	 * @param progress
 	 * <br>Range: {@code [0.0 .. 1.0]}
 	 */
-	public final synchronized void setProgress(final double progress) {
+	public final void setProgress(final double progress) {
 		if (this.getProgress() != progress) {
-			this.progress = progress;
+			synchronized (this) {
+				this.progress = progress;
+			}
 			
 			for (final Listener listener : this.getListeners()) {
 				listener.progressChanged();
@@ -115,9 +117,11 @@ public abstract class AbstractOperation implements Operation {
 	 * <br>Should not be null
 	 * <br>Shared parameter
 	 */
-	public final synchronized void setState(final State state) {
+	public final void setState(final State state) {
 		if (this.getState() != state) {
-			this.state = state;
+			synchronized (this) {
+				this.state = state;
+			}
 			
 			for (final Listener listener : this.getListeners()) {
 				listener.stateChanged();
