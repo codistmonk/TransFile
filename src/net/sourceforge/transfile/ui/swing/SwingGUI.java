@@ -23,7 +23,6 @@ import static net.sourceforge.transfile.i18n.Translator.createLocale;
 import static net.sourceforge.transfile.i18n.Translator.getDefaultTranslator;
 import static net.sourceforge.transfile.i18n.Translator.Helpers.translate;
 import static net.sourceforge.transfile.tools.Tools.getLoggerForThisMethod;
-import static net.sourceforge.transfile.ui.swing.StatusService.StatusMessage;
 
 import java.awt.Container;
 import java.awt.Dimension;
@@ -60,6 +59,7 @@ import net.sourceforge.transfile.operations.Session;
 import net.sourceforge.transfile.settings.Settings;
 import net.sourceforge.transfile.settings.exceptions.IllegalConfigValueException;
 import net.sourceforge.transfile.ui.UserInterface;
+import net.sourceforge.transfile.ui.swing.StatusService.StatusMessage;
 import net.sourceforge.transfile.ui.swing.exceptions.NativeLookAndFeelException;
 
 
@@ -123,7 +123,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		// check whether the application is running on Mac OS X and store the result
 		this.onMacOSX = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
 		
-		this.session = new Session(DummyConnection.createDummyConnectionConnectedToItself(), this.new DestinationFileProvider());
+		this.session = new Session(DummyConnection.createDummyConnectionThatConnectsToItself(), this.new DestinationFileProvider());
 		
 		this.setStartupLocale();
 	}
@@ -191,10 +191,10 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	 * Invoked when a connection to a peer has been established
 	 * 
 	 */
-	void onConnectSuccessful() {
-		getStatusService().postStatusMessage(translate(new StatusMessage("status_connected")));
+	final void onConnectSuccessful() {
+		this.getStatusService().postStatusMessage(translate(new StatusMessage("status_connected")));
 		
-		showTransferScreen();
+		this.showTransferScreen();
 	}
 	
 	/**
@@ -452,13 +452,13 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	 * sends and receives files through the previously established connection
 	 * 
 	 */
-	private void showTransferScreen() {
-		Set<TopLevelPanel> visiblePanels = new HashSet<TopLevelPanel>(3);
+	private final void showTransferScreen() {
+		final Set<TopLevelPanel> visiblePanels = new HashSet<TopLevelPanel>(3);
 		
 		visiblePanels.add(this.transferPanel);
 		visiblePanels.add(this.statusPanel);
 		
-		setVisiblePanels(visiblePanels);
+		this.setVisiblePanels(visiblePanels);
 	}
 	
 	/**
@@ -466,16 +466,18 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	 * 
 	 * @param visiblePanels the panels to show
 	 */
-	private void setVisiblePanels(Set<TopLevelPanel> visiblePanels) {
-		for(TopLevelPanel panel: this.panels) {
-			if(visiblePanels.contains(panel))
+	private final void setVisiblePanels(final Set<TopLevelPanel> visiblePanels) {
+		for (TopLevelPanel panel : this.panels) {
+			if (visiblePanels.contains(panel)) {
 				panel.showPanel();
-			else
+			}
+			else {
 				panel.hidePanel();
+			}
 		}
 		
 		// resize the main window to fit the currently active panels
-		pack();
+		this.pack();
 	}
 	
 	/**

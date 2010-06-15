@@ -169,8 +169,8 @@ public class OperationComponent extends JPanel {
 	}
 	
 	/**
-	 * 
 	 * TODO doc
+	 * 
 	 * @return
 	 * <br>A non-null value
 	 * <br>A new value

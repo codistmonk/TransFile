@@ -54,6 +54,9 @@ import net.sourceforge.transfile.exceptions.SerializationException;
 import net.sourceforge.transfile.exceptions.SerializationFileInUseException;
 import net.sourceforge.transfile.network.exceptions.BilateralConnectException;
 import net.sourceforge.transfile.network.exceptions.PeerURLFormatException;
+import net.sourceforge.transfile.operations.Connection;
+import net.sourceforge.transfile.operations.Connection.State;
+import net.sourceforge.transfile.operations.messages.Message;
 import net.sourceforge.transfile.settings.Settings;
 import net.sourceforge.transfile.settings.exceptions.IllegalConfigValueException;
 
@@ -199,8 +202,8 @@ public class NetworkPanel extends TopLevelPanel {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
 		c.insets = new Insets(5, 5, 5, 5);
-		add(this.remoteURLPanel, c);
-		setupRemoteURLPanel();
+		GUITools.add(this, this.remoteURLPanel, c);
+		this.setupRemoteURLPanel();
 		
 		this.localURLPanel = new JPanel();
 		this.localURLPanel.setBorder(translate(BorderFactory.createTitledBorder("section_local_peerurl")));
@@ -209,15 +212,15 @@ public class NetworkPanel extends TopLevelPanel {
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
 		c.insets = new Insets(5, 5, 5, 5);
-		add(this.localURLPanel, c);
-		setupLocalURLPanel();
+		GUITools.add(this, this.localURLPanel, c);
+		this.setupLocalURLPanel();
 		
 		this.connectButton = translate(new JButton("button_connect"));
 		this.connectButton.addActionListener(new ActionListener() {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				onUserActionConnect();
+				NetworkPanel.this.onUserActionConnect();
 			}
 			
 		});
@@ -226,7 +229,7 @@ public class NetworkPanel extends TopLevelPanel {
 		c.insets = new Insets(5, 5, 5, 5);
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.weightx = 1;
-		add(this.connectButton, c);
+		GUITools.add(this, this.connectButton, c);
 		
 		this.stopButton = translate(new JButton("button_interrupt_connect"));
 		this.stopButton.setVisible(false);
@@ -234,11 +237,32 @@ public class NetworkPanel extends TopLevelPanel {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				onUserActionInterrupt();				
+				NetworkPanel.this.onUserActionInterrupt();				
 			}
 			
 		});
-		add(this.stopButton, c);
+		GUITools.add(this, this.stopButton, c);
+		
+		this.getWindow().getSession().getConnection().addConnectionListener(new Connection.Listener() {
+			
+			@Override
+			public final void stateChanged() {
+				final State state = NetworkPanel.this.getWindow().getSession().getConnection().getState();
+				
+				NetworkPanel.this.getConnectButton().setVisible(state == State.DISCONNECTED);
+				NetworkPanel.this.getStopButton().setVisible(state != State.DISCONNECTED);
+				
+				if (state == State.CONNECTED) {
+					NetworkPanel.this.getWindow().onConnectSuccessful();
+				}
+			}
+			
+			@Override
+			public final void messageReceived(final Message message) {
+				// Do nothing
+			}
+			
+		});
 	}
 	
 	/**
@@ -282,6 +306,42 @@ public class NetworkPanel extends TopLevelPanel {
 	 */
 	protected final ControllableBackend getBackend() {
 		return this.backend;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 * <br>A possibly null value
+	 */
+	final JPanel getRemoteURLPanel() {
+		return this.remoteURLPanel;
+	}
+
+	/**
+	 * 
+	 * @return
+	 * <br>A possibly null value
+	 */
+	final JPanel getLocalURLPanel() {
+		return this.localURLPanel;
+	}
+
+	/**
+	 * 
+	 * @return
+	 * <br>A possibly null value
+	 */
+	final JButton getConnectButton() {
+		return this.connectButton;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 * <br>A possibly null value
+	 */
+	final JButton getStopButton() {
+		return this.stopButton;
 	}
 	
 	/**
@@ -455,7 +515,7 @@ public class NetworkPanel extends TopLevelPanel {
 	 * Invoked when the user initializes a connection attempt, i.e. by pressing the "Connect" button
 	 * 
 	 */
-	void onUserActionConnect() {
+	final void onUserActionConnect() {
 		final String remoteURL = (String) this.remoteURLBar.getSelectedItem();
 		
 		if(remoteURL == null || "".equals(remoteURL)) {
@@ -463,9 +523,18 @@ public class NetworkPanel extends TopLevelPanel {
 			return;
 		}
 		
-		showStopButton();
-		
 		getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("status_connecting")));
+		
+		this.getWindow().getSession().getConnection().setRemotePeer(remoteURL);
+		this.getWindow().getSession().getConnection().connect();
+		
+		// TODO remove dead code
+		
+		if (true) {
+			return;
+		}
+		
+		showStopButton();
 		
 		this.connectWorker = new SwingWorker<Void, Void>() {
 
@@ -526,9 +595,18 @@ public class NetworkPanel extends TopLevelPanel {
 	 * Invoked when the user interrupts a running connection attempt
 	 * 
 	 */
-	void onUserActionInterrupt() {
-		if(this.connectWorker == null)
+	final void onUserActionInterrupt() {
+		this.getWindow().getSession().getConnection().disconnect();
+		
+		// TODO remove dead code
+		
+		if (true) {
 			return;
+		}
+		
+		if (this.connectWorker == null) {
+			return;
+		}
 		
 		this.connectWorker.cancel(true);
 	}

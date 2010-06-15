@@ -52,12 +52,6 @@ abstract class TopLevelPanel extends JPanel {
 	 */
 	private boolean isInit = false;
 	
-	/*
-	 * True when the panel is currently being shown to the user
-	 */
-	private boolean isShown = false;
-	
-	
 	/**
 	 * Constructs a TopLevelPanel instance
 	 * 
@@ -81,14 +75,6 @@ abstract class TopLevelPanel extends JPanel {
 	}
 	
 	/**
-	 * 
-	 * @return true if the panel is currently being shown
-	 */
-	public final boolean isShown() {
-		return this.isShown;
-	}
-	
-	/**
 	 * Tells the panel to initialize and perform all expensive initialization operations
 	 * 
 	 */
@@ -105,15 +91,19 @@ abstract class TopLevelPanel extends JPanel {
 	 * 
 	 */
 	final void showPanel() {
-		if(this.isShown)
+		if (this.isShowing()) {
 			return;
+		}
 		
-		if(!this.isInit)
-			initPanel();
+		if (!this.isInitialized()) {
+			this.initPanel();
+		}
 		
-		loadState();
-		onShow();
-		setVisible(true);
+		this.loadState();
+		
+		this.onShow();
+		
+		this.setVisible(true);
 	}
 	
 	/**
@@ -121,11 +111,13 @@ abstract class TopLevelPanel extends JPanel {
 	 * 
 	 */
 	final void hidePanel() {
-		if(!this.isShown)
+		if (!this.isShowing()) {
 			return;
+		}
 		
-		setVisible(false);
-		onHide();
+		this.setVisible(false);
+		
+		this.onHide();
 	}
 	
 	/**

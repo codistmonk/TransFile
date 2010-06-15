@@ -138,10 +138,22 @@ public class DummyConnection extends AbstractConnection {
 	 * <br>A non-null value
 	 * <br>A new value
 	 */
-	public static final DummyConnection createDummyConnectionConnectedToItself() {
+	public static final DummyConnection createDummyConnectionThatConnectsToItself() {
 		final DummyConnection result = new DummyConnection();
 		
 		result.setRemoteConnection(result);
+		
+		return result;
+	}
+	
+	/**
+	 * @return
+	 * <br>A non-null value
+	 * <br>A new value
+	 */
+	public static final DummyConnection createDummyConnectionConnectedToItself() {
+		final DummyConnection result = createDummyConnectionThatConnectsToItself();
+		
 		result.connect();
 		
 		return result;
