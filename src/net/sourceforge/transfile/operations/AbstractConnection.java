@@ -17,6 +17,8 @@ public abstract class AbstractConnection implements Connection {
 	
 	private String remotePeer;
 	
+	private Exception connectError;
+	
 	private State state;
 	
 	/**
@@ -95,6 +97,22 @@ public abstract class AbstractConnection implements Connection {
 		this.remotePeer = remotePeer;
 	}
 	
+	@Override
+	public final Exception getConnectError() {
+		return this.connectError;
+	}
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @param connectError
+	 * <br>Can be null
+	 * <br>Shared parameter
+	 */
+	protected final void setConnectError(final Exception connectError) {
+		this.connectError = connectError;
+	}
+
 	@Override
 	public final State getState() {
 		return this.state;

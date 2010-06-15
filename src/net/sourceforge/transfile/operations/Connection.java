@@ -93,6 +93,15 @@ public interface Connection {
 	 * TODO doc
 	 * 
 	 * @return
+	 * <br>A possibly null value
+	 * <br>A shared value
+	 */
+	public abstract Exception getConnectError();
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @return
 	 * <br>A non-null value
 	 */
 	public abstract State getState();
