@@ -19,31 +19,17 @@
 
 package net.sourceforge.transfile.operations;
 
-import static net.sourceforge.transfile.operations.AbstractConnection.DEFAULT_LOCAL_PEER;
-import static net.sourceforge.transfile.operations.AbstractConnection.DEFAULT_REMOTE_PEER;
-import static net.sourceforge.transfile.tools.Tools.array;
-
 /**
  * TODO doc
  *
- * @author codistmonk (creation 2010-06-15)
+ * @author codistmonk (creation 2010-06-08)
  *
  */
-public class SimpleSocketConnectionTest extends AbstractConnectionTestBase {
+public class SessionWithSimpleSocketConnectionTest extends AbstractSessionTestBase {
 	
 	@Override
-	protected final Connection createUnmatchedConnection() {
-		return new SimpleSocketConnection();
-	}
-	
-	@Override
-	protected final Connection[] createMatchingConnectionPair() {
-		return array(new SimpleSocketConnection(DEFAULT_LOCAL_PEER, DEFAULT_REMOTE_PEER), new SimpleSocketConnection(DEFAULT_REMOTE_PEER, DEFAULT_LOCAL_PEER));
-	}
-	
-	@Override
-	protected final long getInactivityThreshold() {
-		return 10000L;
+	public final Connection[] createMatchingConnectionPair() {
+		return new SimpleSocketConnectionTest().createMatchingConnectionPair();
 	}
 	
 }

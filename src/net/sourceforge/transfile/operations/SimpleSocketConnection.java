@@ -79,7 +79,7 @@ public class SimpleSocketConnection extends AbstractConnection {
 	}
 	
 	@Override
-	public final void sendMessage(final Message message) {
+	public final void doSendMessage(final Message message) {
 		try {
 			this.output.writeObject(message);
 			this.output.flush();

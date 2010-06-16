@@ -19,143 +19,17 @@
 
 package net.sourceforge.transfile.operations;
 
-import static org.junit.Assert.*;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import net.sourceforge.transfile.operations.AbstractConnectionTestBase.ConnectionRecorder;
-import net.sourceforge.transfile.operations.messages.DisconnectMessage;
-import net.sourceforge.transfile.operations.messages.FileOfferMessage;
-import net.sourceforge.transfile.tools.Tools;
-
-import org.junit.Test;
-
-
 /**
  * TODO doc
  *
- * @author Martin Riedel
+ * @author codistmonk (creation 2010-06-08)
  *
  */
-public class SessionTest {
+public class SessionTest extends AbstractSessionTestBase {
 	
-	@Test
-	public final void testOfferFile() throws IOException {
-		final Connection[] connections = new DummyConnectionTest().createMatchingConnectionPair();
-		final Connection connection1 = connections[0];
-		final Connection connection2 = connections[1];
-		final ConnectionRecorder connectionRecorder1 = new ConnectionRecorder(connection1);
-		final ConnectionRecorder connectionRecorder2 = new ConnectionRecorder(connection2);
-		final File sourceFile = AbstractOperationTestBase.SOURCE_FILE;
-		final Session session = new Session(connection1, new ReceiveOperationTest.TemporaryDestinationFileProvider(sourceFile));
-		final SessionRecorder sessionRecorder = new SessionRecorder(session);
-		
-		assertEquals(Connection.State.DISCONNECTED, connection1.getState());
-		assertEquals(Connection.State.DISCONNECTED, connection2.getState());
-		
-		connection1.connect();
-		connection2.connect();
-		this.waitUntilConnectionAreReady(connections);
-		
-		assertEquals(Connection.State.CONNECTED, connection1.getState());
-		assertEquals(Connection.State.CONNECTED, connection2.getState());
-		
-		session.offerFile(sourceFile);
-		this.waitUntilConnectionAreReady(connections);
-		connection1.disconnect();
-		this.waitUntilConnectionAreReady(connections);
-		
-		assertEquals(Connection.State.DISCONNECTED, connection1.getState());
-		assertEquals(Connection.State.DISCONNECTED, connection2.getState());
-		assertEquals(Arrays.asList(
-				Connection.State.CONNECTING,
-				Connection.State.CONNECTED,
-				Connection.State.DISCONNECTED
-				), connectionRecorder1.getEvents());
-		assertEquals(Arrays.asList(
-				Connection.State.CONNECTING,
-				Connection.State.CONNECTED,
-				new FileOfferMessage(sourceFile),
-				Connection.State.DISCONNECTED,
-				new DisconnectMessage()
-		), connectionRecorder2.getEvents());
-		assertTrue(sessionRecorder.getEvents().size() == 1);
-		
-		final SendOperation sendOperation = Tools.cast(SendOperation.class, sessionRecorder.getEvents().get(0));
-		
-		assertNotNull(sendOperation);
-		assertEquals(sourceFile, sendOperation.getLocalFile());
-	}
-	
-	/**
-	 * TODO doc
-	 * 
-	 * @param connections
-	 * <br>Should not be null
-	 */
-	public final void waitUntilConnectionAreReady(final Connection... connections) {
-		new DummyConnectionTest().waitUntilConnectionsAreReady(connections);
-	}
-	
-	/**
-	 * TODO doc
-	 *
-	 * @author codistmonk (creation 2010-06-08)
-	 *
-	 */
-	public static class SessionRecorder implements Session.Listener {
-		
-		private final Session session;
-		
-		private final List<Object> events;
-		
-		/**
-		 * 
-		 * @param session
-		 * <br>Should not be null
-		 * <br>Shared parameter
-		 */
-		public SessionRecorder(final Session session) {
-			this.session = session;
-			this.events = new ArrayList<Object>();
-			
-			this.getSession().addSessionListener(this);
-		}
-		
-		/**
-		 * 
-		 * @return
-		 * <br>A non-null value
-		 * <br>A shared value
-		 */
-		public final Session getSession() {
-			return this.session;
-		}
-		
-		/**
-		 * 
-		 * @return
-		 * <br>A non-null value
-		 * <br>A shared value
-		 */
-		public final List<Object> getEvents() {
-			return this.events;
-		}
-		
-		@Override
-		public final void receiveOperationAdded(final ReceiveOperation receiveOperation) {
-			this.getEvents().add(receiveOperation);
-		}
-		
-		@Override
-		public final void sendOperationAdded(final SendOperation sendOperation) {
-			this.getEvents().add(sendOperation);
-		}
-		
+	@Override
+	protected final Connection[] createMatchingConnectionPair() {
+		return new DummyConnectionTest().createMatchingConnectionPair();
 	}
 	
 }

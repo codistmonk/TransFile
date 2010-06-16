@@ -24,6 +24,8 @@ public abstract class AbstractConnection implements Connection {
 	
 	private State state;
 	
+	private long lastMessageTime;
+	
 	public AbstractConnection() {
 		this(DEFAULT_LOCAL_PEER, DEFAULT_REMOTE_PEER);
 	}
@@ -110,31 +112,12 @@ public abstract class AbstractConnection implements Connection {
 	}
 	
 	/**
-	 * TODO doc
 	 * 
-	 * @param connectionError
-	 * <br>Can be null
-	 * <br>Shared parameter
+	 * @return
+	 * <br>Range: {@code [0L .. Long.MAX_VALUE]}
 	 */
-	protected final void setConnectionError(final Exception connectionError) {
-		this.connectionError = connectionError;
-	}
-	
-	/**
-	 * TODO doc
-	 * 
-	 * @param message
-	 * <br>Should not be null
-	 * <br>Maybe shared parameter
-	 */
-	protected final void dispatchMessage(final Message message) {
-		if (message instanceof DisconnectMessage) {
-			this.setState(State.DISCONNECTED);
-		}
-		
-		for (final Listener listener : this.getListeners()) {
-			listener.messageReceived(message);
-		}
+	public final long getLastMessageTime() {
+		return this.lastMessageTime;
 	}
 	
 	@Override
@@ -158,6 +141,59 @@ public abstract class AbstractConnection implements Connection {
 				listener.stateChanged();
 			}
 		}
+	}
+	
+	@Override
+	public final void sendMessage(final Message message) {
+		if (this.getState() != State.CONNECTED) {
+			return;
+		}
+		
+		this.setLastMessageTime();
+		
+		this.doSendMessage(message);
+	}
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @param message
+	 * <br>Should not be null
+	 */
+	protected abstract void doSendMessage(final Message message);
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @param connectionError
+	 * <br>Can be null
+	 * <br>Shared parameter
+	 */
+	protected final void setConnectionError(final Exception connectionError) {
+		this.connectionError = connectionError;
+	}
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @param message
+	 * <br>Should not be null
+	 * <br>Maybe shared parameter
+	 */
+	protected final void dispatchMessage(final Message message) {
+		this.setLastMessageTime();
+		
+		if (message instanceof DisconnectMessage) {
+			this.setState(State.DISCONNECTED);
+		}
+		
+		for (final Listener listener : this.getListeners()) {
+			listener.messageReceived(message);
+		}
+	}
+	
+	protected final void setLastMessageTime() {
+		this.lastMessageTime = System.currentTimeMillis();
 	}
 	
 	public static final String DEFAULT_LOCAL_PEER = getPeer("transfile", "0.0.0.0", "12345");

@@ -22,52 +22,37 @@ package net.sourceforge.transfile.operations;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import net.sourceforge.transfile.operations.messages.DataOfferMessage;
+import net.sourceforge.transfile.operations.AbstractConnectionTestBase.ConnectionRecorder;
 import net.sourceforge.transfile.operations.messages.DisconnectMessage;
-import net.sourceforge.transfile.operations.messages.Message;
+import net.sourceforge.transfile.operations.messages.FileOfferMessage;
+import net.sourceforge.transfile.tools.Tools;
 
 import org.junit.Test;
+
 
 /**
  * TODO doc
  *
- * @author codistmonk (creation 2010-06-05)
+ * @author codistmonk (creation 2010-06-15)
  *
  */
-public abstract class AbstractConnectionTestBase extends AbstractTestWithConnections {
+public abstract class AbstractSessionTestBase extends AbstractTestWithConnections {
 	
 	@Test(timeout = TEST_TIMEOUT)
-	public final void testToggleUnmatchedConnection() {
-		final Connection connection = this.createUnmatchedConnection();
-		final ConnectionRecorder connectionLogger = new ConnectionRecorder(connection);
-		
-		assertEquals(Connection.State.DISCONNECTED, connection.getState());
-		
-		connection.connect();
-		this.waitUntilConnectionsAreReady(connection);
-		connection.disconnect();
-		this.waitUntilConnectionsAreReady(connection);
-		
-		assertEquals(Connection.State.DISCONNECTED, connection.getState());
-		assertEquals(Arrays.asList(
-				Connection.State.CONNECTING,
-				Connection.State.DISCONNECTED
-				), connectionLogger.getEvents());
-	}
-	
-	@Test(timeout = TEST_TIMEOUT)
-	public final void testConnectionAndDataTransfer() {
+	public final void testOfferFile() throws IOException {
 		final Connection[] connections = this.createMatchingConnectionPair();
 		final Connection connection1 = connections[0];
 		final Connection connection2 = connections[1];
 		final ConnectionRecorder connectionRecorder1 = new ConnectionRecorder(connection1);
 		final ConnectionRecorder connectionRecorder2 = new ConnectionRecorder(connection2);
-		final Message dataMessage1 = new DataOfferMessage(new File("dummy"), 0L, "Hello world!".getBytes());
-		final Message dataMessage2 = new DataOfferMessage(new File("dummy"), 0L, "42".getBytes());
+		final File sourceFile = AbstractOperationTestBase.SOURCE_FILE;
+		final Session session = new Session(connection1, new ReceiveOperationTest.TemporaryDestinationFileProvider(sourceFile));
+		final SessionRecorder sessionRecorder = new SessionRecorder(session);
 		
 		assertEquals(Connection.State.DISCONNECTED, connection1.getState());
 		assertEquals(Connection.State.DISCONNECTED, connection2.getState());
@@ -79,9 +64,7 @@ public abstract class AbstractConnectionTestBase extends AbstractTestWithConnect
 		assertEquals(Connection.State.CONNECTED, connection1.getState());
 		assertEquals(Connection.State.CONNECTED, connection2.getState());
 		
-		connection1.sendMessage(dataMessage1);
-		this.waitUntilConnectionsAreReady(connections);
-		connection2.sendMessage(dataMessage2);
+		session.offerFile(sourceFile);
 		this.waitUntilConnectionsAreReady(connections);
 		connection1.disconnect();
 		waitUntilState(Connection.State.DISCONNECTED, connections);
@@ -91,53 +74,46 @@ public abstract class AbstractConnectionTestBase extends AbstractTestWithConnect
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
-				dataMessage2,
 				Connection.State.DISCONNECTED
 				), connectionRecorder1.getEvents());
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
-				dataMessage1,
-				// The state is changed as soon as the disconnect message is received
-				// That's why the logger detects the state change before the disconnect message
-				// TODO should this behavior be changed?
+				new FileOfferMessage(sourceFile),
 				Connection.State.DISCONNECTED,
 				new DisconnectMessage()
 		), connectionRecorder2.getEvents());
+		assertTrue(sessionRecorder.getEvents().size() == 1);
+		
+		final SendOperation sendOperation = Tools.cast(SendOperation.class, sessionRecorder.getEvents().get(0));
+		
+		assertNotNull(sendOperation);
+		assertEquals(sourceFile, sendOperation.getLocalFile());
 	}
 	
 	/**
 	 * TODO doc
-	 * 
-	 * @return
-	 * <br>A non-null value
-	 * <br>A new value
-	 */
-	protected abstract Connection createUnmatchedConnection();
-	
-	/**
-	 * TODO doc
 	 *
-	 * @author codistmonk (creation 2010-06-05)
+	 * @author codistmonk (creation 2010-06-08)
 	 *
 	 */
-	public static class ConnectionRecorder implements Connection.Listener {
+	public static class SessionRecorder implements Session.Listener {
 		
-		private final Connection connection;
+		private final Session session;
 		
 		private final List<Object> events;
 		
 		/**
 		 * 
-		 * @param connection
+		 * @param session
 		 * <br>Should not be null
 		 * <br>Shared parameter
 		 */
-		public ConnectionRecorder(final Connection connection) {
-			this.connection = connection;
+		public SessionRecorder(final Session session) {
+			this.session = session;
 			this.events = new ArrayList<Object>();
 			
-			this.getConnection().addConnectionListener(this);
+			this.getSession().addSessionListener(this);
 		}
 		
 		/**
@@ -146,8 +122,8 @@ public abstract class AbstractConnectionTestBase extends AbstractTestWithConnect
 		 * <br>A non-null value
 		 * <br>A shared value
 		 */
-		public final Connection getConnection() {
-			return this.connection;
+		public final Session getSession() {
+			return this.session;
 		}
 		
 		/**
@@ -160,20 +136,14 @@ public abstract class AbstractConnectionTestBase extends AbstractTestWithConnect
 			return this.events;
 		}
 		
-		/** 
-		 * {@inheritDoc}
-		 */
 		@Override
-		public final void messageReceived(final Message message) {
-			this.getEvents().add(message);
+		public final void receiveOperationAdded(final ReceiveOperation receiveOperation) {
+			this.getEvents().add(receiveOperation);
 		}
 		
-		/** 
-		 * {@inheritDoc}
-		 */
 		@Override
-		public final void stateChanged() {
-			this.getEvents().add(this.getConnection().getState());
+		public final void sendOperationAdded(final SendOperation sendOperation) {
+			this.getEvents().add(sendOperation);
 		}
 		
 	}

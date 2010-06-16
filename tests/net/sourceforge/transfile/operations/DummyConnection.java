@@ -48,16 +48,12 @@ public class DummyConnection extends AbstractConnection {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public final void sendMessage(final Message message) {
-		if (this.getState() != State.CONNECTED) {
-			return;
-		}
-		
+	protected final void doSendMessage(final Message message) {
 		EXECUTOR.execute(new Runnable() {
 			
 			@Override
 			public void run() {
-				DummyConnection.this.doSendMessage(message);
+				DummyConnection.this.remoteDispatch(message);
 			}
 			
 		});
@@ -107,7 +103,7 @@ public class DummyConnection extends AbstractConnection {
 	 * <br>Should not be null
 	 * <br>Maybe shared parameter
 	 */
-	final void doSendMessage(final Message message) {
+	final void remoteDispatch(final Message message) {
 		if (this.getRemoteConnection() != null) {
 			this.getRemoteConnection().dispatchMessage(message);
 		}

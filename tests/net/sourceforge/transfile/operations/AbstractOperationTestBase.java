@@ -40,13 +40,13 @@ import org.junit.Test;
  * @author codistmonk (creation 2010-06-05)
  *
  */
-public abstract class AbstractOperationTestBase {
+public abstract class AbstractOperationTestBase extends AbstractTestWithConnections {
 	
-	@Test(timeout = 10000)
+	@Test(timeout = TEST_TIMEOUT)
 	public final void testNoInfiniteLoop() {
 		final DummyConnection connection = DummyConnection.createDummyConnectionConnectedToItself();
 		
-		this.waitUntilConnectionAreReady(connection);
+		this.waitUntilConnectionsAreReady(connection);
 		
 		assertEquals(Connection.State.CONNECTED, connection.getState());
 		
@@ -67,7 +67,7 @@ public abstract class AbstractOperationTestBase {
 		// Should terminate normally
 	}
 	
-	@Test
+	@Test(timeout = TEST_TIMEOUT)
 	public final void testStartPauseResumeCancelRemove() {
 		final Connection[] connections = this.createMatchingConnectionPair();
 		final Connection connection1 = connections[0];
@@ -80,7 +80,7 @@ public abstract class AbstractOperationTestBase {
 		
 		connection1.connect();
 		connection2.connect();
-		this.waitUntilConnectionAreReady(connections);
+		waitUntilState(Connection.State.CONNECTED, connections);
 		
 		final File sourceFile = SOURCE_FILE;
 		final Operation operation = this.createOperation(connection1, sourceFile);
@@ -89,29 +89,29 @@ public abstract class AbstractOperationTestBase {
 		assertEquals(State.QUEUED, operation.getState());
 		
 		operation.getController().start();
-		this.waitUntilConnectionAreReady(connections);
+		this.waitUntilConnectionsAreReady(connections);
 		
 		assertEquals(State.PROGRESSING, operation.getState());
 		
 		operation.getController().pause();
-		this.waitUntilConnectionAreReady(connections);
+		this.waitUntilConnectionsAreReady(connections);
 		
 		assertEquals(State.PAUSED, operation.getState());
 		
 		operation.getController().start();
-		this.waitUntilConnectionAreReady(connections);
+		this.waitUntilConnectionsAreReady(connections);
 		
 		assertEquals(State.PROGRESSING, operation.getState());
 		
 		operation.getController().cancel();
-		this.waitUntilConnectionAreReady(connections);
+		this.waitUntilConnectionsAreReady(connections);
 		
 		assertEquals(State.CANCELED, operation.getState());
 		
 		operation.getController().remove();
-		this.waitUntilConnectionAreReady(connections);
+		this.waitUntilConnectionsAreReady(connections);
 		connection1.disconnect();
-		this.waitUntilConnectionAreReady(connections);
+		waitUntilState(Connection.State.DISCONNECTED, connections);
 		
 		assertEquals(State.REMOVED, operation.getState());
 		assertEquals(Arrays.asList(
@@ -145,26 +145,13 @@ public abstract class AbstractOperationTestBase {
 	 * @param operation
 	 * <br>Should not be null
 	 * @param state
-	 * <br>Should not be null
-	 * @param timeout in milliseconds
-	 * <br>Range: {@code [0 .. Long.MAX_VALUE]}
+	 * <br>Can be null
 	 */
-	public static final void waitUntilState(final Operation operation, final State state, final long timeout) {
-		final long maximumTime = System.currentTimeMillis() + timeout;
-		
-		while (System.currentTimeMillis() <= maximumTime && operation.getState() != state) {
+	public static final void waitUntilState(final Operation operation, final State state) {
+		while (operation.getState() != state) {
 			Thread.yield();
 		}
 	}
-	
-	/**
-	 * TODO doc
-	 * 
-	 * @return
-	 * <br>A non-null value
-	 * <br>A new value
-	 */
-	public abstract Connection[] createMatchingConnectionPair();
 	
 	/**
 	 * TODO doc
@@ -179,15 +166,7 @@ public abstract class AbstractOperationTestBase {
 	 * <br>A non-null value
 	 * <br>A new value
 	 */
-	public abstract Operation createOperation(Connection connection, File file);
-	
-	/**
-	 * TODO doc
-	 * 
-	 * @param connections
-	 * <br>Should not be null
-	 */
-	public abstract void waitUntilConnectionAreReady(Connection... connections);
+	protected abstract Operation createOperation(Connection connection, File file);
 	
 	public static final File SOURCE_FILE = new File("tests/" + ReceiveOperationTest.class.getPackage().getName().replaceAll("\\.", "/") + "/data.txt");
 	

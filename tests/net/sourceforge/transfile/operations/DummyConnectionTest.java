@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 public class DummyConnectionTest extends AbstractConnectionTestBase {
 	
 	@Override
-	public final Connection[] createMatchingConnectionPair() {
+	protected final Connection[] createMatchingConnectionPair() {
 		final DummyConnection connection1 = new DummyConnection();
 		final DummyConnection connection2 = new DummyConnection();
 		
@@ -46,13 +46,8 @@ public class DummyConnectionTest extends AbstractConnectionTestBase {
 	}
 	
 	@Override
-	public final Connection createUnmatchedConnection() {
+	protected final Connection createUnmatchedConnection() {
 		return new DummyConnection();
-	}
-	
-	@Override
-	public final void waitUntilConnectionsAreReady(final Connection... connections) {
-		waitUntilExecutorIsReady(DummyConnection.EXECUTOR, WAIT_DURATION);
 	}
 	
 	/**

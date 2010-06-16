@@ -19,7 +19,6 @@
 
 package net.sourceforge.transfile.operations;
 
-import static net.sourceforge.transfile.operations.AbstractConnectionTestBase.WAIT_DURATION;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
@@ -43,7 +42,7 @@ import org.junit.Test;
  */
 public class SendOperationTest extends AbstractOperationTestBase {
 	
-	@Test
+	@Test(timeout = TEST_TIMEOUT)
 	public final void testSendData() {
 		final Connection[] connections = this.createMatchingConnectionPair();
 		final Connection connection1 = connections[0];
@@ -56,7 +55,7 @@ public class SendOperationTest extends AbstractOperationTestBase {
 		
 		connection1.connect();
 		connection2.connect();
-		this.waitUntilConnectionAreReady(connections);
+		waitUntilState(Connection.State.CONNECTED, connections);
 		
 		final File sourceFile = SOURCE_FILE;
 		final Operation operation = this.createOperation(connection1, sourceFile);
@@ -70,18 +69,18 @@ public class SendOperationTest extends AbstractOperationTestBase {
 		assertEquals(0.0, operation.getProgress(), 0.0);
 		
 		operation.getController().start();
-		this.waitUntilConnectionAreReady(connections);
+		this.waitUntilConnectionsAreReady(connections);
 		connection2.sendMessage(accept);
-		this.waitUntilConnectionAreReady(connections);
+		this.waitUntilConnectionsAreReady(connections);
 		connection2.sendMessage(dataRequest1);
-		this.waitUntilConnectionAreReady(connections);
+		this.waitUntilConnectionsAreReady(connections);
 		connection2.sendMessage(dataRequest2);
-		this.waitUntilConnectionAreReady(connections);
+		this.waitUntilConnectionsAreReady(connections);
 		connection2.sendMessage(done);
-		waitUntilState(operation, State.DONE, WAIT_DURATION);
-		this.waitUntilConnectionAreReady(connections);
+		waitUntilState(operation, State.DONE);
+		this.waitUntilConnectionsAreReady(connections);
 		connection2.disconnect();
-		this.waitUntilConnectionAreReady(connections);
+		waitUntilState(Connection.State.DISCONNECTED, connections);
 		
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
@@ -114,7 +113,7 @@ public class SendOperationTest extends AbstractOperationTestBase {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public final Connection[] createMatchingConnectionPair() {
+	protected final Connection[] createMatchingConnectionPair() {
 		return new DummyConnectionTest().createMatchingConnectionPair();
 	}
 	
@@ -122,13 +121,8 @@ public class SendOperationTest extends AbstractOperationTestBase {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public final Operation createOperation(final Connection connection, final File file) {
+	protected final Operation createOperation(final Connection connection, final File file) {
 		return new SendOperation(connection, file);
-	}
-	
-	@Override
-	public final void waitUntilConnectionAreReady(final Connection... connections) {
-		new DummyConnectionTest().waitUntilConnectionsAreReady(connections);
 	}
 	
 }
