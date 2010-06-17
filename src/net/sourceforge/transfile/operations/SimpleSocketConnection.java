@@ -203,7 +203,7 @@ public class SimpleSocketConnection extends AbstractConnection {
 				} catch (final Exception exception) {
 					SimpleSocketConnection.this.setConnectionError(exception);
 				}
-			} while (System.currentTimeMillis() < maximumTime);
+			} while (System.currentTimeMillis() < maximumTime && !Thread.currentThread().isInterrupted());
 		}
 		
 	}
