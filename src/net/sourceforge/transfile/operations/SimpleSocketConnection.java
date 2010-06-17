@@ -185,27 +185,25 @@ public class SimpleSocketConnection extends AbstractConnection {
 			final InetSocketAddress localAddress = new InetSocketAddress(getPort(SimpleSocketConnection.this.getLocalPeer()));
 			final InetSocketAddress remoteAddress = getInetSocketAddress(SimpleSocketConnection.this.getRemotePeer());
 			
-			try {
-				SimpleSocketConnection.this.setConnectionError(null);
-				
-				final Socket socket = new Socket();
-				
-				socket.setReuseAddress(true);
-				socket.setSoTimeout(0);
-				socket.bind(localAddress);
-				socket.connect(remoteAddress, SOCKET_TIMEOUT);
-				Tools.debugPrint(SimpleSocketConnection.this, socket);
-				SimpleSocketConnection.this.setOutput(new ObjectOutputStream(socket.getOutputStream()));
-				SimpleSocketConnection.this.getExecutor().execute(SimpleSocketConnection.this.new ReceptionTask(socket));
-				
-				return;
-			} catch (final Exception exception) {
-				SimpleSocketConnection.this.setConnectionError(exception);
-			}
-			
-			if (System.currentTimeMillis() < maximumTime) {
-				SimpleSocketConnection.this.getExecutor().execute(this);
-			}
+			do {
+				try {
+					SimpleSocketConnection.this.setConnectionError(null);
+					
+					final Socket socket = new Socket();
+					
+					socket.setReuseAddress(true);
+					socket.setSoTimeout(0);
+					socket.bind(localAddress);
+					socket.connect(remoteAddress, SOCKET_TIMEOUT);
+					Tools.debugPrint(SimpleSocketConnection.this, socket);
+					SimpleSocketConnection.this.setOutput(new ObjectOutputStream(socket.getOutputStream()));
+					SimpleSocketConnection.this.getExecutor().execute(SimpleSocketConnection.this.new ReceptionTask(socket));
+					
+					return;
+				} catch (final Exception exception) {
+					SimpleSocketConnection.this.setConnectionError(exception);
+				}
+			} while (System.currentTimeMillis() < maximumTime);
 		}
 		
 	}
