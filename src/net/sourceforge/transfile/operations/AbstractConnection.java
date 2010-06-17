@@ -26,6 +26,12 @@ public abstract class AbstractConnection implements Connection {
 	
 	private long lastMessageTime;
 	
+	private long receivedMessageCount;
+	
+	private long sentMessageCount;
+	
+	private final Object synchronizer;
+	
 	public AbstractConnection() {
 		this(DEFAULT_LOCAL_PEER, DEFAULT_REMOTE_PEER);
 	}
@@ -44,6 +50,7 @@ public abstract class AbstractConnection implements Connection {
 		this.localPeer = localPeer;
 		this.remotePeer = remotePeer;
 		this.state = State.DISCONNECTED;
+		this.synchronizer = new Object();
 	}
 	
 	/**
@@ -117,7 +124,9 @@ public abstract class AbstractConnection implements Connection {
 	 * <br>Range: {@code [0L .. Long.MAX_VALUE]}
 	 */
 	public final long getLastMessageTime() {
-		return this.lastMessageTime;
+		synchronized (this.synchronizer) {
+			return this.lastMessageTime;
+		}
 	}
 	
 	@Override
@@ -149,11 +158,36 @@ public abstract class AbstractConnection implements Connection {
 			return;
 		}
 		
-		this.setLastMessageTime();
+		synchronized (this.synchronizer) {
+			this.setLastMessageTime();
+			++this.sentMessageCount;
+		}
 		
 		this.doSendMessage(message);
 	}
 	
+	/**
+	 * 
+	 * @return
+	 * <br>Range: {@code [0L .. Long.MAX_VALUE]}
+	 */
+	public final long getReceivedMessageCount() {
+		synchronized (this.synchronizer) {
+			return this.receivedMessageCount;
+		}
+	}
+	
+	/**
+	 * 
+	 * @return
+	 * <br>Range: {@code [0L .. Long.MAX_VALUE]}
+	 */
+	public final long getSentMessageCount() {
+		synchronized (this.synchronizer) {
+			return this.sentMessageCount;
+		}
+	}
+
 	/**
 	 * TODO doc
 	 * 
@@ -181,7 +215,10 @@ public abstract class AbstractConnection implements Connection {
 	 * <br>Maybe shared parameter
 	 */
 	protected final void dispatchMessage(final Message message) {
-		this.setLastMessageTime();
+		synchronized (this.synchronizer) {
+			this.setLastMessageTime();
+			++this.receivedMessageCount;
+		}
 		
 		if (message instanceof DisconnectMessage) {
 			this.setState(State.DISCONNECTED);

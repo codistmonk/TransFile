@@ -51,7 +51,7 @@ public abstract class AbstractSessionTestBase extends AbstractTestWithConnection
 		final SessionRecorder sessionRecorder = new SessionRecorder(session);
 		
 		session.offerFile(sourceFile);
-		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.waitUntilMatchingConnectionPairAreReady();
 		this.getConnection1().disconnect();
 		
 		waitAndAssertState(Connection.State.DISCONNECTED, this.getConnections());

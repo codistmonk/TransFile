@@ -71,18 +71,22 @@ public class SimpleSocketConnection extends AbstractConnection {
 	
 	@Override
 	public final void disconnect() {
-		if (this.output != null) {
-			this.sendMessage(new DisconnectMessage());
+		try {
+			if (this.output != null) {
+				this.sendMessage(new DisconnectMessage());
+			}
+		} finally {
+			this.setExecutor(null);
 		}
-		
-		this.setExecutor(null);
 	}
 	
 	@Override
-	public final void doSendMessage(final Message message) {
+	public final synchronized void doSendMessage(final Message message) {
 		try {
-			this.output.writeObject(message);
-			this.output.flush();
+			if (this.output != null) {
+				this.output.writeObject(message);
+				this.output.flush();
+			}
 		} catch (final IOException exception) {
 			exception.printStackTrace();
 		}
@@ -134,12 +138,15 @@ public class SimpleSocketConnection extends AbstractConnection {
 	 */
 	final void setExecutor(final ExecutorService executor) {
 		if (executor != this.getExecutor() && this.getExecutor() != null) {
-			synchronized (this) {
-				this.getExecutor().shutdownNow();
+			try {
+				synchronized (this) {
+					this.getExecutor().shutdownNow();
+				}
+				
+				this.setState(State.DISCONNECTED);
+			} finally {
+				this.setOutput(null);
 			}
-			
-			this.setState(State.DISCONNECTED);
-			this.setOutput(null);
 		}
 		
 		this.executor = executor;
@@ -162,24 +169,37 @@ public class SimpleSocketConnection extends AbstractConnection {
 		
 		@Override
 		public final void run() {
+			try {
+				Thread.sleep(2 * SOCKET_TIMEOUT);
+			} catch (final InterruptedException exception1) {
+				return;
+			}
+			
 			final long maximumTime = System.currentTimeMillis() + CONNECT_TIMEOUT;
 			final InetSocketAddress localAddress = new InetSocketAddress(getPort(SimpleSocketConnection.this.getLocalPeer()));
 			final InetSocketAddress remoteAddress = getInetSocketAddress(SimpleSocketConnection.this.getRemotePeer());
 			
-			do {
-				try {
-					final Socket socket = new Socket();
-					
-					socket.setReuseAddress(true);
-					socket.bind(localAddress);
-					socket.connect(remoteAddress, SOCKET_TIMEOUT);
-					
-					SimpleSocketConnection.this.setOutput(new ObjectOutputStream(socket.getOutputStream()));
-					SimpleSocketConnection.this.getExecutor().execute(SimpleSocketConnection.this.new ReceptionTask(socket));
-				} catch (final Exception exception) {
-					SimpleSocketConnection.this.setConnectionError(exception);
-				}
-			} while (System.currentTimeMillis() < maximumTime);
+			try {
+				SimpleSocketConnection.this.setConnectionError(null);
+				
+				final Socket socket = new Socket();
+				
+				socket.setReuseAddress(true);
+				socket.setSoTimeout(0);
+				socket.bind(localAddress);
+				socket.connect(remoteAddress, SOCKET_TIMEOUT);
+				Tools.debugPrint(SimpleSocketConnection.this, socket);
+				SimpleSocketConnection.this.setOutput(new ObjectOutputStream(socket.getOutputStream()));
+				SimpleSocketConnection.this.getExecutor().execute(SimpleSocketConnection.this.new ReceptionTask(socket));
+				
+				return;
+			} catch (final Exception exception) {
+				SimpleSocketConnection.this.setConnectionError(exception);
+			}
+			
+			if (System.currentTimeMillis() < maximumTime) {
+				SimpleSocketConnection.this.getExecutor().execute(this);
+			}
 		}
 		
 	}
@@ -228,7 +248,7 @@ public class SimpleSocketConnection extends AbstractConnection {
 					System.err.println(Tools.debug(2, exception.getMessage()));
 					object = "retry";
 				}
-			} while (!(object instanceof DisconnectMessage));
+			} while (object != null && !(object instanceof DisconnectMessage));
 			
 			SimpleSocketConnection.this.setExecutor(null);
 		}

@@ -70,9 +70,9 @@ public abstract class AbstractConnectionTestBase extends AbstractTestWithConnect
 		final Message dataMessage2 = new DataOfferMessage(new File("dummy"), 0L, "42".getBytes());
 		
 		this.getConnection1().sendMessage(dataMessage1);
-		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.waitUntilMatchingConnectionPairAreReady();
 		this.getConnection2().sendMessage(dataMessage2);
-		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.waitUntilMatchingConnectionPairAreReady();
 		this.getConnection1().disconnect();
 		
 		waitAndAssertState(Connection.State.DISCONNECTED, this.getConnections());

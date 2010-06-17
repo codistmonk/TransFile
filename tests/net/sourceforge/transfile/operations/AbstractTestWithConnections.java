@@ -25,6 +25,7 @@ import org.junit.Before;
 
 import net.sourceforge.transfile.operations.AbstractConnectionTestBase.ConnectionRecorder;
 import net.sourceforge.transfile.operations.Connection.State;
+import net.sourceforge.transfile.tools.Tools;
 
 /**
  * TODO doc
@@ -176,9 +177,33 @@ public abstract class AbstractTestWithConnections {
 		for (final Connection connection : connections) {
 			if (connection instanceof AbstractConnection) {
 				while (System.currentTimeMillis() < ((AbstractConnection) connection).getLastMessageTime() + this.getInactivityThreshold()) {
-					Thread.yield();
+					atomicWait();
 				}
 			}
+		}
+	}
+	
+	protected void waitUntilMatchingConnectionPairAreReady() {
+		final AbstractConnection connection1 = (AbstractConnection) this.getConnection1();
+		final AbstractConnection connection2 = (AbstractConnection) this.getConnection2();
+		
+		long i = 0L;
+		Tools.debugPrint(
+				"\n", i, connection1, connection2,
+				"\n", connection1.getReceivedMessageCount(), connection1.getSentMessageCount(),
+				"\n", connection2.getReceivedMessageCount(), connection2.getSentMessageCount()
+		);
+		while (connection1.getReceivedMessageCount() != connection2.getSentMessageCount() || connection1.getSentMessageCount() != connection2.getReceivedMessageCount()) {
+			++i;
+			
+			if (i % INFO_PERIOD == 0L) {
+				Tools.debugPrint(
+						"\n", i,
+						"\n", connection1.getReceivedMessageCount(), connection1.getSentMessageCount(),
+						"\n", connection2.getReceivedMessageCount(), connection2.getSentMessageCount()
+				);
+			}
+			atomicWait();
 		}
 	}
 	
@@ -198,19 +223,40 @@ public abstract class AbstractTestWithConnections {
 	 */
 	protected final void createAndConnectMatchingConnectionPair() {
 		this.setConnections(this.createMatchingConnectionPair());
-		
+		Tools.debugPrint((Object[]) this.getConnections());
 		assertEquals(Connection.State.DISCONNECTED, this.getConnection1().getState());
 		assertEquals(Connection.State.DISCONNECTED, this.getConnection2().getState());
 		
 		this.getConnection1().connect();
 		this.getConnection2().connect();
+		
 		waitAndAssertState(Connection.State.CONNECTED, this.getConnections());
 	}
 	
 	/**
+	 * Number affecting the frequency of debugPrint calls to display messages when an expected state is taking too long to occur.
+	 */
+	private static final long INFO_PERIOD = 100L;
+	
+	/**
 	 * Time in milliseconds.
 	 */
-	public static final long TEST_TIMEOUT = 60000L;
+	public static final long TEST_TIMEOUT = 20000L;
+	
+	/**
+	 * Time in milliseconds.
+	 */
+	public static final long ATOMIC_WAIT_DURATION = 10L;
+	
+	public static final void atomicWait() {
+		Thread.yield();
+		
+		try {
+			Thread.sleep(ATOMIC_WAIT_DURATION);
+		} catch (final InterruptedException exception) {
+			exception.printStackTrace();
+		}
+	}
 	
 	/**
 	 * TODO doc
@@ -223,10 +269,15 @@ public abstract class AbstractTestWithConnections {
 	public static final void waitAndAssertState(final State state, final Connection... connections) {
 		boolean wait = true;
 		
+		long j = 0L;
 		while (wait) {
-			Thread.yield();
+			atomicWait();
 			
 			wait = false;
+			
+			if ((j++) % INFO_PERIOD == 0L && connections.length == 2) {
+				Tools.debugPrint(connections[0].getConnectionError(), connections[1].getConnectionError());
+			}
 			
 			for (final Connection connection : connections) {
 				wait |= connection.getState() != state;

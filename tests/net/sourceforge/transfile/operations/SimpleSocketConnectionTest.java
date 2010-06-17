@@ -41,9 +41,4 @@ public class SimpleSocketConnectionTest extends AbstractConnectionTestBase {
 		return array(new SimpleSocketConnection(DEFAULT_LOCAL_PEER, DEFAULT_REMOTE_PEER), new SimpleSocketConnection(DEFAULT_REMOTE_PEER, DEFAULT_LOCAL_PEER));
 	}
 	
-	@Override
-	protected final long getInactivityThreshold() {
-		return 10000L;
-	}
-	
 }
