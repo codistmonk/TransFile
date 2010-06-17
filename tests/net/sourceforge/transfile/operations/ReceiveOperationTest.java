@@ -25,7 +25,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 
-import net.sourceforge.transfile.operations.AbstractConnectionTestBase.ConnectionRecorder;
 import net.sourceforge.transfile.operations.Operation.State;
 import net.sourceforge.transfile.operations.messages.DataOfferMessage;
 import net.sourceforge.transfile.operations.messages.DataRequestMessage;
@@ -47,21 +46,10 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 	
 	@Test(timeout = TEST_TIMEOUT)
 	public final void testRequestData() {
-		final Connection[] connections = this.createMatchingConnectionPair();
-		final Connection connection1 = connections[0];
-		final Connection connection2 = connections[1];
-		final ConnectionRecorder connectionRecorder1 = new ConnectionRecorder(connection1);
-		final ConnectionRecorder connectionRecorder2 = new ConnectionRecorder(connection2);
-		
-		assertEquals(Connection.State.DISCONNECTED, connection1.getState());
-		assertEquals(Connection.State.DISCONNECTED, connection2.getState());
-		
-		connection1.connect();
-		connection2.connect();
-		waitUntilState(Connection.State.CONNECTED, connections);
+		this.createAndConnectMatchingConnectionPair();
 		
 		final File sourceFile = SOURCE_FILE;
-		final ReceiveOperation operation = this.createOperation(connection1, sourceFile);
+		final ReceiveOperation operation = this.createOperation(this.getConnection1(), sourceFile);
 		final File destinationFile = operation.getDestinationFileProvider().getDestinationFile("");
 		final OperationRecorder operationRecorder = new OperationRecorder(operation);
 		final Message acceptMessage = new StateMessage(sourceFile, State.PROGRESSING);
@@ -72,11 +60,11 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		
 		// TODO test changing the order of the following 2 instructions
 		operation.getController().start();
-		this.waitUntilConnectionsAreReady(connections);
-		connection2.sendMessage(acceptMessage);
-		this.waitUntilConnectionsAreReady(connections);
-		connection2.disconnect();
-		waitUntilState(Connection.State.DISCONNECTED, connections);
+		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.getConnection2().sendMessage(acceptMessage);
+		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.getConnection2().disconnect();
+		waitAndAssertState(Connection.State.DISCONNECTED, this.getConnections());
 		
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
@@ -84,14 +72,14 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 				acceptMessage,
 				Connection.State.DISCONNECTED,
 				new DisconnectMessage()
-		), connectionRecorder1.getEvents());
+		), this.getConnectionRecorder1().getEvents());
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
 				new StateMessage(sourceFile, Operation.State.PROGRESSING),
 				new DataRequestMessage(sourceFile, 0L, ReceiveOperation.PREFERRED_TRANSFERRED_BYTE_COUNT),
 				Connection.State.DISCONNECTED
-		), connectionRecorder2.getEvents());
+		), this.getConnectionRecorder2().getEvents());
 		assertEquals(Arrays.asList(
 				(Object) Operation.State.PROGRESSING
 		), operationRecorder.getEvents());
@@ -99,21 +87,10 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 	
 	@Test(timeout = TEST_TIMEOUT)
 	public final void testReceiveData() {
-		final Connection[] connections = this.createMatchingConnectionPair();
-		final Connection connection1 = connections[0];
-		final Connection connection2 = connections[1];
-		final ConnectionRecorder connectionRecorder1 = new ConnectionRecorder(connection1);
-		final ConnectionRecorder connectionRecorder2 = new ConnectionRecorder(connection2);
-		
-		assertEquals(Connection.State.DISCONNECTED, connection1.getState());
-		assertEquals(Connection.State.DISCONNECTED, connection2.getState());
-		
-		connection1.connect();
-		connection2.connect();
-		waitUntilState(Connection.State.CONNECTED, connections);
+		this.createAndConnectMatchingConnectionPair();
 		
 		final File sourceFile = SOURCE_FILE;
-		final ReceiveOperation operation = this.createOperation(connection1, sourceFile);
+		final ReceiveOperation operation = this.createOperation(this.getConnection1(), sourceFile);
 		final File destinationFile = operation.getDestinationFileProvider().getDestinationFile("");
 		final OperationRecorder operationRecorder = new OperationRecorder(operation);
 		final Message acceptMessage = new StateMessage(sourceFile, State.PROGRESSING);
@@ -123,16 +100,16 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		assertEquals(0L, destinationFile.length());
 		
 		operation.getController().start();
-		this.waitUntilConnectionsAreReady(connections);
-		connection2.sendMessage(acceptMessage);
-		this.waitUntilConnectionsAreReady(connections);
-		connection2.sendMessage(new DataOfferMessage(sourceFile, 0L, (byte) '4'));
-		this.waitUntilConnectionsAreReady(connections);
-		connection2.sendMessage(new DataOfferMessage(sourceFile, 1L, (byte) '2'));
+		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.getConnection2().sendMessage(acceptMessage);
+		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.getConnection2().sendMessage(new DataOfferMessage(sourceFile, 0L, (byte) '4'));
+		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.getConnection2().sendMessage(new DataOfferMessage(sourceFile, 1L, (byte) '2'));
 		waitUntilState(operation, State.DONE);
-		this.waitUntilConnectionsAreReady(connections);
-		connection2.disconnect();
-		waitUntilState(Connection.State.DISCONNECTED, connections);
+		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.getConnection2().disconnect();
+		waitAndAssertState(Connection.State.DISCONNECTED, this.getConnections());
 		
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
@@ -142,7 +119,7 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 				new DataOfferMessage(sourceFile, 1L, (byte) '2'),
 				Connection.State.DISCONNECTED,
 				new DisconnectMessage()
-				), connectionRecorder1.getEvents());
+				), this.getConnectionRecorder1().getEvents());
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
@@ -152,7 +129,7 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 				new DataRequestMessage(sourceFile, 2L, ReceiveOperation.PREFERRED_TRANSFERRED_BYTE_COUNT),
 				new StateMessage(sourceFile, Operation.State.DONE),
 				Connection.State.DISCONNECTED
-		), connectionRecorder2.getEvents());
+		), this.getConnectionRecorder2().getEvents());
 		assertEquals(Arrays.asList(
 				(Object) Operation.State.PROGRESSING,
 				0.5,
@@ -164,21 +141,10 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 	
 	@Test(timeout = TEST_TIMEOUT)
 	public final void testReceiveDataWithPause() {
-		final Connection[] connections = this.createMatchingConnectionPair();
-		final Connection connection1 = connections[0];
-		final Connection connection2 = connections[1];
-		final ConnectionRecorder connectionRecorder1 = new ConnectionRecorder(connection1);
-		final ConnectionRecorder connectionRecorder2 = new ConnectionRecorder(connection2);
-		
-		assertEquals(Connection.State.DISCONNECTED, connection1.getState());
-		assertEquals(Connection.State.DISCONNECTED, connection2.getState());
-		
-		connection1.connect();
-		connection2.connect();
-		waitUntilState(Connection.State.CONNECTED, connections);
+		this.createAndConnectMatchingConnectionPair();
 		
 		final File sourceFile = SOURCE_FILE;
-		final ReceiveOperation operation = this.createOperation(connection1, sourceFile);
+		final ReceiveOperation operation = this.createOperation(this.getConnection1(), sourceFile);
 		final File destinationFile = operation.getDestinationFileProvider().getDestinationFile("");
 		final OperationRecorder operationRecorder = new OperationRecorder(operation);
 		final Message acceptMessage = new StateMessage(sourceFile, State.PROGRESSING);
@@ -188,22 +154,22 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		assertEquals(0L, destinationFile.length());
 		
 		operation.getController().start();
-		this.waitUntilConnectionsAreReady(connections);
-		connection2.sendMessage(acceptMessage);
-		this.waitUntilConnectionsAreReady(connections);
-		connection2.sendMessage(new DataOfferMessage(sourceFile, 0L, (byte) '4'));
-		this.waitUntilConnectionsAreReady(connections);
-		connection2.sendMessage(new StateMessage(sourceFile, State.PAUSED));
-		this.waitUntilConnectionsAreReady(connections);
-		connection2.sendMessage(new StateMessage(sourceFile, State.PROGRESSING));
-		this.waitUntilConnectionsAreReady(connections);
+		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.getConnection2().sendMessage(acceptMessage);
+		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.getConnection2().sendMessage(new DataOfferMessage(sourceFile, 0L, (byte) '4'));
+		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.getConnection2().sendMessage(new StateMessage(sourceFile, State.PAUSED));
+		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.getConnection2().sendMessage(new StateMessage(sourceFile, State.PROGRESSING));
+		this.waitUntilConnectionsAreReady(this.getConnections());
 		operation.getController().start();
-		this.waitUntilConnectionsAreReady(connections);
-		connection2.sendMessage(new DataOfferMessage(sourceFile, 1L, (byte) '2'));
+		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.getConnection2().sendMessage(new DataOfferMessage(sourceFile, 1L, (byte) '2'));
 		waitUntilState(operation, State.DONE);
-		this.waitUntilConnectionsAreReady(connections);
-		connection2.disconnect();
-		waitUntilState(Connection.State.DISCONNECTED, connections);
+		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.getConnection2().disconnect();
+		waitAndAssertState(Connection.State.DISCONNECTED, this.getConnections());
 		
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
@@ -215,7 +181,7 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 				new DataOfferMessage(sourceFile, 1L, (byte) '2'),
 				Connection.State.DISCONNECTED,
 				new DisconnectMessage()
-		), connectionRecorder1.getEvents());
+		), this.getConnectionRecorder1().getEvents());
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
@@ -228,7 +194,7 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 				new DataRequestMessage(sourceFile, 2L, ReceiveOperation.PREFERRED_TRANSFERRED_BYTE_COUNT),
 				new StateMessage(sourceFile, Operation.State.DONE),
 				Connection.State.DISCONNECTED
-		), connectionRecorder2.getEvents());
+		), this.getConnectionRecorder2().getEvents());
 		assertEquals(Arrays.asList(
 				(Object) Operation.State.PROGRESSING,
 				0.5,
@@ -240,17 +206,11 @@ public class ReceiveOperationTest extends AbstractOperationTestBase {
 		assertEquals(destinationFile.length(), sourceFile.length());
 	}
 	
-	/** 
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected final Connection[] createMatchingConnectionPair() {
 		return new DummyConnectionTest().createMatchingConnectionPair();
 	}
 	
-	/** 
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected final ReceiveOperation createOperation(final Connection connection, final File file) {
 		try {

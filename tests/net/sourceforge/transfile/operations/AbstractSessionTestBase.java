@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import net.sourceforge.transfile.operations.AbstractConnectionTestBase.ConnectionRecorder;
 import net.sourceforge.transfile.operations.messages.DisconnectMessage;
 import net.sourceforge.transfile.operations.messages.FileOfferMessage;
 import net.sourceforge.transfile.tools.Tools;
@@ -45,44 +44,30 @@ public abstract class AbstractSessionTestBase extends AbstractTestWithConnection
 	
 	@Test(timeout = TEST_TIMEOUT)
 	public final void testOfferFile() throws IOException {
-		final Connection[] connections = this.createMatchingConnectionPair();
-		final Connection connection1 = connections[0];
-		final Connection connection2 = connections[1];
-		final ConnectionRecorder connectionRecorder1 = new ConnectionRecorder(connection1);
-		final ConnectionRecorder connectionRecorder2 = new ConnectionRecorder(connection2);
+		this.createAndConnectMatchingConnectionPair();
+		
 		final File sourceFile = AbstractOperationTestBase.SOURCE_FILE;
-		final Session session = new Session(connection1, new ReceiveOperationTest.TemporaryDestinationFileProvider(sourceFile));
+		final Session session = new Session(this.getConnection1(), new ReceiveOperationTest.TemporaryDestinationFileProvider(sourceFile));
 		final SessionRecorder sessionRecorder = new SessionRecorder(session);
 		
-		assertEquals(Connection.State.DISCONNECTED, connection1.getState());
-		assertEquals(Connection.State.DISCONNECTED, connection2.getState());
-		
-		connection1.connect();
-		connection2.connect();
-		waitUntilState(Connection.State.CONNECTED, connections);
-		
-		assertEquals(Connection.State.CONNECTED, connection1.getState());
-		assertEquals(Connection.State.CONNECTED, connection2.getState());
-		
 		session.offerFile(sourceFile);
-		this.waitUntilConnectionsAreReady(connections);
-		connection1.disconnect();
-		waitUntilState(Connection.State.DISCONNECTED, connections);
+		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.getConnection1().disconnect();
 		
-		assertEquals(Connection.State.DISCONNECTED, connection1.getState());
-		assertEquals(Connection.State.DISCONNECTED, connection2.getState());
+		waitAndAssertState(Connection.State.DISCONNECTED, this.getConnections());
+		
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
 				Connection.State.DISCONNECTED
-				), connectionRecorder1.getEvents());
+				), this.getConnectionRecorder1().getEvents());
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
 				new FileOfferMessage(sourceFile),
 				Connection.State.DISCONNECTED,
 				new DisconnectMessage()
-		), connectionRecorder2.getEvents());
+		), this.getConnectionRecorder2().getEvents());
 		assertTrue(sessionRecorder.getEvents().size() == 1);
 		
 		final SendOperation sendOperation = Tools.cast(SendOperation.class, sessionRecorder.getEvents().get(0));

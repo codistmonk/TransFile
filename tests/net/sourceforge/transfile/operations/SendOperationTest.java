@@ -24,7 +24,6 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.util.Arrays;
 
-import net.sourceforge.transfile.operations.AbstractConnectionTestBase.ConnectionRecorder;
 import net.sourceforge.transfile.operations.Operation.State;
 import net.sourceforge.transfile.operations.messages.DataOfferMessage;
 import net.sourceforge.transfile.operations.messages.DataRequestMessage;
@@ -44,21 +43,10 @@ public class SendOperationTest extends AbstractOperationTestBase {
 	
 	@Test(timeout = TEST_TIMEOUT)
 	public final void testSendData() {
-		final Connection[] connections = this.createMatchingConnectionPair();
-		final Connection connection1 = connections[0];
-		final Connection connection2 = connections[1];
-		final ConnectionRecorder connectionRecorder1 = new ConnectionRecorder(connection1);
-		final ConnectionRecorder connectionRecorder2 = new ConnectionRecorder(connection2);
-		
-		assertEquals(Connection.State.DISCONNECTED, connection1.getState());
-		assertEquals(Connection.State.DISCONNECTED, connection2.getState());
-		
-		connection1.connect();
-		connection2.connect();
-		waitUntilState(Connection.State.CONNECTED, connections);
+		this.createAndConnectMatchingConnectionPair();
 		
 		final File sourceFile = SOURCE_FILE;
-		final Operation operation = this.createOperation(connection1, sourceFile);
+		final Operation operation = this.createOperation(this.getConnection1(), sourceFile);
 		final OperationRecorder operationRecorder = new OperationRecorder(operation);
 		final Message accept = new StateMessage(sourceFile, State.PROGRESSING);
 		final Message dataRequest1 = new DataRequestMessage(sourceFile, 0L, ReceiveOperation.PREFERRED_TRANSFERRED_BYTE_COUNT);
@@ -69,18 +57,18 @@ public class SendOperationTest extends AbstractOperationTestBase {
 		assertEquals(0.0, operation.getProgress(), 0.0);
 		
 		operation.getController().start();
-		this.waitUntilConnectionsAreReady(connections);
-		connection2.sendMessage(accept);
-		this.waitUntilConnectionsAreReady(connections);
-		connection2.sendMessage(dataRequest1);
-		this.waitUntilConnectionsAreReady(connections);
-		connection2.sendMessage(dataRequest2);
-		this.waitUntilConnectionsAreReady(connections);
-		connection2.sendMessage(done);
+		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.getConnection2().sendMessage(accept);
+		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.getConnection2().sendMessage(dataRequest1);
+		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.getConnection2().sendMessage(dataRequest2);
+		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.getConnection2().sendMessage(done);
 		waitUntilState(operation, State.DONE);
-		this.waitUntilConnectionsAreReady(connections);
-		connection2.disconnect();
-		waitUntilState(Connection.State.DISCONNECTED, connections);
+		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.getConnection2().disconnect();
+		waitAndAssertState(Connection.State.DISCONNECTED, this.getConnections());
 		
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
@@ -91,7 +79,7 @@ public class SendOperationTest extends AbstractOperationTestBase {
 				done,
 				Connection.State.DISCONNECTED,
 				new DisconnectMessage()
-				), connectionRecorder1.getEvents());
+				), this.getConnectionRecorder1().getEvents());
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
@@ -100,7 +88,7 @@ public class SendOperationTest extends AbstractOperationTestBase {
 				new DataOfferMessage(sourceFile, 1L, (byte) '2'),
 				new StateMessage(sourceFile, Operation.State.DONE),
 				Connection.State.DISCONNECTED
-		), connectionRecorder2.getEvents());
+		), this.getConnectionRecorder2().getEvents());
 		assertEquals(Arrays.asList(
 				(Object) Operation.State.PROGRESSING,
 				0.5,
@@ -109,17 +97,11 @@ public class SendOperationTest extends AbstractOperationTestBase {
 		), operationRecorder.getEvents());
 	}
 	
-	/** 
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected final Connection[] createMatchingConnectionPair() {
 		return new DummyConnectionTest().createMatchingConnectionPair();
 	}
 	
-	/** 
-	 * {@inheritDoc}
-	 */
 	@Override
 	protected final Operation createOperation(final Connection connection, final File file) {
 		return new SendOperation(connection, file);

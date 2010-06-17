@@ -49,10 +49,13 @@ public abstract class AbstractConnectionTestBase extends AbstractTestWithConnect
 		
 		connection.connect();
 		this.waitUntilConnectionsAreReady(connection);
-		connection.disconnect();
-		this.waitUntilConnectionsAreReady(connection);
 		
-		assertEquals(Connection.State.DISCONNECTED, connection.getState());
+		assertEquals(Connection.State.CONNECTING, connection.getState());
+		
+		connection.disconnect();
+		
+		waitAndAssertState(Connection.State.DISCONNECTED, connection);
+		
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
 				Connection.State.DISCONNECTED
@@ -61,39 +64,25 @@ public abstract class AbstractConnectionTestBase extends AbstractTestWithConnect
 	
 	@Test(timeout = TEST_TIMEOUT)
 	public final void testConnectionAndDataTransfer() {
-		final Connection[] connections = this.createMatchingConnectionPair();
-		final Connection connection1 = connections[0];
-		final Connection connection2 = connections[1];
-		final ConnectionRecorder connectionRecorder1 = new ConnectionRecorder(connection1);
-		final ConnectionRecorder connectionRecorder2 = new ConnectionRecorder(connection2);
+		this.createAndConnectMatchingConnectionPair();
+		
 		final Message dataMessage1 = new DataOfferMessage(new File("dummy"), 0L, "Hello world!".getBytes());
 		final Message dataMessage2 = new DataOfferMessage(new File("dummy"), 0L, "42".getBytes());
 		
-		assertEquals(Connection.State.DISCONNECTED, connection1.getState());
-		assertEquals(Connection.State.DISCONNECTED, connection2.getState());
+		this.getConnection1().sendMessage(dataMessage1);
+		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.getConnection2().sendMessage(dataMessage2);
+		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.getConnection1().disconnect();
 		
-		connection1.connect();
-		connection2.connect();
-		waitUntilState(Connection.State.CONNECTED, connections);
+		waitAndAssertState(Connection.State.DISCONNECTED, this.getConnections());
 		
-		assertEquals(Connection.State.CONNECTED, connection1.getState());
-		assertEquals(Connection.State.CONNECTED, connection2.getState());
-		
-		connection1.sendMessage(dataMessage1);
-		this.waitUntilConnectionsAreReady(connections);
-		connection2.sendMessage(dataMessage2);
-		this.waitUntilConnectionsAreReady(connections);
-		connection1.disconnect();
-		waitUntilState(Connection.State.DISCONNECTED, connections);
-		
-		assertEquals(Connection.State.DISCONNECTED, connection1.getState());
-		assertEquals(Connection.State.DISCONNECTED, connection2.getState());
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
 				dataMessage2,
 				Connection.State.DISCONNECTED
-				), connectionRecorder1.getEvents());
+				), this.getConnectionRecorder1().getEvents());
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
@@ -103,7 +92,7 @@ public abstract class AbstractConnectionTestBase extends AbstractTestWithConnect
 				// TODO should this behavior be changed?
 				Connection.State.DISCONNECTED,
 				new DisconnectMessage()
-		), connectionRecorder2.getEvents());
+		), this.getConnectionRecorder2().getEvents());
 	}
 	
 	/**

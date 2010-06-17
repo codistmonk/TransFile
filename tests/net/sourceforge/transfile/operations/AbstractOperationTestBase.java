@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import net.sourceforge.transfile.operations.AbstractConnectionTestBase.ConnectionRecorder;
 import net.sourceforge.transfile.operations.Operation.State;
 import net.sourceforge.transfile.operations.messages.DisconnectMessage;
 import net.sourceforge.transfile.operations.messages.StateMessage;
@@ -69,56 +68,45 @@ public abstract class AbstractOperationTestBase extends AbstractTestWithConnecti
 	
 	@Test(timeout = TEST_TIMEOUT)
 	public final void testStartPauseResumeCancelRemove() {
-		final Connection[] connections = this.createMatchingConnectionPair();
-		final Connection connection1 = connections[0];
-		final Connection connection2 = connections[1];
-		final ConnectionRecorder connectionRecorder1 = new ConnectionRecorder(connection1);
-		final ConnectionRecorder connectionRecorder2 = new ConnectionRecorder(connection2);
-		
-		assertEquals(Connection.State.DISCONNECTED, connection1.getState());
-		assertEquals(Connection.State.DISCONNECTED, connection2.getState());
-		
-		connection1.connect();
-		connection2.connect();
-		waitUntilState(Connection.State.CONNECTED, connections);
+		this.createAndConnectMatchingConnectionPair();
 		
 		final File sourceFile = SOURCE_FILE;
-		final Operation operation = this.createOperation(connection1, sourceFile);
+		final Operation operation = this.createOperation(this.getConnection1(), sourceFile);
 		final OperationRecorder operationRecorder = new OperationRecorder(operation);
 		
 		assertEquals(State.QUEUED, operation.getState());
 		
 		operation.getController().start();
-		this.waitUntilConnectionsAreReady(connections);
+		this.waitUntilConnectionsAreReady(this.getConnections());
 		
 		assertEquals(State.PROGRESSING, operation.getState());
 		
 		operation.getController().pause();
-		this.waitUntilConnectionsAreReady(connections);
+		this.waitUntilConnectionsAreReady(this.getConnections());
 		
 		assertEquals(State.PAUSED, operation.getState());
 		
 		operation.getController().start();
-		this.waitUntilConnectionsAreReady(connections);
+		this.waitUntilConnectionsAreReady(this.getConnections());
 		
 		assertEquals(State.PROGRESSING, operation.getState());
 		
 		operation.getController().cancel();
-		this.waitUntilConnectionsAreReady(connections);
+		this.waitUntilConnectionsAreReady(this.getConnections());
 		
 		assertEquals(State.CANCELED, operation.getState());
 		
 		operation.getController().remove();
-		this.waitUntilConnectionsAreReady(connections);
-		connection1.disconnect();
-		waitUntilState(Connection.State.DISCONNECTED, connections);
+		this.waitUntilConnectionsAreReady(this.getConnections());
+		this.getConnection1().disconnect();
+		waitAndAssertState(Connection.State.DISCONNECTED, this.getConnections());
 		
 		assertEquals(State.REMOVED, operation.getState());
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
 				Connection.State.DISCONNECTED
-		), connectionRecorder1.getEvents());
+		), this.getConnectionRecorder1().getEvents());
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
 				Connection.State.CONNECTED,
@@ -129,7 +117,7 @@ public abstract class AbstractOperationTestBase extends AbstractTestWithConnecti
 				new StateMessage(sourceFile, State.REMOVED),
 				Connection.State.DISCONNECTED,
 				new DisconnectMessage()
-		), connectionRecorder2.getEvents());
+		), this.getConnectionRecorder2().getEvents());
 		assertEquals(Arrays.asList(
 				State.PROGRESSING,
 				State.PAUSED,
