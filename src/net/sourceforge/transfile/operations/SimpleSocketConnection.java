@@ -169,6 +169,12 @@ public class SimpleSocketConnection extends AbstractConnection {
 		
 		@Override
 		public final void run() {
+			// TODO find a better fix
+			// If a connection is canceled (using disconnect()) while the socket is trying to connect,
+			// then the socket will still be able to connect before timing out, thus preventing a new
+			// connection with the same port to be established, and also making the peer connection
+			// unavailable (connected to an unused socket)
+			// The following call to sleep() is a quick fix to this problem encountered during testing
 			try {
 				Thread.sleep(2 * SOCKET_TIMEOUT);
 			} catch (final InterruptedException exception1) {
