@@ -267,7 +267,7 @@ public class SimpleSocketConnection extends AbstractConnection {
 	/**
 	 * Time in milliseconds.
 	 */
-	public static final long CONNECT_TIMEOUT = 10000L;
+	public static final long CONNECT_TIMEOUT = 20000L;
 	
 	/**
 	 * TODO doc
