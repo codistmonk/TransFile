@@ -25,11 +25,11 @@ package net.sourceforge.transfile.operations;
  * @author codistmonk (creation 2010-06-05)
  *
  */
-public class SendOperationTest extends AbstractSendOperationTestBase {
+public class SendOperationWithSimpleSocketConnectionTest extends AbstractSendOperationTestBase {
 	
 	@Override
 	protected final Connection[] createMatchingConnectionPair() {
-		return new DummyConnectionTest().createMatchingConnectionPair();
+		return new SimpleSocketConnectionTest().createMatchingConnectionPair();
 	}
 	
 }
