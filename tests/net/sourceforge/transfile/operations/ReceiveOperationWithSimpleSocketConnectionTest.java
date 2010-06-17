@@ -22,14 +22,14 @@ package net.sourceforge.transfile.operations;
 /**
  * TODO doc
  *
- * @author codistmonk (creation 2010-06-05)
+ * @author codistmonk (creation 2010-06-16)
  *
  */
-public class ReceiveOperationTest extends AbstractReceiveOperationTestBase {
+public class ReceiveOperationWithSimpleSocketConnectionTest extends AbstractReceiveOperationTestBase {
 	
 	@Override
 	protected final Connection[] createMatchingConnectionPair() {
-		return new DummyConnectionTest().createMatchingConnectionPair();
+		return new SimpleSocketConnectionTest().createMatchingConnectionPair();
 	}
 	
 }
