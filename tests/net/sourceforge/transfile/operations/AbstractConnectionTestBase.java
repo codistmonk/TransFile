@@ -41,7 +41,7 @@ import org.junit.Test;
 public abstract class AbstractConnectionTestBase extends AbstractTestWithConnections {
 	
 	@Test(timeout = TEST_TIMEOUT)
-	public final void testToggleUnmatchedConnection() {
+	public final void testAbortConnectUnmatchedConnection() {
 		final Connection connection = this.createUnmatchedConnection();
 		final ConnectionRecorder connectionLogger = new ConnectionRecorder(connection);
 		
@@ -49,8 +49,6 @@ public abstract class AbstractConnectionTestBase extends AbstractTestWithConnect
 		
 		connection.connect();
 		this.waitUntilConnectionsAreReady(connection);
-		
-		assertEquals(Connection.State.CONNECTING, connection.getState());
 		
 		connection.disconnect();
 		
@@ -60,6 +58,25 @@ public abstract class AbstractConnectionTestBase extends AbstractTestWithConnect
 				Connection.State.CONNECTING,
 				Connection.State.DISCONNECTED
 				), connectionLogger.getEvents());
+	}
+	
+	@Test(timeout = TEST_TIMEOUT)
+	public final void testConnectTimeout() throws InterruptedException {
+		final Connection connection = this.createUnmatchedConnection();
+		final ConnectionRecorder connectionLogger = new ConnectionRecorder(connection);
+		
+		assertEquals(Connection.State.DISCONNECTED, connection.getState());
+		
+		connection.connect();
+		
+		Thread.sleep(this.getConnectTimeout());
+		
+		waitAndAssertState(Connection.State.DISCONNECTED, connection);
+		
+		assertEquals(Arrays.asList(
+				Connection.State.CONNECTING,
+				Connection.State.DISCONNECTED
+		), connectionLogger.getEvents());
 	}
 	
 	@Test(timeout = TEST_TIMEOUT)
@@ -93,6 +110,16 @@ public abstract class AbstractConnectionTestBase extends AbstractTestWithConnect
 				Connection.State.DISCONNECTED,
 				new DisconnectMessage()
 		), this.getConnectionRecorder2().getEvents());
+	}
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @return a time in milliseconds
+	 * <br>Range: {@code [0L .. Long.MAX_VALUE]}
+	 */
+	protected long getConnectTimeout() {
+		return 500L;
 	}
 	
 	/**

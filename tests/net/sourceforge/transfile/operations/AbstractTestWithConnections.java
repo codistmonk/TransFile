@@ -241,7 +241,7 @@ public abstract class AbstractTestWithConnections {
 	/**
 	 * Time in milliseconds.
 	 */
-	public static final long TEST_TIMEOUT = 20000L;
+	public static final long TEST_TIMEOUT = 30000L;
 	
 	/**
 	 * Time in milliseconds.

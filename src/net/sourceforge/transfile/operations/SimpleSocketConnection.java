@@ -185,7 +185,9 @@ public class SimpleSocketConnection extends AbstractConnection {
 			final InetSocketAddress localAddress = new InetSocketAddress(getPort(SimpleSocketConnection.this.getLocalPeer()));
 			final InetSocketAddress remoteAddress = getInetSocketAddress(SimpleSocketConnection.this.getRemotePeer());
 			
-			this.connect(maximumTime, localAddress, remoteAddress);
+			if (this.connect(maximumTime, localAddress, remoteAddress) == null) {
+				SimpleSocketConnection.this.setExecutor(null);
+			}
 		}
 
 		/**
@@ -200,23 +202,38 @@ public class SimpleSocketConnection extends AbstractConnection {
 		 * @param remoteAddress
 		 * <br>Not null
 		 * <br>Shared
+		 * @return
+		 * <br>Not null
+		 * <br>New
 		 */
-		private final void connect(final long maximumTime, final InetSocketAddress localAddress, final InetSocketAddress remoteAddress) {
+		private final Socket connect(final long maximumTime, final InetSocketAddress localAddress, final InetSocketAddress remoteAddress) {
 			do {
+				SimpleSocketConnection.this.setConnectionError(null);
+				
 				try {
-					SimpleSocketConnection.this.setConnectionError(null);
-					
-					final Socket socket = this.connect(localAddress, remoteAddress);
-					
-					Tools.debugPrint(SimpleSocketConnection.this, socket);
-					SimpleSocketConnection.this.setOutput(new ObjectOutputStream(socket.getOutputStream()));
-					SimpleSocketConnection.this.getExecutor().execute(SimpleSocketConnection.this.new ReceptionTask(socket));
-					
-					return;
+					return this.prepareToReadAndWrite(this.connect(localAddress, remoteAddress));
 				} catch (final Exception exception) {
 					SimpleSocketConnection.this.setConnectionError(exception);
 				}
 			} while (System.currentTimeMillis() < maximumTime && !Thread.currentThread().isInterrupted());
+			
+			return null;
+		}
+		
+		/**
+		 * TODO doc
+		 * 
+		 * @param socket
+		 * <br>Not null
+		 * @return {@code socket}
+		 * <br>Not null
+		 * @throws IOException if an I/O error occurs
+		 */
+		private final Socket prepareToReadAndWrite(final Socket socket) throws IOException {
+			SimpleSocketConnection.this.setOutput(new ObjectOutputStream(socket.getOutputStream()));
+			SimpleSocketConnection.this.getExecutor().execute(SimpleSocketConnection.this.new ReceptionTask(socket));
+			
+			return socket;
 		}
 		
 		/**
@@ -241,6 +258,8 @@ public class SimpleSocketConnection extends AbstractConnection {
 			result.setSoTimeout(0);
 			result.bind(localAddress);
 			result.connect(remoteAddress, CONNECT_INTERVAL);
+			
+			Tools.debugPrint(SimpleSocketConnection.this, result);
 			
 			return result;
 		}

@@ -71,6 +71,8 @@ public class DummyConnection extends AbstractConnection {
 			if (this.getRemoteConnection() != null && this.getRemoteConnection().getState() == State.CONNECTING) {
 				this.setState(State.CONNECTED);
 				this.getRemoteConnection().setState(State.CONNECTED);
+			} else if (this.getRemoteConnection() == null) {
+				this.setState(State.DISCONNECTED);
 			}
 			break;
 		default:
@@ -109,7 +111,7 @@ public class DummyConnection extends AbstractConnection {
 		}
 	}
 	
-	static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
+	private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
 	
 	/**
 	 * @return
