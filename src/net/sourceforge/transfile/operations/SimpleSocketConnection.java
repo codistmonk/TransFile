@@ -176,7 +176,7 @@ public class SimpleSocketConnection extends AbstractConnection {
 			// unavailable (connected to an unused socket)
 			// The following call to sleep() is a quick fix to this problem encountered during testing
 			try {
-				Thread.sleep(2 * SOCKET_TIMEOUT);
+				Thread.sleep(2 * CONNECT_INTERVAL);
 			} catch (final InterruptedException exception1) {
 				return;
 			}
@@ -185,16 +185,29 @@ public class SimpleSocketConnection extends AbstractConnection {
 			final InetSocketAddress localAddress = new InetSocketAddress(getPort(SimpleSocketConnection.this.getLocalPeer()));
 			final InetSocketAddress remoteAddress = getInetSocketAddress(SimpleSocketConnection.this.getRemotePeer());
 			
+			this.connect(maximumTime, localAddress, remoteAddress);
+		}
+
+		/**
+		 * TODO doc
+		 * <br>Blocking.
+		 * 
+		 * @param maximumTime
+		 * <br>Range: {@code [0L .. Long.MAX_VALUE]}
+		 * @param localAddress
+		 * <br>Not null
+		 * <br>Shared
+		 * @param remoteAddress
+		 * <br>Not null
+		 * <br>Shared
+		 */
+		private final void connect(final long maximumTime, final InetSocketAddress localAddress, final InetSocketAddress remoteAddress) {
 			do {
 				try {
 					SimpleSocketConnection.this.setConnectionError(null);
 					
-					final Socket socket = new Socket();
+					final Socket socket = this.connect(localAddress, remoteAddress);
 					
-					socket.setReuseAddress(true);
-					socket.setSoTimeout(0);
-					socket.bind(localAddress);
-					socket.connect(remoteAddress, SOCKET_TIMEOUT);
 					Tools.debugPrint(SimpleSocketConnection.this, socket);
 					SimpleSocketConnection.this.setOutput(new ObjectOutputStream(socket.getOutputStream()));
 					SimpleSocketConnection.this.getExecutor().execute(SimpleSocketConnection.this.new ReceptionTask(socket));
@@ -204,6 +217,32 @@ public class SimpleSocketConnection extends AbstractConnection {
 					SimpleSocketConnection.this.setConnectionError(exception);
 				}
 			} while (System.currentTimeMillis() < maximumTime && !Thread.currentThread().isInterrupted());
+		}
+		
+		/**
+		 * TODO doc
+		 * <br>Blocking.
+		 * 
+		 * @param localAddress
+		 * <br>Not null
+		 * <br>Shared
+		 * @param remoteAddress
+		 * <br>Not null
+		 * <br>Shared
+		 * @return
+		 * <br>Not null
+		 * <br>New
+		 * @throws Exception if an error occurs
+		 */
+		private final Socket connect(final InetSocketAddress localAddress, final InetSocketAddress remoteAddress) throws Exception {
+			final Socket result = new Socket();
+			
+			result.setReuseAddress(true);
+			result.setSoTimeout(0);
+			result.bind(localAddress);
+			result.connect(remoteAddress, CONNECT_INTERVAL);
+			
+			return result;
 		}
 		
 	}
@@ -232,37 +271,76 @@ public class SimpleSocketConnection extends AbstractConnection {
 		@Override
 		public final void run() {
 			try {
-				this.input = new ObjectInputStream(this.socket.getInputStream());
-			} catch (final IOException exception) {
-				Tools.throwUnchecked(exception);
+				this.setInput();
+				this.receiveAndProcessObjects();
+			} finally {
+				SimpleSocketConnection.this.setExecutor(null);
 			}
-			
+		}
+
+		/**
+		 * TODO doc
+		 * <br>Blocking.
+		 */
+		private void receiveAndProcessObjects() {
 			Object object = null;
 			
 			do {
 				try {
-					object = this.input.readObject();
-					
-					if (object instanceof Message) {
-						SimpleSocketConnection.this.dispatchMessage((Message) object);
-					}
+					object = this.readInput();
 				} catch (final IOException exception) {
-					object = null;
+					object = STOP;
 				} catch (final ClassNotFoundException exception) {
 					System.err.println(Tools.debug(2, exception.getMessage()));
-					object = "retry";
+					object = RETRY;
 				}
-			} while (object != null && !(object instanceof DisconnectMessage));
+			} while (object != STOP && !(object instanceof DisconnectMessage));
+		}
+		
+		/**
+		 * Creates an instance of {@link ObjectInputStream} from {@code this.socket}.
+		 * <br>Blocking.
+		 * 
+		 * @throws RuntimeException if an I/O error occurs
+		 */
+		private final void setInput() {
+			try {
+				this.input = new ObjectInputStream(this.socket.getInputStream());
+			} catch (final IOException exception) {
+				Tools.throwUnchecked(exception);
+			}
+		}
+		
+		/**
+		 * Waits for an object and then dispatches it if it is an instance of {@link Message}.
+		 * <br>Blocking.
+		 * 
+		 * @return
+		 * <br>Maybe null
+		 * <br>Maybe shared
+		 * @throws IOException if an I/O error occurs
+		 * @throws ClassNotFoundException if the class of a serialized object cannot be found
+		 */
+		private final Object readInput() throws IOException, ClassNotFoundException {
+			final Object result = this.input.readObject();
 			
-			SimpleSocketConnection.this.setExecutor(null);
+			if (result instanceof Message) {
+				SimpleSocketConnection.this.dispatchMessage((Message) result);
+			}
+			
+			return result;
 		}
 		
 	}
 	
+	static final Object STOP = null;
+	
+	static final Object RETRY = "retry";
+	
 	/**
 	 * Time in milliseconds.
 	 */
-	public static final int SOCKET_TIMEOUT = 100;
+	public static final int CONNECT_INTERVAL = 100;
 	
 	/**
 	 * Time in milliseconds.
