@@ -184,6 +184,8 @@ public abstract class AbstractTestWithConnections {
 	}
 	
 	protected void waitUntilMatchingConnectionPairAreReady() {
+		atomicWait();
+		
 		final AbstractConnection connection1 = (AbstractConnection) this.getConnection1();
 		final AbstractConnection connection2 = (AbstractConnection) this.getConnection2();
 		
@@ -203,6 +205,7 @@ public abstract class AbstractTestWithConnections {
 						"\n", connection2.getReceivedMessageCount(), connection2.getSentMessageCount()
 				);
 			}
+			
 			atomicWait();
 		}
 	}

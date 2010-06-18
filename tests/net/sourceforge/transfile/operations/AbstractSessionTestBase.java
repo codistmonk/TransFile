@@ -76,6 +76,123 @@ public abstract class AbstractSessionTestBase extends AbstractTestWithConnection
 		assertEquals(sourceFile, sendOperation.getLocalFile());
 	}
 	
+	@Test(timeout = TEST_TIMEOUT)
+	public final void testOfferAndTransfer() throws IOException, InterruptedException {
+		this.createAndConnectMatchingConnectionPair();
+		
+		final File sourceFile = AbstractOperationTestBase.SOURCE_FILE;
+		final Session localSession = new Session(this.getConnection1(), new ReceiveOperationTest.TemporaryDestinationFileProvider(sourceFile));
+		final SessionRecorder localSessionRecorder = new SessionRecorder(localSession);
+		final ReceiveOperationTest.TemporaryDestinationFileProvider destinationFileProvider = new ReceiveOperationTest.TemporaryDestinationFileProvider(sourceFile);
+		final Session remoteSession = new Session(this.getConnection2(), destinationFileProvider);
+		final SessionRecorder remoteSessionRecorder = new SessionRecorder(remoteSession);
+		
+		localSession.offerFile(sourceFile);
+		this.waitUntilMatchingConnectionPairAreReady();
+		Tools.debugPrint(localSessionRecorder.getEvents());
+		Tools.debugPrint(remoteSessionRecorder.getEvents());
+		
+		final Thread localUser = new LocalUser((SendOperation) localSessionRecorder.getEvents().get(0));
+		final Thread remoteUser = new RemoteUser((ReceiveOperation) remoteSessionRecorder.getEvents().get(0));
+		
+		localUser.start();
+		remoteUser.start();
+		
+		localUser.join();
+		remoteUser.join();
+		
+		this.waitUntilMatchingConnectionPairAreReady();
+		localSession.getConnection().disconnect();
+		this.waitUntilMatchingConnectionPairAreReady();
+		
+		assertEquals(destinationFileProvider.getDestinationFile("").length(), sourceFile.length());
+	}
+	
+	/**
+	 * 
+	 * TODO doc
+	 *
+	 * @author codistmonk (creation 2010-06-18)
+	 *
+	 */
+	private static abstract class AbstractUser extends Thread {
+		
+		private final Operation operation;
+		
+		/**
+		 * 
+		 * @param operation
+		 * <br>Not null
+		 * <br>Shared
+		 */
+		public AbstractUser(final Operation operation) {
+			this.operation = operation;
+		}
+		
+		/**
+		 * 
+		 * @return
+		 * <br>Not null
+		 * <br>Shared
+		 */
+		public final Operation getOperation() {
+			return this.operation;
+		}
+		
+	}
+	
+	/**
+	 * 
+	 * TODO doc
+	 *
+	 * @author codistmonk (creation 2010-06-18)
+	 *
+	 */
+	private static final class LocalUser extends AbstractUser {
+		
+		/**
+		 * 
+		 * @param operation
+		 * <br>Not null
+		 * <br>Shared
+		 */
+		public LocalUser(final Operation operation) {
+			super(operation);
+		}
+		
+		@Override
+		public final void run() {
+			this.getOperation().getController().start();
+		}
+		
+	}
+	
+	/**
+	 * 
+	 * TODO doc
+	 *
+	 * @author codistmonk (creation 2010-06-18)
+	 *
+	 */
+	private static final class RemoteUser extends AbstractUser {
+		
+		/**
+		 * 
+		 * @param operation
+		 * <br>Not null
+		 * <br>Shared
+		 */
+		public RemoteUser(final Operation operation) {
+			super(operation);
+		}
+		
+		@Override
+		public final void run() {
+			this.getOperation().getController().start();
+		}
+		
+	}
+	
 	/**
 	 * TODO doc
 	 *
