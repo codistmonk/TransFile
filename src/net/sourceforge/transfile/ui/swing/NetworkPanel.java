@@ -23,6 +23,7 @@ import static net.sourceforge.transfile.i18n.Translator.Helpers.translate;
 import static net.sourceforge.transfile.ui.swing.StatusService.StatusMessage;
 import static net.sourceforge.transfile.tools.Tools.getLoggerForThisMethod;
 
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -130,10 +131,8 @@ public class NetworkPanel extends TopLevelPanel {
 	/*
 	 * Dynamic GUI elements
 	 */
-	private JLabel localLANAddrLabel;
-	private JLabel localInternetAddrLabel;
-	private JComboBox localIPAddrBox;
-	private JTextField localInternetAddrField;
+	private JComboBox localIPAddressBox;
+	private JTextField localInternetAddressField;
 	private JTextField localURLField;
 	private JButton connectButton;
 	private JButton stopButton;
@@ -364,7 +363,7 @@ public class NetworkPanel extends TopLevelPanel {
 	 * @return the local Internet address text field
 	 */
 	final JTextField getLocalInternetAddrField() {
-		return this.localInternetAddrField;
+		return this.localInternetAddressField;
 	}
 
 	/**
@@ -422,14 +421,14 @@ public class NetworkPanel extends TopLevelPanel {
 	 * 
 	 */
 	void updateLocalIPAddrBox() {
-		this.localIPAddrBox.removeAllItems();
+		this.localIPAddressBox.removeAllItems();
 		
 		if(this.localInternetIPAddress != null && !("".equals(this.localInternetIPAddress)))
 			if(!(this.localLANAddresses.contains(this.localInternetIPAddress)))
-				this.localIPAddrBox.addItem(this.localInternetIPAddress);
+				this.localIPAddressBox.addItem(this.localInternetIPAddress);
 		
 		for(String address: this.localLANAddresses)
-			this.localIPAddrBox.addItem(address);
+			this.localIPAddressBox.addItem(address);
 		
 		onLocalIPAddrBoxUpdated();
 	}
@@ -469,7 +468,7 @@ public class NetworkPanel extends TopLevelPanel {
 	 * 
 	 * @param selectedItem the IP address selected by the user
 	 */
-	void onUserActionSelectLocalAddr(final String selectedItem) {	
+	void onUserActionSelectLocalAddress(final String selectedItem) {	
 		this.lastSelectedLocalAddress = this.selectedLocalAddress;
 		this.selectedLocalAddress = selectedItem;
 		
@@ -566,20 +565,11 @@ public class NetworkPanel extends TopLevelPanel {
 	 * 
 	 */
 	private void setupRemoteURLPanel() {
-		this.remoteURLPanel.setLayout(new GridBagLayout());
-		final GridBagConstraints c = new GridBagConstraints();
-		
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 1;
-		c.anchor = GridBagConstraints.CENTER;
-		c.insets = new Insets(5, 5, 5, 5);
-		
-		c.gridx = 0;
-		c.gridy = 0;
-		
 		final int maxRetainedItems = Settings.getPreferences().getInt("peerurlbar_max_retained_items", Settings.PEERURLBAR_MAX_RETAINED_ITEMS);
-		if(maxRetainedItems < 1)
+		
+		if (maxRetainedItems < 1) {
 			throw new IllegalConfigValueException("peerurlbar_max_retained_items", Integer.toString(maxRetainedItems));
+		}
 		
 		try {
 			this.remoteURLBar = new PeerURLBar(Settings.getPreferences().get("remote_peerurlbar_state_file_name", Settings.REMOTE_PEERURLBAR_STATE_FILE_NAME), maxRetainedItems);
@@ -588,9 +578,100 @@ public class NetworkPanel extends TopLevelPanel {
 			this.remoteURLBar = new PeerURLBar(maxRetainedItems);
 		}
 		
-		this.remoteURLPanel.add(this.remoteURLBar, c);
+		final GridBagConstraints constraints = new GridBagConstraints();
+		
+		constraints.fill = GridBagConstraints.HORIZONTAL;
+		constraints.weightx = 1;
+		constraints.anchor = GridBagConstraints.CENTER;
+		constraints.insets = new Insets(5, 5, 5, 5);
+		
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.gridwidth = 1;
+		
+		final JPanel remoteURLDetails = new JPanel();
+		
+		GUITools.add(this.remoteURLPanel, new FoldableComponent(this.remoteURLBar, remoteURLDetails), constraints);
+		
+		final JTextField remoteIPTextField = this.createRemoteIPTextField();
+		final PortSpinner remotePortSpinner = this.createRemotePortSpinner();
+		
+		gridBagTable(remoteURLDetails, new Component[][] {
+				{ translate(new JLabel("label_remote_ip")), remoteIPTextField },
+				{ translate(new JLabel("label_remote_port")), remotePortSpinner }
+		});
 		
 		this.synchronizeConnectionWithRemoteURLBar();
+	}
+	
+	private final JTextField createRemoteIPTextField() {
+		final JTextField result = new JTextField();
+		
+		// TODO synchronize with model
+		
+		return result;
+	}
+	
+	private final PortSpinner createRemotePortSpinner() {
+		final PortSpinner result = new PortSpinner();
+		
+		// TODO synchronize with model
+		
+		return result;
+	}
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @param result
+	 * <br>Not null
+	 * <br>Input-output
+	 * @param components
+	 * <br>Not null
+	 * @return {@code result}
+	 * <br>Not null
+	 */
+	private static final JPanel gridBagTable(final JPanel result, final Component[][] components) {
+		final GridBagConstraints constraints = new GridBagConstraints();
+		
+		constraints.insets = new Insets(5, 5, 5, 5);
+		constraints.anchor = GridBagConstraints.LINE_START;
+		constraints.gridy = 0;
+		
+		for (final Component[] row : components) {
+			switch (row.length) {
+			case 1:
+				constraints.gridwidth = 2;
+				constraints.gridx = 0;
+				constraints.fill = GridBagConstraints.HORIZONTAL;
+				constraints.weightx = 1;
+				
+				GUITools.add(result, row[0], constraints);
+				
+				break;
+			case 2:
+				constraints.gridwidth = 1;
+				constraints.gridx = 0;
+				constraints.fill = GridBagConstraints.NONE;
+				constraints.weightx = 0;
+				
+				GUITools.add(result, row[0], constraints);
+				
+				constraints.gridx = 1;
+				constraints.fill = GridBagConstraints.HORIZONTAL;
+				constraints.weightx = 1;
+				
+				GUITools.add(result, row[1], constraints);
+				
+				break;
+			case 3:
+				throw new IllegalArgumentException("Each row must have 1 or 2 cells, but row " + constraints.gridy + " has " + row.length);
+			}
+			
+			++constraints.gridy;
+		}
+		
+		return result;
 	}
 	
 	private final void synchronizeConnectionWithRemoteURLBar() {
@@ -624,16 +705,11 @@ public class NetworkPanel extends TopLevelPanel {
 	 * 
 	 */
 	private void setupLocalURLPanel() {
+		this.localURLField = createLocalURLField();
+		final JPanel localURLDetails = new JPanel();
 		final GridBagConstraints constraints = new GridBagConstraints();
 		
-		/*
-		 * GLOBAL
-		 */
 		constraints.insets = new Insets(5, 5, 5, 5);
-		
-		/*
-		 * LOCAL PEERURL FIELD
-		 */
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 		constraints.gridwidth = 1;
@@ -641,80 +717,101 @@ public class NetworkPanel extends TopLevelPanel {
 		constraints.weightx = 1;
 		constraints.anchor = GridBagConstraints.CENTER;
 		
-		this.localURLField = new JTextField();
-		this.localURLField.setEditable(false);
-		
-		final JPanel localURLDetails = new JPanel(new GridBagLayout());
-		
 		GUITools.add(this.getLocalURLPanel(), new FoldableComponent(this.localURLField, localURLDetails), constraints);
 		
-		/*
-		 * LEFT COLUMN
-		 */
-		constraints.gridx = 0;
-		constraints.gridwidth = 1;
-		constraints.fill = GridBagConstraints.NONE;
-		constraints.weightx = 0;
-		constraints.anchor = GridBagConstraints.LINE_START;
+		this.localIPAddressBox = this.createLocalIPAddressBox();
+		this.localInternetAddressField = createLocalInternetAddressField();
+		this.localPort = this.createLocalPortSpinner();
 		
-		this.localLANAddrLabel = translate(new JLabel("label_local_lan_addresses"));
-		constraints.gridy = 0;
-		GUITools.add(localURLDetails, this.localLANAddrLabel, constraints);
+		gridBagTable(localURLDetails, new Component[][] {
+				{ translate(new JLabel("label_local_lan_addresses")), this.localIPAddressBox },
+				{ translate(new JLabel("label_local_internet_address")), this.localInternetAddressField },
+				{ translate(new JLabel("label_local_port")), this.getLocalPort() },
+		});
 		
-		this.localInternetAddrLabel = translate(new JLabel("label_local_internet_address"));
-		++constraints.gridy;
-		GUITools.add(localURLDetails, this.localInternetAddrLabel, constraints);
+		this.synchronizeConnectionWithLocalPort();
+	}
+
+	/**
+	 * TODO doc
+	 * 
+	 * @return
+	 * <br>Not null
+	 * <br>New
+	 */
+	private PortSpinner createLocalPortSpinner() {
+		final PortSpinner result = new PortSpinner();
 		
-		JLabel localPortLabel = translate(new JLabel("label_local_port"));
-		++constraints.gridy;
-		GUITools.add(localURLDetails, localPortLabel, constraints);
+		result.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public final void stateChanged(final ChangeEvent event) {
+				NetworkPanel.this.onUserActionChangeLocalPort();
+			}
+			
+		});
 		
-		/*
-		 *  RIGHT COLUMN
-		 */
-		constraints.gridx = 1;
-		constraints.fill = GridBagConstraints.HORIZONTAL;
-		constraints.weightx = 1;
+		return result;
+	}
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @return
+	 * <br>Not null
+	 * <br>New
+	 */
+	private static final JTextField createLocalInternetAddressField() {
+		final JTextField result = new JTextField();
 		
-		this.localIPAddrBox = new JComboBox();
-		this.localIPAddrBox.setEditable(false);
-		this.localIPAddrBox.addActionListener(new ActionListener() {
+		result.setEditable(false);
+		
+		return result;
+	}
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @return
+	 * <br>Not null
+	 * <br>New
+	 */
+	private final JComboBox createLocalIPAddressBox() {
+		final JComboBox result = new JComboBox();
+		
+		result.setEditable(false);
+		result.addActionListener(new ActionListener() {
 
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				JComboBox source = (JComboBox) e.getSource();
-				String selectedItem = (String) source.getSelectedItem();
+			public final void actionPerformed(final ActionEvent event) {
+				final JComboBox source = (JComboBox) event.getSource();
+				final String selectedItem = (String) source.getSelectedItem();
 				
-				if(e.getActionCommand().equals("comboBoxChanged")) {
-					if(selectedItem != null) {
-						onUserActionSelectLocalAddr(selectedItem);	
+				if (event.getActionCommand().equals("comboBoxChanged")) {
+					if (selectedItem != null) {
+						NetworkPanel.this.onUserActionSelectLocalAddress(selectedItem);
 					}
 				}
 			}
 			
 		});
-		constraints.gridy = 0;
-		GUITools.add(localURLDetails, this.localIPAddrBox, constraints);
 		
-		this.localInternetAddrField = new JTextField();
-		this.localInternetAddrField.setEditable(false);
+		return result;
+	}
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @return
+	 * <br>Not null
+	 * <br>New
+	 */
+	private static final JTextField createLocalURLField() {
+		final JTextField result = new JTextField();
 		
-		++constraints.gridy;
-		GUITools.add(localURLDetails, this.localInternetAddrField, constraints);
+		result.setEditable(false);
 		
-		this.localPort = new PortSpinner();
-		this.getLocalPort().addChangeListener(new ChangeListener() {
-			
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				onUserActionChangeLocalPort();
-			}
-			
-		});
-		++constraints.gridy;
-		GUITools.add(localURLDetails, this.getLocalPort(), constraints);
-		
-		this.synchronizeConnectionWithLocalPort();
+		return result;
 	}
 	
 	private final void synchronizeConnectionWithLocalPort() {
@@ -860,10 +957,10 @@ public class NetworkPanel extends TopLevelPanel {
 			return;
 
 		if(this.localLANAddresses.contains(ipToSelect))
-			this.localIPAddrBox.setSelectedItem(ipToSelect);
+			this.localIPAddressBox.setSelectedItem(ipToSelect);
 		else
 			if(ipToSelect.equals(this.localInternetIPAddress))
-				this.localIPAddrBox.setSelectedItem(ipToSelect);	
+				this.localIPAddressBox.setSelectedItem(ipToSelect);	
 		
 		// selection events not to be processed by the 
 		if(this.disregardNextLocalIPChange)
