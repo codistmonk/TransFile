@@ -53,15 +53,14 @@ import javax.swing.UIManager;
 import net.sourceforge.transfile.backend.BackendEventHandler;
 import net.sourceforge.transfile.backend.ControllableBackend;
 import net.sourceforge.transfile.i18n.Translator;
-import net.sourceforge.transfile.operations.DummyConnection;
 import net.sourceforge.transfile.operations.ReceiveOperation;
 import net.sourceforge.transfile.operations.Session;
+import net.sourceforge.transfile.operations.SimpleSocketConnection;
 import net.sourceforge.transfile.settings.Settings;
 import net.sourceforge.transfile.settings.exceptions.IllegalConfigValueException;
 import net.sourceforge.transfile.ui.UserInterface;
 import net.sourceforge.transfile.ui.swing.StatusService.StatusMessage;
 import net.sourceforge.transfile.ui.swing.exceptions.NativeLookAndFeelException;
-
 
 /**
  * Main class of the Swing GUI for TransFile. Handles global events, aggregates GUI windows
@@ -111,11 +110,17 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	 */
 	private final Session session;
 	
-	/**
-	 * Constructs a SwingGUI instance
-	 * 
-	 */
 	public SwingGUI() {
+		this(createSession());
+	}
+	
+	/**
+	 * 
+	 * @param session
+	 * <br>Not null
+	 * <br>Shared
+	 */
+	SwingGUI(final Session session) {
 		super(title);
 		
 		this.statusService = new StatusServiceProvider();
@@ -123,7 +128,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		// check whether the application is running on Mac OS X and store the result
 		this.onMacOSX = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
 		
-		this.session = new Session(DummyConnection.createDummyConnectionThatConnectsToItself(), this.new DestinationFileProvider());
+		this.session = session;
 		
 		this.setStartupLocale();
 	}
@@ -156,7 +161,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 			@SuppressWarnings("synthetic-access")
 			@Override
 			public void run() {
-				SwingGUI.this._start();
+				SwingGUI.this.doStart();
 			}
 			
 		});
@@ -215,24 +220,28 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	 * Quits the application
 	 * 
 	 */
-	void quit() {
+	final void quit() {
 		// inform all TopLevelPanels about the impending shutdown
-		for(TopLevelPanel panel: this.panels)
+		for(TopLevelPanel panel: this.panels) {
 			panel.informQuit();
+		}
 
-		// tell the Backend to quit
-		this.backend.quit();
+		if (this.backend != null) {
+			this.backend.quit();
+		}
 	}
 	
 	/**
 	 * Sets up and starts the Swing GUI. Should be invoked from the Swing event dispatch thread
 	 * 
 	 */
-	private void _start() {
+	private final void doStart() {
+		GUITools.checkAWT();
+		
 		try {
 			this.setNativeLookAndFeel();
-		} catch(NativeLookAndFeelException e) {
-			this.showErrorDialog(e);
+		} catch (final NativeLookAndFeelException exception) {
+			this.showErrorDialog(exception);
 		}
 		
 		this.addWindowListener(this.new MainWindowListener());
@@ -351,6 +360,26 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		
 		final JMenu fileMenu = translate(new JMenu("menu_file"));
 		
+		{
+			final JMenuItem newInstanceItem = translate(new JMenuItem("menu_item_new_instance"));
+			
+			newInstanceItem.addActionListener(new ActionListener() {
+				
+				@Override
+				public final void actionPerformed(final ActionEvent event) {
+					final Session newSession = createSession();
+					
+					newSession.getConnection().setLocalPeer(SwingGUI.this.getSession().getConnection().getRemotePeer());
+					newSession.getConnection().setRemotePeer(SwingGUI.this.getSession().getConnection().getLocalPeer());
+					
+					new SwingGUI(newSession).start();
+				}
+				
+			});
+			
+			fileMenu.add(newInstanceItem);
+		}
+		
 		// add the "Exit" item to the "File" menu, unless running on Mac OS (X) in which
 		// case there is already a "Quit" item in the application menu
 		if(!this.onMacOSX) {
@@ -405,9 +434,13 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 			throw new NativeLookAndFeelException(exception);
 		}
 		
-		// Mac-specific adaptations
-		if (this.onMacOSX) {
-			MacOSXAdapter.adapt(this);
+		try {
+			// Mac-specific adaptations
+			if (this.onMacOSX) {
+				MacOSXAdapter.adapt(this);
+			}
+		} catch (final Exception exception) {
+			// Ignore
 		}
 	}
 	
@@ -499,36 +532,6 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	}
 	
 	/**
-	 * TODO doc
-	 *
-	 * @author codistmonk (creation 2010-06-13)
-	 *
-	 */
-	private class DestinationFileProvider implements ReceiveOperation.DestinationFileProvider {
-		
-		/**
-		 * Package-private default constructor to suppress visibility warnings.
-		 */
-		public DestinationFileProvider() {
-			// Do nothing
-		}
-		
-		@Override
-		public final File getDestinationFile(final String fileName) {
-			final JFileChooser fileChooser = new JFileChooser();
-			
-			fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			
-			if (JFileChooser.APPROVE_OPTION == fileChooser.showOpenDialog(SwingGUI.this) && fileChooser.getSelectedFile() != null) {
-				return new File(fileChooser.getSelectedFile(), fileName);
-			}
-			
-			return null;
-		}
-		
-	}
-
-	/**
 	 * Listens for when the user closes the window
 	 * 
 	 * @author Martin Riedel
@@ -554,10 +557,6 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		
 	}
 	
-	static {
-		GUITools.useSystemLookAndFeel();
-	}
-	
 	/**
 	 * Adds {@code menu} to {@code menuBar} if {@code menu} contains at least one sub element.
 	 * @param menuBar
@@ -570,6 +569,47 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		if (menu.getSubElements() != null && menu.getSubElements().length > 0) {
 			menuBar.add(menu);
 		}
+	}
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @return
+	 * <br>Not null
+	 * <br>New
+	 */
+	static final Session createSession() {
+		return new Session(new SimpleSocketConnection(), new DestinationFileProvider());
+	}
+	
+	/**
+	 * TODO doc
+	 *
+	 * @author codistmonk (creation 2010-06-13)
+	 *
+	 */
+	private static class DestinationFileProvider implements ReceiveOperation.DestinationFileProvider {
+		
+		/**
+		 * Package-private default constructor to suppress visibility warnings.
+		 */
+		public DestinationFileProvider() {
+			// Do nothing
+		}
+		
+		@Override
+		public final File getDestinationFile(final String fileName) {
+			final JFileChooser fileChooser = new JFileChooser();
+			
+			fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			
+			if (JFileChooser.APPROVE_OPTION == fileChooser.showOpenDialog(null) && fileChooser.getSelectedFile() != null) {
+				return new File(fileChooser.getSelectedFile(), fileName);
+			}
+			
+			return null;
+		}
+		
 	}
 	
 }

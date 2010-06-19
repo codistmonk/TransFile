@@ -525,6 +525,7 @@ public class NetworkPanel extends TopLevelPanel {
 		
 		getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("status_connecting")));
 		
+		this.getWindow().getSession().getConnection().setLocalPeer("transfile://0.0.0.0:" + this.localPort.getValue());
 		this.getWindow().getSession().getConnection().setRemotePeer(remoteURL);
 		this.getWindow().getSession().getConnection().connect();
 		
