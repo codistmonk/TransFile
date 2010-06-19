@@ -313,7 +313,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 			
 		});
 		
-		setupMenuBar();
+		this.setupMenuBar();
 		
 		// set up content pane
 		
@@ -324,7 +324,6 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		// "Network" panel
 		
 		this.networkPanel = new NetworkPanel(this, this.backend);
-		this.networkPanel.setPreferredSize(new Dimension(340, 285));
 		this.panels.add(this.networkPanel);
 		pane.add(this.networkPanel);
 		
@@ -350,7 +349,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		final JMenuBar menuBar = new JMenuBar();
 		this.setJMenuBar(menuBar);
 		
-		final JMenu fileMenu = translate(new JMenu("menu_file"));
+		final JMenu instanceMenu = translate(new JMenu("menu_instance"));
 		
 		{
 			final JMenuItem newInstanceItem = translate(new JMenuItem("menu_item_new_instance"));
@@ -376,8 +375,10 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 				
 			});
 			
-			fileMenu.add(newInstanceItem);
+			instanceMenu.add(newInstanceItem);
 		}
+		
+		final JMenu fileMenu = translate(new JMenu("menu_file"));
 		
 		// add the "Exit" item to the "File" menu, unless running on Mac OS (X) in which
 		// case there is already a "Quit" item in the application menu
@@ -456,11 +457,14 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 			@Override
 			public void componentResized(final ComponentEvent event) {
 				// enforce maximum height
-				if(SwingGUI.this.getSize().height > SwingGUI.this.getMaximumSize().height)
+				if (SwingGUI.this.getSize().height > SwingGUI.this.getMaximumSize().height) {
 					SwingGUI.this.setSize(SwingGUI.this.getSize().width, SwingGUI.this.getMaximumSize().height);
+				}
+				
 				// enforce maximum width
-				if(SwingGUI.this.getSize().width > SwingGUI.this.getMaximumSize().width)
-					SwingGUI.this.setSize(SwingGUI.this.getSize().height, SwingGUI.this.getMaximumSize().width);
+				if(SwingGUI.this.getSize().width > SwingGUI.this.getMaximumSize().width) {
+					SwingGUI.this.setSize(SwingGUI.this.getMaximumSize().width, SwingGUI.this.getSize().height);
+				}
 			}
 		});
 	}

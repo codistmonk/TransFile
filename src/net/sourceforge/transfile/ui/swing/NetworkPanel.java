@@ -624,55 +624,57 @@ public class NetworkPanel extends TopLevelPanel {
 	 * 
 	 */
 	private void setupLocalURLPanel() {
-		this.localURLPanel.setLayout(new GridBagLayout());
-		final GridBagConstraints c = new GridBagConstraints();
+		final GridBagConstraints constraints = new GridBagConstraints();
 		
 		/*
 		 * GLOBAL
 		 */
-		c.insets = new Insets(5, 5, 5, 5);
+		constraints.insets = new Insets(5, 5, 5, 5);
 		
 		/*
 		 * LOCAL PEERURL FIELD
 		 */
-		c.gridx = 0;
-		c.gridy = 0;
-		c.gridwidth = 2;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 1;
-		c.anchor = GridBagConstraints.CENTER;
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.gridwidth = 1;
+		constraints.fill = GridBagConstraints.HORIZONTAL;
+		constraints.weightx = 1;
+		constraints.anchor = GridBagConstraints.CENTER;
 		
 		this.localURLField = new JTextField();
 		this.localURLField.setEditable(false);
-		this.localURLPanel.add(this.localURLField, c);
+		
+		final JPanel localURLDetails = new JPanel(new GridBagLayout());
+		
+		GUITools.add(this.getLocalURLPanel(), new FoldableComponent(this.localURLField, localURLDetails), constraints);
 		
 		/*
 		 * LEFT COLUMN
 		 */
-		c.gridx = 0;
-		c.gridwidth = 1;
-		c.fill = GridBagConstraints.NONE;
-		c.weightx = 0;
-		c.anchor = GridBagConstraints.LINE_START;
+		constraints.gridx = 0;
+		constraints.gridwidth = 1;
+		constraints.fill = GridBagConstraints.NONE;
+		constraints.weightx = 0;
+		constraints.anchor = GridBagConstraints.LINE_START;
 		
 		this.localLANAddrLabel = translate(new JLabel("label_local_lan_addresses"));
-		c.gridy = 1;
-		this.localURLPanel.add(this.localLANAddrLabel, c);
+		constraints.gridy = 0;
+		GUITools.add(localURLDetails, this.localLANAddrLabel, constraints);
 		
 		this.localInternetAddrLabel = translate(new JLabel("label_local_internet_address"));
-		c.gridy = 2;
-		this.localURLPanel.add(this.localInternetAddrLabel, c);
+		++constraints.gridy;
+		GUITools.add(localURLDetails, this.localInternetAddrLabel, constraints);
 		
 		JLabel localPortLabel = translate(new JLabel("label_local_port"));
-		c.gridy = 3;
-		this.localURLPanel.add(localPortLabel, c);
+		++constraints.gridy;
+		GUITools.add(localURLDetails, localPortLabel, constraints);
 		
 		/*
 		 *  RIGHT COLUMN
 		 */
-		c.gridx = 1;
-		c.fill = GridBagConstraints.HORIZONTAL;
-		c.weightx = 1;
+		constraints.gridx = 1;
+		constraints.fill = GridBagConstraints.HORIZONTAL;
+		constraints.weightx = 1;
 		
 		this.localIPAddrBox = new JComboBox();
 		this.localIPAddrBox.setEditable(false);
@@ -691,14 +693,14 @@ public class NetworkPanel extends TopLevelPanel {
 			}
 			
 		});
-		c.gridy = 1;
-		this.localURLPanel.add(this.localIPAddrBox, c);
+		constraints.gridy = 0;
+		GUITools.add(localURLDetails, this.localIPAddrBox, constraints);
 		
 		this.localInternetAddrField = new JTextField();
 		this.localInternetAddrField.setEditable(false);
 		
-		c.gridy = 2;
-		this.localURLPanel.add(this.localInternetAddrField, c);
+		++constraints.gridy;
+		GUITools.add(localURLDetails, this.localInternetAddrField, constraints);
 		
 		this.localPort = new PortSpinner();
 		this.getLocalPort().addChangeListener(new ChangeListener() {
@@ -709,8 +711,8 @@ public class NetworkPanel extends TopLevelPanel {
 			}
 			
 		});
-		c.gridy = 3;
-		this.localURLPanel.add(this.getLocalPort(), c);
+		++constraints.gridy;
+		GUITools.add(localURLDetails, this.getLocalPort(), constraints);
 		
 		this.synchronizeConnectionWithLocalPort();
 	}
