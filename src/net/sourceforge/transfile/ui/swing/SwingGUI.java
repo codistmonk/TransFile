@@ -111,16 +111,6 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	private final Session session;
 	
 	public SwingGUI() {
-		this(createSession());
-	}
-	
-	/**
-	 * 
-	 * @param session
-	 * <br>Not null
-	 * <br>Shared
-	 */
-	SwingGUI(final Session session) {
 		super(title);
 		
 		this.statusService = new StatusServiceProvider();
@@ -128,7 +118,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		// check whether the application is running on Mac OS X and store the result
 		this.onMacOSX = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
 		
-		this.session = session;
+		this.session = createSession();
 		
 		this.setStartupLocale();
 	}
@@ -225,7 +215,9 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		for(TopLevelPanel panel: this.panels) {
 			panel.informQuit();
 		}
-
+		
+		this.getSession().getConnection().disconnect();
+		
 		if (this.backend != null) {
 			this.backend.quit();
 		}
@@ -367,12 +359,19 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 				
 				@Override
 				public final void actionPerformed(final ActionEvent event) {
-					final Session newSession = createSession();
+					final SwingGUI newSwingGUI = new SwingGUI();
 					
-					newSession.getConnection().setLocalPeer(SwingGUI.this.getSession().getConnection().getRemotePeer());
-					newSession.getConnection().setRemotePeer(SwingGUI.this.getSession().getConnection().getLocalPeer());
+					newSwingGUI.start();
 					
-					new SwingGUI(newSession).start();
+					SwingUtilities.invokeLater(new Runnable() {
+						
+						@Override
+						public final void run() {
+							newSwingGUI.getSession().getConnection().setRemotePeer(SwingGUI.this.getSession().getConnection().getLocalPeer());
+							newSwingGUI.getSession().getConnection().setLocalPeer(SwingGUI.this.getSession().getConnection().getRemotePeer());
+						}
+						
+					});
 				}
 				
 			});

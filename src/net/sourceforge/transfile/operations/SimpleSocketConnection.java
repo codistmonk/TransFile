@@ -63,6 +63,7 @@ public class SimpleSocketConnection extends AbstractConnection {
 	@Override
 	public final void connect() {
 		if (this.getState() == State.DISCONNECTED) {
+			this.setConnectionError(null);
 			this.setState(State.CONNECTING);
 			Tools.debugPrint("Connecting", this.getLocalPeer(), "to", this.getRemotePeer());
 			this.getExecutor().execute(this.new ConnectionTask());

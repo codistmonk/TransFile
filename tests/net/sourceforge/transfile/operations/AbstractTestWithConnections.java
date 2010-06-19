@@ -184,7 +184,11 @@ public abstract class AbstractTestWithConnections {
 	}
 	
 	protected void waitUntilMatchingConnectionPairAreReady() {
-		atomicWait();
+		try {
+			Thread.sleep(this.getInactivityThreshold());
+		} catch (final InterruptedException exception) {
+			Tools.throwUnchecked(exception);
+		}
 		
 		final AbstractConnection connection1 = (AbstractConnection) this.getConnection1();
 		final AbstractConnection connection2 = (AbstractConnection) this.getConnection2();

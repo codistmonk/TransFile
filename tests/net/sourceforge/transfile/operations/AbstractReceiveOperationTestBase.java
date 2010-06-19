@@ -136,7 +136,7 @@ public abstract class AbstractReceiveOperationTestBase extends AbstractOperation
 				1.0,
 				Operation.State.DONE
 		), operationRecorder.getEvents());
-		assertEquals(destinationFile.length(), sourceFile.length());
+		assertEquals(sourceFile.length(), destinationFile.length());
 	}
 	
 	@Test(timeout = TEST_TIMEOUT)
@@ -203,7 +203,7 @@ public abstract class AbstractReceiveOperationTestBase extends AbstractOperation
 				1.0,
 				Operation.State.DONE
 		), operationRecorder.getEvents());
-		assertEquals(destinationFile.length(), sourceFile.length());
+		assertEquals(sourceFile.length(), destinationFile.length());
 	}
 	
 	@Override

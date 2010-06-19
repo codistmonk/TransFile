@@ -105,7 +105,7 @@ public abstract class AbstractSessionTestBase extends AbstractTestWithConnection
 		localSession.getConnection().disconnect();
 		this.waitUntilMatchingConnectionPairAreReady();
 		
-		assertEquals(destinationFileProvider.getDestinationFile("").length(), sourceFile.length());
+		assertEquals(sourceFile.length(), destinationFileProvider.getDestinationFile("").length());
 	}
 	
 	/**

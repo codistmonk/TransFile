@@ -33,10 +33,10 @@ import java.awt.event.ItemListener;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 
@@ -61,8 +61,6 @@ import net.sourceforge.transfile.operations.Connection;
 import net.sourceforge.transfile.operations.Connection.State;
 import net.sourceforge.transfile.settings.Settings;
 import net.sourceforge.transfile.settings.exceptions.IllegalConfigValueException;
-import net.sourceforge.transfile.tools.Tools;
-
 
 /**
  * The area where the user enters the remote PeerURL, selects their local port and ip address
@@ -100,12 +98,6 @@ public class NetworkPanel extends TopLevelPanel {
 	 * Represents the local internet/external/public IP address - or null if it hasn't been discovered yet
 	 */
 	private String localInternetIPAddress = null;
-	
-	/*
-	 * The SwingWorker used to initiate a connection. Null whenever a connection attempt is not
-	 * currently running.
-	 */
-	private SwingWorker<Void, Void> connectWorker = null;
 	
 	/*
 	 * True if the user has selected a local IP address during this execution of the program
@@ -250,7 +242,11 @@ public class NetworkPanel extends TopLevelPanel {
 			
 			@Override
 			protected final void doStateChanged() {
-				final State state = NetworkPanel.this.getWindow().getSession().getConnection().getState();
+				final Connection connection = NetworkPanel.this.getWindow().getSession().getConnection();
+				
+				NetworkPanel.this.postErrorMessage(connection.getConnectionError());
+				
+				final State state = connection.getState();
 				
 				NetworkPanel.this.getConnectButton().setVisible(state == State.DISCONNECTED);
 				NetworkPanel.this.getStopButton().setVisible(state != State.DISCONNECTED);
@@ -421,23 +417,6 @@ public class NetworkPanel extends TopLevelPanel {
 	}
 	
 	/**
-	 * Getter for {@code connectWorker}
-	 *
-	 * @return the worker thread trying to establish a connection, or null if none is active
-	 */
-	final SwingWorker<Void, Void> getConnectWorker() {
-		return this.connectWorker;
-	}
-
-	/**
-	 * Unsets the active worker thread for establishing a connection
-	 *
-	 */
-	final void unsetConnectWorker() {
-		this.connectWorker = null;
-	}
-
-	/**
 	 * Updates the ComboBox containing the local IP addresses so that it contains
 	 * exactly the elements from the provided Set<String> of addresses
 	 * 
@@ -517,77 +496,53 @@ public class NetworkPanel extends TopLevelPanel {
 		final String remoteURL = (String) this.remoteURLBar.getSelectedItem();
 		
 		if(remoteURL == null || "".equals(remoteURL)) {
-			getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_invalid_peerurl")));
+			this.getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_invalid_peerurl")));
+			
 			return;
 		}
 		
-		getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("status_connecting")));
+		this.getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("status_connecting")));
 		
-//		this.getWindow().getSession().getConnection().setLocalPeer("transfile://0.0.0.0:" + this.getLocalPort().getValue());
-//		this.getWindow().getSession().getConnection().setRemotePeer(remoteURL);
 		this.getWindow().getSession().getConnection().connect();
-		
-		// TODO remove dead code
-		
-		if (true) {
+	}
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @param throwable
+	 * <br>Maybe null
+	 * <br>Maybe shared
+	 */
+	final void postErrorMessage(final Throwable throwable) {
+		if (throwable == null) {
 			return;
 		}
 		
-		showStopButton();
-		
-		this.connectWorker = new SwingWorker<Void, Void>() {
-
-			@Override
-			protected Void doInBackground() throws Exception {
-				NetworkPanel.this.getBackend().connect(remoteURL, ((Number) NetworkPanel.this.getLocalPort().getValue()).intValue());
-				return null;
-			}
-			
-			@Override
-			protected void done() {
-				try {
-					get();
-					// if the flow reaches this / no exceptions are thrown, the connection has been established.
-					onConnectSuccessful();
-				} catch(CancellationException e) {
-					getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("status_interrupted")));
-				} catch(InterruptedException e) {
-					//TODO when exactly does this happen. should be while the third thread
-					// involved with this SwingWorker gets interrupted while waiting for get to
-					// stop blocking - handle? if yes, how?
-				} catch(ExecutionException e) {
-					Throwable cause = e.getCause();
-					
-					if(cause instanceof PeerURLFormatException) {
-						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_invalid_peerurl")));
-						getLoggerForThisMethod().log(Level.INFO, "failed to connect", cause);
-					} else if(cause instanceof UnknownHostException) {
-						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_unknown_host")));
-						getLoggerForThisMethod().log(Level.INFO, "failed to connect", cause);
-					} else if(cause instanceof IllegalStateException) {
-						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_illegal_state"), cause));
-						getLoggerForThisMethod().log(Level.SEVERE, "failed to connect", cause);
-					} else if(cause instanceof BilateralConnectException) {
-						// TODO...
-						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_no_link")));
-						getLoggerForThisMethod().log(Level.INFO, "failed to connect", cause);
-					} else if(cause instanceof InterruptedException) {
-						// ignore, situation handled by CancellationException
-					} else {
-						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_unknown")));
-						getLoggerForThisMethod().log(Level.SEVERE, "failed to connect (unknown error)", cause);
-					}
-				} finally {
-					// in any case, revert to default connection state
-					// (either the connection attempt failed, or it succeeded and the panel should be reset for future use)
-					NetworkPanel.this.unsetConnectWorker();
-					showConnectButton();
-				}
-			}
-			
-		};
-		
-		this.connectWorker.execute();
+		try {
+			throw throwable;
+		} catch (final PeerURLFormatException exception) {
+				getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_invalid_peerurl")));
+				getLoggerForThisMethod().log(Level.INFO, "failed to connect", exception);
+		} catch (final UnknownHostException exception) {
+			getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_unknown_host")));
+			getLoggerForThisMethod().log(Level.INFO, "failed to connect", exception);
+		} catch (final IllegalStateException exception) {
+			getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_illegal_state"), exception));
+			getLoggerForThisMethod().log(Level.SEVERE, "failed to connect", exception);
+		} catch (final BilateralConnectException exception) {
+			// TODO...
+			getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_no_link")));
+			getLoggerForThisMethod().log(Level.INFO, "failed to connect", exception);
+		} catch (final InterruptedException exception) {
+			// ignore, situation handled by CancellationException
+		} catch (final SocketTimeoutException exception) {
+			getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_timeout")));
+			getLoggerForThisMethod().log(Level.INFO, "failed to connect", exception);
+		} catch (final Throwable throwable2) {
+			throwable2.printStackTrace();
+			getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("connect_fail_unknown")));
+			getLoggerForThisMethod().log(Level.SEVERE, "failed to connect (unknown error)", throwable2);
+		}
 	}
 
 	/**
@@ -596,18 +551,6 @@ public class NetworkPanel extends TopLevelPanel {
 	 */
 	final void onUserActionInterrupt() {
 		this.getWindow().getSession().getConnection().disconnect();
-		
-		// TODO remove dead code
-		
-		if (true) {
-			return;
-		}
-		
-		if (this.connectWorker == null) {
-			return;
-		}
-		
-		this.connectWorker.cancel(true);
 	}
 	
 	final PeerURLBar getRemoteURLBar() {
@@ -798,8 +741,6 @@ public class NetworkPanel extends TopLevelPanel {
 		});
 		
 		this.getLocalPort().setValue(AbstractConnection.getPort(connection.getLocalPeer()));
-		
-		Tools.debugPrint(this.getLocalPort().getValue());
 	}
 	
 	/**
@@ -886,15 +827,6 @@ public class NetworkPanel extends TopLevelPanel {
 			}
 			
 		}.execute();	
-	}
-	
-	/**
-	 * Shows the "Stop" button, hiding the "Connect" button
-	 * 
-	 */
-	private void showStopButton() {
-		this.connectButton.setVisible(false);
-		this.stopButton.setVisible(true);
 	}
 	
 	/**
