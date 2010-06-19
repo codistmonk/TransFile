@@ -28,6 +28,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
@@ -54,10 +56,12 @@ import net.sourceforge.transfile.exceptions.SerializationException;
 import net.sourceforge.transfile.exceptions.SerializationFileInUseException;
 import net.sourceforge.transfile.network.exceptions.BilateralConnectException;
 import net.sourceforge.transfile.network.exceptions.PeerURLFormatException;
+import net.sourceforge.transfile.operations.AbstractConnection;
 import net.sourceforge.transfile.operations.Connection;
 import net.sourceforge.transfile.operations.Connection.State;
 import net.sourceforge.transfile.settings.Settings;
 import net.sourceforge.transfile.settings.exceptions.IllegalConfigValueException;
+import net.sourceforge.transfile.tools.Tools;
 
 
 /**
@@ -265,7 +269,7 @@ public class NetworkPanel extends TopLevelPanel {
 	@Override
 	protected void loadState() {
 		// load last entered local port (property always exists because there is a default)
-		this.localPort.setValue(Settings.getPreferences().getInt("local_port", Settings.LOCAL_PORT));
+		this.getLocalPort().setValue(Settings.getPreferences().getInt("local_port", Settings.LOCAL_PORT));
 		
 		// selected local IP address is loaded in onLANAddressesDiscovered() (if applicable)
 	}
@@ -285,7 +289,7 @@ public class NetworkPanel extends TopLevelPanel {
 		}
 		
 		// save local port
-		Settings.getPreferences().put("local_port", this.localPort.getValue().toString());
+		Settings.getPreferences().put("local_port", this.getLocalPort().getValue().toString());
 		
 		// save selected local IP address
 		if(this.selectedLocalAddress != null && !("".equals(this.selectedLocalAddress))) {
@@ -519,8 +523,8 @@ public class NetworkPanel extends TopLevelPanel {
 		
 		getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("status_connecting")));
 		
-		this.getWindow().getSession().getConnection().setLocalPeer("transfile://0.0.0.0:" + this.localPort.getValue());
-		this.getWindow().getSession().getConnection().setRemotePeer(remoteURL);
+//		this.getWindow().getSession().getConnection().setLocalPeer("transfile://0.0.0.0:" + this.getLocalPort().getValue());
+//		this.getWindow().getSession().getConnection().setRemotePeer(remoteURL);
 		this.getWindow().getSession().getConnection().connect();
 		
 		// TODO remove dead code
@@ -606,6 +610,10 @@ public class NetworkPanel extends TopLevelPanel {
 		this.connectWorker.cancel(true);
 	}
 	
+	final PeerURLBar getRemoteURLBar() {
+		return this.remoteURLBar;
+	}
+	
 	/*
 	 * END USER ACTION EVENT HANDLERS
 	 */
@@ -637,7 +645,35 @@ public class NetworkPanel extends TopLevelPanel {
 			this.remoteURLBar = new PeerURLBar(maxRetainedItems);
 		}
 		
-		this.remoteURLPanel.add(this.remoteURLBar, c);		
+		this.remoteURLPanel.add(this.remoteURLBar, c);
+		
+		this.synchronizeConnectionWithRemoteURLBar();
+	}
+	
+	private final void synchronizeConnectionWithRemoteURLBar() {
+		final Connection connection = NetworkPanel.this.getWindow().getSession().getConnection();
+		
+		this.getRemoteURLBar().addItemListener(new ItemListener() {
+			
+			@Override
+			public final void itemStateChanged(final ItemEvent event) {
+				if (event.getStateChange() == ItemEvent.SELECTED) {
+					connection.setRemotePeer(event.getItem().toString());
+				}
+			}
+			
+		});
+		
+		connection.addConnectionListener(new Connection.AbstractListener() {
+			
+			@Override
+			protected final void doRemotePeerChanged() {
+				NetworkPanel.this.getRemoteURLBar().setSelectedItem(connection.getRemotePeer());
+			}
+			
+		});
+		
+		this.getRemoteURLBar().setSelectedItem(connection.getRemotePeer());
 	}
 	
 	/**
@@ -722,7 +758,7 @@ public class NetworkPanel extends TopLevelPanel {
 		this.localURLPanel.add(this.localInternetAddrField, c);
 		
 		this.localPort = new PortSpinner();
-		this.localPort.addChangeListener(new ChangeListener() {
+		this.getLocalPort().addChangeListener(new ChangeListener() {
 			
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -731,7 +767,39 @@ public class NetworkPanel extends TopLevelPanel {
 			
 		});
 		c.gridy = 3;
-		this.localURLPanel.add(this.localPort, c);
+		this.localURLPanel.add(this.getLocalPort(), c);
+		
+		this.synchronizeConnectionWithLocalPort();
+	}
+	
+	private final void synchronizeConnectionWithLocalPort() {
+		final Connection connection = NetworkPanel.this.getWindow().getSession().getConnection();
+		
+		this.getLocalPort().addChangeListener(new ChangeListener() {
+			
+			@Override
+			public final void stateChanged(final ChangeEvent event) {
+				final String[] protocolHostPort = AbstractConnection.getProtocolHostPort(connection.getLocalPeer());
+				
+				protocolHostPort[2] = NetworkPanel.this.getLocalPort().getValue().toString();
+				
+				connection.setLocalPeer(AbstractConnection.getPeer(protocolHostPort));
+			}
+			
+		});
+		
+		connection.addConnectionListener(new Connection.AbstractListener() {
+			
+			@Override
+			protected final void doLocalPeerChanged() {
+				NetworkPanel.this.getLocalPort().setValue(AbstractConnection.getPort(connection.getLocalPeer()));
+			}
+			
+		});
+		
+		this.getLocalPort().setValue(AbstractConnection.getPort(connection.getLocalPeer()));
+		
+		Tools.debugPrint(this.getLocalPort().getValue());
 	}
 	
 	/**
@@ -839,7 +907,7 @@ public class NetworkPanel extends TopLevelPanel {
 			return;
 		}
 		
-		this.localURLField.setText(this.backend.makePeerURL(this.selectedLocalAddress, ((Number) this.localPort.getValue()).intValue()));
+		this.localURLField.setText(this.backend.makePeerURL(this.selectedLocalAddress, ((Number) this.getLocalPort().getValue()).intValue()));
 	}
 	
 	/**
