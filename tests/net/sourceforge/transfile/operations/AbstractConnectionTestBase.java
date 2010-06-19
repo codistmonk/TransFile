@@ -41,9 +41,32 @@ import org.junit.Test;
 public abstract class AbstractConnectionTestBase extends AbstractTestWithConnections {
 	
 	@Test(timeout = TEST_TIMEOUT)
+	public final void testUpdatePeers() {
+		final Connection connection = this.createUnmatchedConnection();
+		final ConnectionRecorder connectionRecorder = new ConnectionRecorder(connection);
+		
+		final String localPeer = "protocol://localHost:1";
+		final String remotePeer = "protocol://remoteHost:2";
+		
+		connection.setLocalPeer(localPeer);
+		connection.setRemotePeer(remotePeer);
+		connection.setLocalPeer(localPeer);
+		connection.setRemotePeer(remotePeer);
+		connection.setLocalPeer(remotePeer);
+		connection.setRemotePeer(localPeer);
+		
+		assertEquals(Arrays.asList(
+				localPeer,
+				remotePeer,
+				remotePeer,
+				localPeer
+		), connectionRecorder.getEvents());
+	}
+	
+	@Test(timeout = TEST_TIMEOUT)
 	public final void testAbortConnectUnmatchedConnection() {
 		final Connection connection = this.createUnmatchedConnection();
-		final ConnectionRecorder connectionLogger = new ConnectionRecorder(connection);
+		final ConnectionRecorder connectionRecorder = new ConnectionRecorder(connection);
 		
 		assertEquals(Connection.State.DISCONNECTED, connection.getState());
 		
@@ -57,13 +80,13 @@ public abstract class AbstractConnectionTestBase extends AbstractTestWithConnect
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
 				Connection.State.DISCONNECTED
-				), connectionLogger.getEvents());
+				), connectionRecorder.getEvents());
 	}
 	
 	@Test(timeout = TEST_TIMEOUT)
 	public final void testConnectTimeout() throws InterruptedException {
 		final Connection connection = this.createUnmatchedConnection();
-		final ConnectionRecorder connectionLogger = new ConnectionRecorder(connection);
+		final ConnectionRecorder connectionRecorder = new ConnectionRecorder(connection);
 		
 		assertEquals(Connection.State.DISCONNECTED, connection.getState());
 		
@@ -76,7 +99,7 @@ public abstract class AbstractConnectionTestBase extends AbstractTestWithConnect
 		assertEquals(Arrays.asList(
 				Connection.State.CONNECTING,
 				Connection.State.DISCONNECTED
-		), connectionLogger.getEvents());
+		), connectionRecorder.getEvents());
 	}
 	
 	@Test(timeout = TEST_TIMEOUT)
@@ -176,17 +199,21 @@ public abstract class AbstractConnectionTestBase extends AbstractTestWithConnect
 			return this.events;
 		}
 		
-		/** 
-		 * {@inheritDoc}
-		 */
+		@Override
+		public final void localPeerChanged() {
+			this.getEvents().add(this.getConnection().getLocalPeer());
+		}
+		
+		@Override
+		public final void remotePeerChanged() {
+			this.getEvents().add(this.getConnection().getRemotePeer());
+		}
+		
 		@Override
 		public final void messageReceived(final Message message) {
 			this.getEvents().add(message);
 		}
 		
-		/** 
-		 * {@inheritDoc}
-		 */
 		@Override
 		public final void stateChanged() {
 			this.getEvents().add(this.getConnection().getState());

@@ -126,6 +126,18 @@ public interface Connection {
 		 * TODO doc
 		 * 
 		 */
+		public abstract void localPeerChanged();
+		
+		/**
+		 * TODO doc
+		 * 
+		 */
+		public abstract void remotePeerChanged();
+		
+		/**
+		 * TODO doc
+		 * 
+		 */
 		public abstract void stateChanged();
 		
 		/**
@@ -136,6 +148,72 @@ public interface Connection {
 		 * <br>Maybe shared parameter
 		 */
 		public abstract void messageReceived(Message message);
+		
+	}
+	
+	/**
+	 * 
+	 * TODO doc
+	 *
+	 * @author codistmonk (creation 2010-06-19)
+	 *
+	 */
+	public static abstract class AbstractListener implements Listener {
+		
+		@Override
+		public final void localPeerChanged() {
+			this.doLocalPeerChanged();
+		}
+		
+		@Override
+		public final void messageReceived(final Message message) {
+			this.doMessageReceived(message);
+		}
+		
+		@Override
+		public final void remotePeerChanged() {
+			this.doRemotePeerChanged();
+		}
+		
+		@Override
+		public final void stateChanged() {
+			this.doStateChanged();
+		}
+		
+		/**
+		 * Called by {@link #localPeerChanged()}.
+		 * <br>The default implementation does nothing.
+		 */
+		protected void doLocalPeerChanged() {
+			// Do nothing
+		}
+		
+		/**
+		 * Called by {@link #remotePeerChanged()}.
+		 * <br>The default implementation does nothing.
+		 */
+		protected void doRemotePeerChanged() {
+			// Do nothing
+		}
+		
+		/**
+		 * Called by {@link #stateChanged()}.
+		 * <br>The default implementation does nothing.
+		 */
+		protected void doStateChanged() {
+			// Do nothing
+		}
+		
+		/**
+		 * Called by {@link #messageReceived(Message)}.
+		 * <br>The default implementation does nothing.
+		 * @param message
+		 * <br>Not null
+		 * <br>Maybe shared
+		 */
+		protected void doMessageReceived(final Message message) {
+			// Do nothing
+		}
 		
 	}
 	

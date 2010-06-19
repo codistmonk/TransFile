@@ -279,17 +279,14 @@ public abstract class AbstractOperation implements Operation {
 		 * @author codistmonk (creation 2010-06-06)
 		 *
 		 */
-		private class MessageHandler implements Connection.Listener {
+		private class MessageHandler extends Connection.AbstractListener {
 			
 			MessageHandler() {
 				AbstractOperation.this.getConnection().addConnectionListener(this);
 			}
 			
-			/** 
-			 * {@inheritDoc}
-			 */
 			@Override
-			public final void messageReceived(final Message message) {
+			protected final void doMessageReceived(final Message message) {
 				if (message instanceof OperationMessage && ((OperationMessage) message).getSourceFile().equals(AbstractController.this.getSourceFile())) {
 					if (message instanceof StateMessage) {
 						AbstractController.this.setRemoteState(((StateMessage) message).getState());
@@ -297,15 +294,6 @@ public abstract class AbstractOperation implements Operation {
 					
 					AbstractController.this.operationMessageReceived((OperationMessage) message);
 				}
-			}
-			
-			/** 
-			 * {@inheritDoc}
-			 */
-			@Override
-			public final void stateChanged() {
-				// TODO Auto-generated method stub
-				
 			}
 			
 		}

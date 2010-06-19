@@ -130,7 +130,7 @@ public class Session {
 	 * @author codistmonk (creation 2010-06-08)
 	 *
 	 */
-	private final class FileOfferReceiver implements Connection.Listener {
+	private final class FileOfferReceiver extends Connection.AbstractListener {
 		
 		/**
 		 * Package-private default contructor to suppress visibility warnings.
@@ -140,12 +140,7 @@ public class Session {
 		}
 		
 		@Override
-		public final void stateChanged() {
-			// Do nothing
-		}
-		
-		@Override
-		public final void messageReceived(final Message message) {
+		public final void doMessageReceived(final Message message) {
 			if (message instanceof FileOfferMessage) {
 				final ReceiveOperation receiveOperation = new ReceiveOperation(Session.this.getConnection(), (FileOfferMessage) message, Session.this.getDestinationFileProvider());
 				

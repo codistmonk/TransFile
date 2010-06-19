@@ -90,7 +90,11 @@ public abstract class AbstractConnection implements Connection {
 			throw new IllegalStateException(this.getState().toString());
 		}
 		
-		this.localPeer = localPeer;
+		if (!this.getLocalPeer().equals(localPeer)) {
+			this.localPeer = localPeer;
+			
+			this.new LocalPeerChangedEvent().fire();
+		}
 	}
 	
 	@Override
@@ -110,7 +114,11 @@ public abstract class AbstractConnection implements Connection {
 			throw new IllegalStateException(this.getState().toString());
 		}
 		
-		this.remotePeer = remotePeer;
+		if (!this.getRemotePeer().equals(remotePeer)) {
+			this.remotePeer = remotePeer;
+			
+			this.new RemotePeerChangedEvent().fire();
+		}
 	}
 	
 	@Override
@@ -146,9 +154,7 @@ public abstract class AbstractConnection implements Connection {
 				this.state = state;
 			}
 			
-			for (final Listener listener : this.getListeners()) {
-				listener.stateChanged();
-			}
+			this.new StateChangedEvent().fire();
 		}
 	}
 	
@@ -224,13 +230,135 @@ public abstract class AbstractConnection implements Connection {
 			this.setState(State.DISCONNECTED);
 		}
 		
-		for (final Listener listener : this.getListeners()) {
-			listener.messageReceived(message);
-		}
+		this.new MessageReceivedEvent(message).fire();
 	}
 	
 	protected final void setLastMessageTime() {
 		this.lastMessageTime = System.currentTimeMillis();
+	}
+	
+	/**
+	 * 
+	 * TODO doc
+	 *
+	 * @author codistmonk (creation 2010-06-19)
+	 *
+	 */
+	protected abstract class AbstractEvent {
+		
+		public final void fire() {
+			for (final Listener listener : AbstractConnection.this.getListeners()) {
+				this.notifyListener(listener);
+			}
+		}
+		
+		/**
+		 * TODO doc
+		 * 
+		 * @param listener
+		 * <br>Not null
+		 * <br>Shared
+		 * <br>Input-output
+		 */
+		protected abstract void notifyListener(Listener listener);
+		
+	}
+	
+	/**
+	 * 
+	 * TODO doc
+	 *
+	 * @author codistmonk (creation 2010-06-19)
+	 *
+	 */
+	private class LocalPeerChangedEvent extends AbstractEvent {
+		
+		/**
+		 * Package-private default constructor to suppress visibility warnings.
+		 */
+		LocalPeerChangedEvent() {
+			// Do nothing
+		}
+		
+		@Override
+		protected final void notifyListener(final Listener listener) {
+			listener.localPeerChanged();
+		}
+		
+	}
+	
+	/**
+	 * 
+	 * TODO doc
+	 *
+	 * @author codistmonk (creation 2010-06-19)
+	 *
+	 */
+	private class RemotePeerChangedEvent extends AbstractEvent {
+		
+		/**
+		 * Package-private default constructor to suppress visibility warnings.
+		 */
+		RemotePeerChangedEvent() {
+			// Do nothing
+		}
+		
+		@Override
+		protected final void notifyListener(final Listener listener) {
+			listener.remotePeerChanged();
+		}
+		
+	}
+	
+	/**
+	 * 
+	 * TODO doc
+	 *
+	 * @author codistmonk (creation 2010-06-19)
+	 *
+	 */
+	private class StateChangedEvent extends AbstractEvent {
+		
+		/**
+		 * Package-private default constructor to suppress visibility warnings.
+		 */
+		StateChangedEvent() {
+			// Do nothing
+		}
+		
+		@Override
+		protected final void notifyListener(final Listener listener) {
+			listener.stateChanged();
+		}
+		
+	}
+	
+	/**
+	 * 
+	 * TODO doc
+	 *
+	 * @author codistmonk (creation 2010-06-19)
+	 *
+	 */
+	private class MessageReceivedEvent extends AbstractEvent {
+		
+		private final Message message;
+		
+		/**
+		 * 
+		 * @param message
+		 * <br>Not null
+		 * <br>Shared
+		 */
+		MessageReceivedEvent(final Message message) {
+			this.message = message;
+		}
+		
+		@Override
+		protected final void notifyListener(final Listener listener) {
+			listener.messageReceived(this.message);
+		}
+		
 	}
 	
 	public static final String DEFAULT_LOCAL_PEER = getPeer("transfile", "0.0.0.0", "12345");

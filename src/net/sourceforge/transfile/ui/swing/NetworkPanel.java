@@ -56,7 +56,6 @@ import net.sourceforge.transfile.network.exceptions.BilateralConnectException;
 import net.sourceforge.transfile.network.exceptions.PeerURLFormatException;
 import net.sourceforge.transfile.operations.Connection;
 import net.sourceforge.transfile.operations.Connection.State;
-import net.sourceforge.transfile.operations.messages.Message;
 import net.sourceforge.transfile.settings.Settings;
 import net.sourceforge.transfile.settings.exceptions.IllegalConfigValueException;
 
@@ -243,10 +242,10 @@ public class NetworkPanel extends TopLevelPanel {
 		});
 		GUITools.add(this, this.stopButton, c);
 		
-		this.getWindow().getSession().getConnection().addConnectionListener(new Connection.Listener() {
+		this.getWindow().getSession().getConnection().addConnectionListener(new Connection.AbstractListener() {
 			
 			@Override
-			public final void stateChanged() {
+			protected final void doStateChanged() {
 				final State state = NetworkPanel.this.getWindow().getSession().getConnection().getState();
 				
 				NetworkPanel.this.getConnectButton().setVisible(state == State.DISCONNECTED);
@@ -255,11 +254,6 @@ public class NetworkPanel extends TopLevelPanel {
 				if (state == State.CONNECTED) {
 					NetworkPanel.this.getWindow().onConnectSuccessful();
 				}
-			}
-			
-			@Override
-			public final void messageReceived(final Message message) {
-				// Do nothing
 			}
 			
 		});
