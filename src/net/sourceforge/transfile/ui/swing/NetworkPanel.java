@@ -31,11 +31,14 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.text.ParseException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -45,12 +48,20 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.plaf.basic.BasicComboBoxEditor;
 
 import net.sourceforge.transfile.backend.ControllableBackend;
 import net.sourceforge.transfile.exceptions.SerializationException;
@@ -62,6 +73,7 @@ import net.sourceforge.transfile.operations.Connection;
 import net.sourceforge.transfile.operations.Connection.State;
 import net.sourceforge.transfile.settings.Settings;
 import net.sourceforge.transfile.settings.exceptions.IllegalConfigValueException;
+import net.sourceforge.transfile.tools.Tools;
 
 /**
  * The area where the user enters the remote PeerURL, selects their local port and ip address
@@ -71,7 +83,7 @@ import net.sourceforge.transfile.settings.exceptions.IllegalConfigValueException
  *
  */
 public class NetworkPanel extends TopLevelPanel {
-
+	
 	private static final long serialVersionUID = -6730149437479457030L;
 	
 	/*
@@ -564,19 +576,8 @@ public class NetworkPanel extends TopLevelPanel {
 	 * Sets up the "Remote PeerURL" panel
 	 * 
 	 */
-	private void setupRemoteURLPanel() {
-		final int maxRetainedItems = Settings.getPreferences().getInt("peerurlbar_max_retained_items", Settings.PEERURLBAR_MAX_RETAINED_ITEMS);
-		
-		if (maxRetainedItems < 1) {
-			throw new IllegalConfigValueException("peerurlbar_max_retained_items", Integer.toString(maxRetainedItems));
-		}
-		
-		try {
-			this.remoteURLBar = new PeerURLBar(Settings.getPreferences().get("remote_peerurlbar_state_file_name", Settings.REMOTE_PEERURLBAR_STATE_FILE_NAME), maxRetainedItems);
-		} catch(SerializationFileInUseException e) {
-			getLoggerForThisMethod().log(Level.WARNING, "remote PeerURLBar state file already in use, falling back to a non-persistent PeerURLBar", e);
-			this.remoteURLBar = new PeerURLBar(maxRetainedItems);
-		}
+	private final void setupRemoteURLPanel() {
+		this.remoteURLBar = this.createRemoteURLBar();
 		
 		final GridBagConstraints constraints = new GridBagConstraints();
 		
@@ -594,7 +595,7 @@ public class NetworkPanel extends TopLevelPanel {
 		GUITools.add(this.remoteURLPanel, new FoldableComponent(this.remoteURLBar, remoteURLDetails), constraints);
 		
 		final JTextField remoteIPTextField = this.createRemoteIPTextField();
-		final PortSpinner remotePortSpinner = this.createRemotePortSpinner();
+		final JSpinner remotePortSpinner = this.createRemotePortSpinner();
 		
 		gridBagTable(remoteURLDetails, new Component[][] {
 				{ translate(new JLabel("label_remote_ip")), remoteIPTextField },
@@ -604,18 +605,68 @@ public class NetworkPanel extends TopLevelPanel {
 		this.synchronizeConnectionWithRemoteURLBar();
 	}
 	
-	private final JTextField createRemoteIPTextField() {
-		final JTextField result = new JTextField();
+	/**
+	 * TODO doc
+	 * 
+	 * @return
+	 * <br>Not null
+	 * <br>New
+	 * @throws IllegalConfigValueException if the preference value for {@code "peerurlbar_max_retained_items"} is less than {@code 1}
+	 */
+	private final PeerURLBar createRemoteURLBar() {
+		final int maxRetainedItems = Settings.getPreferences().getInt("peerurlbar_max_retained_items", Settings.PEERURLBAR_MAX_RETAINED_ITEMS);
 		
-		// TODO synchronize with model
+		if (maxRetainedItems < 1) {
+			throw new IllegalConfigValueException("peerurlbar_max_retained_items", Integer.toString(maxRetainedItems));
+		}
 		
-		return result;
-	}
-	
-	private final PortSpinner createRemotePortSpinner() {
-		final PortSpinner result = new PortSpinner();
+		PeerURLBar peerURLBar;
 		
-		// TODO synchronize with model
+		try {
+			peerURLBar = new PeerURLBar(Settings.getPreferences().get("remote_peerurlbar_state_file_name", Settings.REMOTE_PEERURLBAR_STATE_FILE_NAME), maxRetainedItems);
+		} catch (final SerializationFileInUseException exception) {
+			getLoggerForThisMethod().log(Level.WARNING, "remote PeerURLBar state file already in use, falling back to a non-persistent PeerURLBar", exception);
+			peerURLBar = new PeerURLBar(maxRetainedItems);
+		}
+		
+		final PeerURLBar result = peerURLBar;
+		
+		final Connection connection = this.getWindow().getSession().getConnection();
+		
+		result.setEditor(new BasicComboBoxEditor() {
+			
+			@Override
+			protected final JTextField createEditorComponent() {
+				final JFormattedTextField result = new JFormattedTextField("");
+				
+				new FormattedTextFieldUpdater(result);
+				
+				result.addPropertyChangeListener(new PropertyChangeListener() {
+					
+					@Override
+					public final void propertyChange(final PropertyChangeEvent event) {
+						if (!"value".equals(event.getPropertyName())) {
+							return;
+						}
+						
+						connection.setRemotePeer(result.getValue().toString());
+					}
+					
+				});
+				
+				return result;
+			}
+			
+		});
+		
+		connection.addConnectionListener(new Connection.AbstractListener() {
+			
+			@Override
+			protected final void doRemotePeerChanged() {
+				result.setSelectedItem(connection.getRemotePeer());
+			}
+			
+		});
 		
 		return result;
 	}
@@ -623,56 +674,86 @@ public class NetworkPanel extends TopLevelPanel {
 	/**
 	 * TODO doc
 	 * 
-	 * @param result
+	 * @return
 	 * <br>Not null
-	 * <br>Input-output
-	 * @param components
-	 * <br>Not null
-	 * @return {@code result}
-	 * <br>Not null
+	 * <br>New
 	 */
-	private static final JPanel gridBagTable(final JPanel result, final Component[][] components) {
-		final GridBagConstraints constraints = new GridBagConstraints();
+	private final JTextField createRemoteIPTextField() {
+		final JFormattedTextField result = new JFormattedTextField();
 		
-		constraints.insets = new Insets(5, 5, 5, 5);
-		constraints.anchor = GridBagConstraints.LINE_START;
-		constraints.gridy = 0;
+		new FormattedTextFieldUpdater(result);
 		
-		for (final Component[] row : components) {
-			switch (row.length) {
-			case 1:
-				constraints.gridwidth = 2;
-				constraints.gridx = 0;
-				constraints.fill = GridBagConstraints.HORIZONTAL;
-				constraints.weightx = 1;
-				
-				GUITools.add(result, row[0], constraints);
-				
-				break;
-			case 2:
-				constraints.gridwidth = 1;
-				constraints.gridx = 0;
-				constraints.fill = GridBagConstraints.NONE;
-				constraints.weightx = 0;
-				
-				GUITools.add(result, row[0], constraints);
-				
-				constraints.gridx = 1;
-				constraints.fill = GridBagConstraints.HORIZONTAL;
-				constraints.weightx = 1;
-				
-				GUITools.add(result, row[1], constraints);
-				
-				break;
-			case 3:
-				throw new IllegalArgumentException("Each row must have 1 or 2 cells, but row " + constraints.gridy + " has " + row.length);
+		final Connection connection = NetworkPanel.this.getWindow().getSession().getConnection();
+		
+		connection.addConnectionListener(new Connection.AbstractListener() {
+			
+			@Override
+			protected final void doRemotePeerChanged() {
+				result.setValue(AbstractConnection.getProtocolHostPort(connection.getRemotePeer())[1]);
 			}
 			
-			++constraints.gridy;
-		}
+		});
+		
+		result.addPropertyChangeListener(new PropertyChangeListener() {
+			
+			@Override
+			public final void propertyChange(final PropertyChangeEvent event) {
+				if (!"value".equals(event.getPropertyName())) {
+					return;
+				}
+				
+				final String[] protocolHostPort = AbstractConnection.getProtocolHostPort(connection.getRemotePeer());
+				
+				protocolHostPort[1] = result.getValue().toString();
+				
+				connection.setRemotePeer(AbstractConnection.getPeer(protocolHostPort));
+			}
+			
+		});
+		
+		result.setValue(AbstractConnection.getProtocolHostPort(connection.getRemotePeer())[1]);
 		
 		return result;
 	}
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @return
+	 * <br>Not null
+	 * <br>New
+	 */
+	private final JSpinner createRemotePortSpinner() {
+		final JSpinner result = createPortSpinner();
+		final Connection connection = NetworkPanel.this.getWindow().getSession().getConnection();
+		
+		connection.addConnectionListener(new Connection.AbstractListener() {
+			
+			@Override
+			protected final void doRemotePeerChanged() {
+				result.setValue(AbstractConnection.getPort(connection.getRemotePeer()));
+			}
+			
+		});
+		
+		result.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public final void stateChanged(final ChangeEvent event) {
+				final String[] protocolHostPort = AbstractConnection.getProtocolHostPort(connection.getRemotePeer());
+				
+				protocolHostPort[2] = result.getValue().toString();
+				
+				connection.setRemotePeer(AbstractConnection.getPeer(protocolHostPort));
+			}
+			
+		});
+		
+		result.setValue(AbstractConnection.getPort(connection.getRemotePeer()));
+		
+		return result;
+	}
+	
 	
 	private final void synchronizeConnectionWithRemoteURLBar() {
 		final Connection connection = NetworkPanel.this.getWindow().getSession().getConnection();
@@ -739,7 +820,7 @@ public class NetworkPanel extends TopLevelPanel {
 	 * <br>Not null
 	 * <br>New
 	 */
-	private PortSpinner createLocalPortSpinner() {
+	private final PortSpinner createLocalPortSpinner() {
 		final PortSpinner result = new PortSpinner();
 		
 		result.addChangeListener(new ChangeListener() {
@@ -750,21 +831,6 @@ public class NetworkPanel extends TopLevelPanel {
 			}
 			
 		});
-		
-		return result;
-	}
-	
-	/**
-	 * TODO doc
-	 * 
-	 * @return
-	 * <br>Not null
-	 * <br>New
-	 */
-	private static final JTextField createLocalInternetAddressField() {
-		final JTextField result = new JTextField();
-		
-		result.setEditable(false);
 		
 		return result;
 	}
@@ -795,21 +861,6 @@ public class NetworkPanel extends TopLevelPanel {
 			}
 			
 		});
-		
-		return result;
-	}
-	
-	/**
-	 * TODO doc
-	 * 
-	 * @return
-	 * <br>Not null
-	 * <br>New
-	 */
-	private static final JTextField createLocalURLField() {
-		final JTextField result = new JTextField();
-		
-		result.setEditable(false);
 		
 		return result;
 	}
@@ -966,5 +1017,182 @@ public class NetworkPanel extends TopLevelPanel {
 		if(this.disregardNextLocalIPChange)
 			this.disregardNextLocalIPChange = false;
 	}
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @return
+	 * <br>Not null
+	 * <br>New
+	 */
+	private static final JTextField createLocalInternetAddressField() {
+		final JTextField result = new JTextField();
+		
+		result.setEditable(false);
+		
+		return result;
+	}
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @return
+	 * <br>Not null
+	 * <br>New
+	 */
+	private static final JTextField createLocalURLField() {
+		final JTextField result = new JTextField();
+		
+		result.setEditable(false);
+		
+		return result;
+	}
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @param result
+	 * <br>Not null
+	 * <br>Input-output
+	 * @param components
+	 * <br>Not null
+	 * @return {@code result}
+	 * <br>Not null
+	 */
+	private static final JPanel gridBagTable(final JPanel result, final Component[][] components) {
+		final GridBagConstraints constraints = new GridBagConstraints();
+		
+		constraints.insets = new Insets(5, 5, 5, 5);
+		constraints.anchor = GridBagConstraints.LINE_START;
+		constraints.gridy = 0;
+		
+		for (final Component[] row : components) {
+			switch (row.length) {
+			case 1:
+				constraints.gridwidth = 2;
+				constraints.gridx = 0;
+				constraints.fill = GridBagConstraints.HORIZONTAL;
+				constraints.weightx = 1;
+				
+				GUITools.add(result, row[0], constraints);
+				
+				break;
+			case 2:
+				constraints.gridwidth = 1;
+				constraints.gridx = 0;
+				constraints.fill = GridBagConstraints.NONE;
+				constraints.weightx = 0;
+				
+				GUITools.add(result, row[0], constraints);
+				
+				constraints.gridx = 1;
+				constraints.fill = GridBagConstraints.HORIZONTAL;
+				constraints.weightx = 1;
+				
+				GUITools.add(result, row[1], constraints);
+				
+				break;
+			case 3:
+				throw new IllegalArgumentException("Each row must have 1 or 2 cells, but row " + constraints.gridy + " has " + row.length);
+			}
+			
+			++constraints.gridy;
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * TODO doc
+	 * 
+	 * @return
+	 * <br>Not null
+	 * <br>New
+	 */
+	private static final JSpinner createPortSpinner() {
+		final JSpinner result = new JSpinner(new SpinnerNumberModel(Settings.LOCAL_PORT, Settings.LOCAL_PORT_MIN, Settings.LOCAL_PORT_MAX, 1));
+		final JSpinner.NumberEditor editor = new JSpinner.NumberEditor(result, "0");
+		final JFormattedTextField textField = editor.getTextField();
+		
+		result.setEditor(editor);
+		
+		textField.setHorizontalAlignment(SwingConstants.LEFT);
+		
+		new FormattedTextFieldUpdater(textField);
+		
+		return result;
+	}
+	
+	/**
+	 * TODO doc
+	 *
+	 * @author codistmonk (creation 2010-06-19)
+	 *
+	 */
+	public static class FormattedTextFieldUpdater implements DocumentListener {
+		
+		private final JFormattedTextField formattedTextField;
+		
+		/**
+		 * @param formattedTextField
+		 * <br>Not null
+		 * <br>Shared
+		 */
+		public FormattedTextFieldUpdater(final JFormattedTextField formattedTextField) {
+			this.formattedTextField = formattedTextField;
+			
+			this.getFormattedTextField().getDocument().addDocumentListener(this);
+		}
+		
+		/**
+		 * @return
+		 * <br>Not null
+		 * <br>Shared
+		 */
+		public final JFormattedTextField getFormattedTextField() {
+			return this.formattedTextField;
+		}
+		
+		@Override
+		public final void removeUpdate(final DocumentEvent event) {
+			this.update();
+		}
 
+		@Override
+		public final void insertUpdate(final DocumentEvent event) {
+			this.update();
+		}
+
+		@Override
+		public final void changedUpdate(final DocumentEvent event) {
+			this.update();
+		}
+
+		private final void update() {
+			SwingUtilities.invokeLater(new Runnable() {
+				
+				@Override
+				public void run() {
+					final JFormattedTextField textField = FormattedTextFieldUpdater.this.getFormattedTextField();
+					final int caretPosition = textField.getCaretPosition();
+					
+					try {
+						textField.commitEdit();
+					} catch (final ParseException exception) {
+						// Ignore
+					}
+					
+					if (!("" + textField.getValue()).equals(textField.getText())) {
+						Tools.debugPrint(textField.getValue());
+						textField.setValue(textField.getValue());
+					}
+					
+					textField.setCaretPosition(caretPosition);
+				}
+				
+			});
+		}
+		
+	}
+	
 }

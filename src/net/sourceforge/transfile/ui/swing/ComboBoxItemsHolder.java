@@ -81,7 +81,11 @@ class ComboBoxItemsHolder implements Serializable {
 
 	/**
 	 * Loads the previously serialized and saved data model state from disk.
-	 *  
+	 * @param stateFile
+	 * <br>Not null
+	 * @return 
+	 * <br>Maybe null
+	 * <br>Maybe New
 	 * @throws SerializationFileNotFoundException if no ComboBoxItemsHolder has been saved to the provided file yet  
 	 * @throws SerializationException if an error occurred while trying to load the model from disk
 	 */

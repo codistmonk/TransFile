@@ -418,6 +418,8 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		
 		// show the "File" menu if it has at least one element
 		addMenuIfNotEmpty(menuBar, fileMenu);
+		// show the "Instance" menu if it has at least one element
+		addMenuIfNotEmpty(menuBar, instanceMenu);
 		// show the "Settings" menu if it has at least one element
 		addMenuIfNotEmpty(menuBar, settingsMenu);
 	}

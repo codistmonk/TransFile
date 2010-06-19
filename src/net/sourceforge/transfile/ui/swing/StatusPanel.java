@@ -260,7 +260,7 @@ public class StatusPanel extends TopLevelPanel {
 	}
 	
 	/**
-	 * Getter for the {@link StatsList} instance used by this {@link StatusPanel}
+	 * Getter for the {@link StatusList} instance used by this {@link StatusPanel}
 	 *
 	 * @return the {@link StatusList} instance used by this {@link StatusPanel}
 	 */
