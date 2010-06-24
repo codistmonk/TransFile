@@ -110,6 +110,10 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	 */
 	private final Session session;
 	
+	/**
+	 * Constructs a new instance
+	 * 
+	 */
 	public SwingGUI() {
 		super(title);
 		
