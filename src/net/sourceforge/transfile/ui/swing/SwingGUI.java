@@ -644,8 +644,8 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		 */
 		@Override
 		protected void handleAbout(final ApplicationEvent event) {
-			SwingGUI.this.showAboutDialog();
 			event.setHandled(true);
+			SwingGUI.this.showAboutDialog();
 		}
 		
 		/**
@@ -653,8 +653,8 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		 */
 		@Override
 		protected void handlePreferences(final ApplicationEvent event) {
-			SwingGUI.this.showPreferences();
 			event.setHandled(true);
+			SwingGUI.this.showPreferences();
 		}
 		
 		/**
@@ -662,6 +662,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		 */
 		@Override
 		protected void handleQuit(final ApplicationEvent event) {
+			event.setHandled(true);
 			SwingGUI.this.quit();
 		}
 		
