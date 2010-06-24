@@ -50,6 +50,11 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+import net.sourceforge.jmacadapter.MacAdapterException;
+import net.sourceforge.jmacadapter.MacAdapterTools;
+import net.sourceforge.jmacadapter.eawtwrappers.Application;
+import net.sourceforge.jmacadapter.eawtwrappers.ApplicationAdapter;
+import net.sourceforge.jmacadapter.eawtwrappers.ApplicationEvent;
 import net.sourceforge.transfile.backend.BackendEventHandler;
 import net.sourceforge.transfile.backend.ControllableBackend;
 import net.sourceforge.transfile.i18n.Translator;
@@ -100,11 +105,6 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	 */
 	private List<TopLevelPanel> panels = new LinkedList<TopLevelPanel>();
 	
-	/*
-	 * True if running on Mac OS X
-	 */
-	private final boolean onMacOSX;
-	
 	/**
 	 * Object managing the creation of operations.
 	 */
@@ -118,9 +118,6 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		super(title);
 		
 		this.statusService = new StatusServiceProvider();
-		
-		// check whether the application is running on Mac OS X and store the result
-		this.onMacOSX = System.getProperty("os.name").toLowerCase().startsWith("mac os x");
 		
 		this.session = createSession();
 		
@@ -386,7 +383,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		
 		// add the "Exit" item to the "File" menu, unless running on Mac OS (X) in which
 		// case there is already a "Quit" item in the application menu
-		if(!this.onMacOSX) {
+		if(!MacAdapterTools.isMacOSX()) {
 			final JMenuItem exitItem = translate(new JMenuItem("menu_item_exit"));
 			
 			exitItem.addActionListener(new ActionListener() {
@@ -405,7 +402,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		
 		// add the "Preferences..." item to the "Settings" menu, unless running on Mac OS (X) in which
 		// case there is already a "Preferences..." item in the application menu
-		if(!this.onMacOSX) {
+		if(!MacAdapterTools.isMacOSX()) {
 			final JMenuItem preferencesItem = translate(new JMenuItem("menu_item_preferences"));
 			
 			preferencesItem.addActionListener(new ActionListener() {
@@ -442,11 +439,15 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		
 		try {
 			// Mac-specific adaptations
-			if (this.onMacOSX) {
-				MacOSXAdapter.adapt(this);
+			if (MacAdapterTools.isMacOSX()) {
+				MacAdapterTools.setUseScreenMenuBar(true);
+				Application.getApplication().setEnabledAboutMenu(false);
+				Application.getApplication().setEnabledPreferencesMenu(true);
+				Application.getApplication().addApplicationListener(new MacOSXApplicationAdapter());
 			}
-		} catch (final Exception exception) {
-			// Ignore
+		} catch (final MacAdapterException e) {
+			//TODO handle properly
+			getLoggerForThisMethod().warning("Exception in Mac OS X adapter");
 		}
 	}
 	
@@ -617,6 +618,51 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 			}
 			
 			return null;
+		}
+		
+	}
+	
+	/**
+	 * Mac OS X {@link ApplicationEvent} handler
+	 *
+	 * @author Martin Riedel
+	 *
+	 */
+	private class MacOSXApplicationAdapter extends ApplicationAdapter {
+
+		/**
+		 * Constructs a new instance
+		 *
+		 */
+		public MacOSXApplicationAdapter() {
+			// do nothing, just allow non-synthetic constructor access by SwingGUI
+		}
+		
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		protected void handleAbout(final ApplicationEvent event) {
+			SwingGUI.this.showAboutDialog();
+			event.setHandled(true);
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		protected void handlePreferences(final ApplicationEvent event) {
+			SwingGUI.this.showPreferences();
+			event.setHandled(true);
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		protected void handleQuit(final ApplicationEvent event) {
+			SwingGUI.this.quit();
 		}
 		
 	}

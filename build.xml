@@ -5,7 +5,7 @@
 	<property name="resources" location="resources" />
 	
     <target name="jar" description="create runnable jar" depends="clean,prepare,compile,copy_resources">
-        <jar destfile="TransFile.jar" filesetmanifest="mergewithoutmain">
+        <jar destfile="bin/TransFile.jar" filesetmanifest="mergewithoutmain">
             <manifest>
                 <attribute name="Main-Class" value="net.sourceforge.transfile.TransFile" />
                 <attribute name="Class-Path" value="." />

@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.ConsoleHandler;
 
+import net.sourceforge.jmacadapter.MacAdapterTools;
 import net.sourceforge.transfile.backend.Backend;
 import net.sourceforge.transfile.settings.Settings;
 import net.sourceforge.transfile.ui.UserInterface;
@@ -54,10 +55,10 @@ public class TransFile implements Runnable {
 	 * Sets the application's title to be used in the automatically generated Mac OS X application menu
 	 * and "About" menu item
 	 * 
-	 * It has to be done early, hence this static initializer
+	 * This has to be done early, hence this static initializer
 	 */
 	static {
-		System.setProperty("com.apple.mrj.application.apple.menu.about.name", TransFile.applicationTitle);
+		MacAdapterTools.setApplicationName(TransFile.applicationTitle);
 	}
 	
 	
