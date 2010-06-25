@@ -5,15 +5,26 @@ import static net.sourceforge.transfile.ui.swing.GUITools.rollover;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
@@ -133,39 +144,64 @@ public class OperationComponent extends JPanel {
 		{
 			constraints.gridx = 0;
 			constraints.gridy = 0;
-			constraints.weightx = 1.0;
+			constraints.weightx = 0.0;
 			constraints.weighty = 0.0;
-			constraints.ipadx = 1;
-			constraints.ipady = VERTICAL_PADDING;
+			constraints.insets = new Insets(VERTICAL_INSET, LARGE_HORIZONTAL_INSET, VERTICAL_INSET, 0);
+			constraints.fill = GridBagConstraints.NONE;
+			
+			GUITools.add(this, this.createFileIconLabel(), constraints);
+		}
+		{
+			++constraints.gridx;
+			constraints.weightx = 1.0;
+			constraints.insets = new Insets(VERTICAL_INSET, LARGE_HORIZONTAL_INSET, VERTICAL_INSET, LARGE_HORIZONTAL_INSET);
 			constraints.fill = GridBagConstraints.HORIZONTAL;
 			
 			GUITools.add(this, this.createProgressBar(), constraints);
 		}
 		{
-			constraints.gridx = 1;
-			constraints.gridy = 0;
+			++constraints.gridx;
 			constraints.weightx = 0.0;
-			constraints.weighty = 0.0;
-			constraints.ipadx = 1;
-			constraints.ipady = VERTICAL_PADDING;
+			constraints.insets = new Insets(VERTICAL_INSET, 0, VERTICAL_INSET, SMALL_HORIZONTAL_INSET);
 			constraints.fill = GridBagConstraints.NONE;
 			
 			GUITools.add(this, this.createStartPauseRetryButton(), constraints);
 		}
 		{
-			constraints.gridx = 2;
-			constraints.gridy = 0;
-			constraints.weightx = 0.0;
-			constraints.weighty = 0.0;
-			constraints.ipadx = 1;
-			constraints.ipady = VERTICAL_PADDING;
-			constraints.fill = GridBagConstraints.NONE;
+			++constraints.gridx;
 			
 			GUITools.add(this, this.createCancelRemoveButton(), constraints);
 		}
 		
 		this.setMaximumSize(new Dimension(Integer.MAX_VALUE, MAXIMUM_HEIGHT));
 		this.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, DEFAULT_BORDER_COLOR));
+	}
+	
+	/**
+	 * 
+	 * TODO doc
+	 *
+	 * @return
+	 * <br>A non-null value
+	 * <br>A new value
+	 */
+	private final JLabel createFileIconLabel() {
+		final Icon icon = getIconForFileName(this.getOperation().getFileName());
+		final JLabel result = new JLabel(icon);
+		
+		if (icon.getIconWidth() < PREFERRED_FILE_ICON_SIZE) {
+			final BufferedImage scaledImage = new BufferedImage(icon.getIconWidth() * FILE_ICON_SCALE, icon.getIconHeight() * FILE_ICON_SCALE, BufferedImage.TYPE_INT_ARGB);
+			final Graphics2D graphics = scaledImage.createGraphics();
+			
+			graphics.scale(FILE_ICON_SCALE, FILE_ICON_SCALE);
+			graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+			
+			icon.paintIcon(result, graphics, 0, 0);
+			
+			result.setIcon(new ImageIcon(scaledImage));
+		}
+		
+		return result;
 	}
 	
 	/**
@@ -279,8 +315,8 @@ public class OperationComponent extends JPanel {
 	}
 	
 	/**
-	 * 
 	 * TODO doc
+	 * 
 	 * @return
 	 * <br>A non-null value
 	 * <br>A new value
@@ -457,15 +493,73 @@ public class OperationComponent extends JPanel {
 	
 	private static final long serialVersionUID = 195201935191732396L;
 	
-	public static final int MAXIMUM_HEIGHT = 48;
+	public static final int MAXIMUM_HEIGHT = 72;
 	
-	public static final int VERTICAL_PADDING = 16;
+	public static final int LARGE_HORIZONTAL_INSET = 8;
+	
+	public static final int SMALL_HORIZONTAL_INSET = 4;
+	
+	public static final int VERTICAL_INSET = 16;
+	
+	public static final int PREFERRED_FILE_ICON_SIZE = 32;
+	
+	public static final int FILE_ICON_SCALE = 2;
 	
 	public static final Color DEFAULT_BACKGROUND_COLOR = Color.WHITE;
 	
 	public static final Color ALTERNATE_BACKGROUND_COLOR = Color.LIGHT_GRAY;
 	
 	public static final Color DEFAULT_BORDER_COLOR = Color.BLACK;
+	
+	/**
+	 * Creates and returns a temporary file that will be deleted upon exit.
+	 *
+	 * @param prefix
+	 * <br>Should not be null
+	 * @param suffix
+	 * <br>Should not be null
+	 * @return
+	 * <br>A possibly null value
+	 * <br>A new value
+	 */
+	private static final File createTemporaryFile(final String prefix, final String suffix) {
+		File result = null;
+		
+		try {
+			result = File.createTempFile(prefix, suffix);
+			
+			result.deleteOnExit();
+		} catch (final IOException exception) {
+			exception.printStackTrace();
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Returns the default system icon for a file named {@code fileName}.
+	 *
+	 * @param fileName
+	 * <br>Should not be null
+	 * @return
+	 * <br>A possibly null value
+	 */
+	private static final Icon getIconForFileName(final String fileName) {
+		final File temporaryFile = createTemporaryFile("tmp", fileName);
+		
+		try {
+			final Object shellFolder = Class.forName("sun.awt.shell.ShellFolder").getMethod("getShellFolder", File.class).invoke(null, temporaryFile);
+			final Image iconImage = (Image) shellFolder.getClass().getMethod("getIcon", boolean.class).invoke(shellFolder, true);
+			
+			if (iconImage != null) {
+				return new ImageIcon(iconImage);
+			}
+		} catch (final Exception exception) {
+			exception.printStackTrace();
+		}
+		
+		return new JFileChooser().getIcon(temporaryFile);
+	}
 	
 	/**
 	 * 
