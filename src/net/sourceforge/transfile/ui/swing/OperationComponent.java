@@ -10,6 +10,7 @@ import java.awt.GridBagConstraints;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.RenderingHints;
+import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -28,6 +29,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
 
 import net.sourceforge.transfile.operations.Operation;
 import net.sourceforge.transfile.operations.Operation.Controller;
@@ -177,6 +179,7 @@ public class OperationComponent extends JPanel {
 		this.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, DEFAULT_BORDER_COLOR));
 	}
 	
+	
 	/**
 	 * 
 	 * TODO doc
@@ -186,20 +189,28 @@ public class OperationComponent extends JPanel {
 	 * <br>A new value
 	 */
 	private final JLabel createFileIconLabel() {
-		final Icon icon = getIconForFileName(this.getOperation().getFileName());
-		final JLabel result = new JLabel(icon);
+		final JLabel result = new JLabel(getIconForFileName(this.getOperation().getFileName()));
 		
-		if (icon.getIconWidth() < PREFERRED_FILE_ICON_SIZE) {
-			final BufferedImage scaledImage = new BufferedImage(icon.getIconWidth() * FILE_ICON_SCALE, icon.getIconHeight() * FILE_ICON_SCALE, BufferedImage.TYPE_INT_ARGB);
-			final Graphics2D graphics = scaledImage.createGraphics();
+		resizeIconIfTooSmall(result);
+		
+		result.addMouseListener(new DragMouseHandler());
+		result.setTransferHandler(new TransferHandler("icon") {
 			
-			graphics.scale(FILE_ICON_SCALE, FILE_ICON_SCALE);
-			graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+			@Override
+			protected final void exportDone(final JComponent source, final Transferable data, final int action) {
+				if (TransferHandler.NONE == action) {
+					OperationComponent.this.getOperation().getController().start();
+				}
+			}
 			
-			icon.paintIcon(result, graphics, 0, 0);
+			@Override
+			public final Icon getVisualRepresentation(final Transferable transferable) {
+				return result.getIcon();
+			}
 			
-			result.setIcon(new ImageIcon(scaledImage));
-		}
+			private static final long serialVersionUID = 9018854963146765450L;
+			
+		});
 		
 		return result;
 	}
@@ -491,6 +502,33 @@ public class OperationComponent extends JPanel {
 		
 	}
 	
+	/**
+	 * 
+	 * TODO doc
+	 *
+	 * @author codistmonk (creation 2010-06-25)
+	 *
+	 */
+	private final class DragMouseHandler extends MouseAdapter {
+		
+		/**
+		 * Package-private default constructor to suppress visibility warnings.
+		 */
+		DragMouseHandler() {
+			// Do nothing
+		}
+		
+		@Override
+		public final void mousePressed(final MouseEvent event) {
+			if (OperationComponent.this.getOperation().getLocalFile() == null) {
+				final JComponent component = (JComponent) event.getComponent();
+				
+				component.getTransferHandler().exportAsDrag(component, event, TransferHandler.COPY);
+			}
+		}
+		
+	}
+	
 	private static final long serialVersionUID = 195201935191732396L;
 	
 	public static final int MAXIMUM_HEIGHT = 72;
@@ -547,9 +585,17 @@ public class OperationComponent extends JPanel {
 	private static final Icon getIconForFileName(final String fileName) {
 		final File temporaryFile = createTemporaryFile("tmp", fileName);
 		
+		// Try to get a big icon
 		try {
-			final Object shellFolder = Class.forName("sun.awt.shell.ShellFolder").getMethod("getShellFolder", File.class).invoke(null, temporaryFile);
-			final Image iconImage = (Image) shellFolder.getClass().getMethod("getIcon", boolean.class).invoke(shellFolder, true);
+			Image iconImage = null;
+			
+			{
+				// Try to use sun.awt
+				final Object shellFolder = Class.forName("sun.awt.shell.ShellFolder")
+					.getMethod("getShellFolder", File.class).invoke(null, temporaryFile);
+				iconImage = (Image) shellFolder.getClass().getMethod("getIcon", boolean.class)
+					.invoke(shellFolder, true);
+			}
 			
 			if (iconImage != null) {
 				return new ImageIcon(iconImage);
@@ -558,7 +604,32 @@ public class OperationComponent extends JPanel {
 			exception.printStackTrace();
 		}
 		
+		// As a last resort, use a small icon
 		return new JFileChooser().getIcon(temporaryFile);
+	}
+	
+	/**
+	 * 
+	 * TODO doc
+	 *
+	 * @param iconLabel
+	 * <br>Should not be null
+	 * <br>Input-output parameter
+	 */
+	private static final void resizeIconIfTooSmall(final JLabel iconLabel) {
+		final Icon icon = iconLabel.getIcon();
+		
+		if (icon.getIconWidth() < PREFERRED_FILE_ICON_SIZE) {
+			final BufferedImage scaledImage = new BufferedImage(icon.getIconWidth() * FILE_ICON_SCALE, icon.getIconHeight() * FILE_ICON_SCALE, BufferedImage.TYPE_INT_ARGB);
+			final Graphics2D graphics = scaledImage.createGraphics();
+			
+			graphics.scale(FILE_ICON_SCALE, FILE_ICON_SCALE);
+			graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+			
+			icon.paintIcon(iconLabel, graphics, 0, 0);
+			
+			iconLabel.setIcon(new ImageIcon(scaledImage));
+		}
 	}
 	
 	/**
