@@ -35,7 +35,7 @@ import net.sourceforge.transfile.operations.Session;
  * @author codistmonk (creation 2010-05-25)
  *
  */
-public class TransferPanel extends TopLevelPanel {
+public class TransferPanel extends AbstractTopLevelPanel {
 	
 	private final SendPanel sendPanel;
 	
@@ -48,8 +48,8 @@ public class TransferPanel extends TopLevelPanel {
 	 */
 	public TransferPanel(final SwingGUI window) {
 		super(window);
-		this.sendPanel = new SendPanel(window);
-		this.receivePanel = new ReceivePanel(window);
+		this.sendPanel = new SendPanel(window.getSession());
+		this.receivePanel = new ReceivePanel(window.getSession());
 		
 		this.setup();
 		
@@ -74,55 +74,6 @@ public class TransferPanel extends TopLevelPanel {
 	 */
 	public final ReceivePanel getReceivePanel() {
 		return this.receivePanel;
-	}
-
-	/** 
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void loadState() {
-		// TODO Auto-generated method stub
-	}
-	
-	/** 
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void onHide() {
-		// TODO Auto-generated method stub
-
-	}
-	
-	/** 
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void onInit() {
-		// TODO Auto-generated method stub
-	}
-	
-	/** 
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void onQuit() {
-		// TODO Auto-generated method stub
-	}
-	
-	/** 
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void onShow() {
-		// TODO Auto-generated method stub
-	}
-	
-	/** 
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void saveState() {
-		// TODO Auto-generated method stub
 	}
 	
 	private final void setup() {

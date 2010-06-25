@@ -28,6 +28,7 @@ import java.awt.BorderLayout;
 import javax.swing.JPanel;
 
 import net.sourceforge.transfile.operations.Operation;
+import net.sourceforge.transfile.operations.Session;
 
 /**
  * TODO doc
@@ -35,18 +36,30 @@ import net.sourceforge.transfile.operations.Operation;
  * @author codistmonk (creation 2010-06-13)
  *
  */
-public abstract class AbstractOperationListPanel extends TopLevelPanel {
+public abstract class AbstractOperationListPanel extends JPanel {
+	
+	private final Session session;
 	
 	private OperationListComponent operationListComponent;
 	
 	/**
 	 * 
-	 * @param window
+	 * @param session
 	 * <br>Should not be null
 	 * <br>Shared parameter
 	 */
-	public AbstractOperationListPanel(final SwingGUI window) {
-		super(window);
+	public AbstractOperationListPanel(final Session session) {
+		this.session = session;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 * <br>A non-null value
+	 * <br>A shared value
+	 */
+	public final Session getSession() {
+		return this.session;
 	}
 	
 	/**
@@ -114,60 +127,6 @@ public abstract class AbstractOperationListPanel extends TopLevelPanel {
 	 */
 	protected OperationListComponent createOperationListComponent() {
 		return new OperationListComponent();
-	}
-	
-	/** 
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void loadState() {
-		// TODO Auto-generated method stub
-
-	}
-
-	/** 
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void onHide() {
-		// TODO Auto-generated method stub
-
-	}
-
-	/** 
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void onInit() {
-		// TODO Auto-generated method stub
-
-	}
-
-	/** 
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void onQuit() {
-		// TODO Auto-generated method stub
-
-	}
-
-	/** 
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void onShow() {
-		// TODO Auto-generated method stub
-
-	}
-
-	/** 
-	 * {@inheritDoc}
-	 */
-	@Override
-	protected void saveState() {
-		// TODO Auto-generated method stub
-
 	}
 	
 	private static final long serialVersionUID = 1308159956345271935L;

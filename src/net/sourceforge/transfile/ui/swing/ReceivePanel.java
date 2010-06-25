@@ -19,6 +19,8 @@
 
 package net.sourceforge.transfile.ui.swing;
 
+import net.sourceforge.transfile.operations.Session;
+
 /**
  * 
  * 
@@ -30,12 +32,12 @@ class ReceivePanel extends AbstractOperationListPanel {
 	
 	/**
 	 * 
-	 * @param window
+	 * @param session
 	 * <br>Should not be null
 	 * <br>Shared parameter
 	 */
-	public ReceivePanel(final SwingGUI window) {
-		super(window);
+	public ReceivePanel(final Session session) {
+		super(session);
 		
 		this.setup();
 	}

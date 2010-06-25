@@ -38,6 +38,8 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 
+import net.sourceforge.transfile.operations.Session;
+
 /**
  * 
  * 
@@ -49,12 +51,12 @@ public class SendPanel extends AbstractOperationListPanel {
 	
 	/**
 	 * 
-	 * @param window
+	 * @param session
 	 * <br>Should not be null
 	 * <br>Shared parameter
 	 */
-	public SendPanel(final SwingGUI window) {
-		super(window);
+	public SendPanel(final Session session) {
+		super(session);
 		
 		this.setup();
 	}
@@ -81,7 +83,7 @@ public class SendPanel extends AbstractOperationListPanel {
 	 * <br>Shared parameter
 	 */
 	final void offerFile(final File file) {
-		this.getWindow().getSession().offerFile(file);
+		this.getSession().offerFile(file);
 	}
 	
 	private final void setup() {
