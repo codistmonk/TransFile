@@ -50,7 +50,7 @@ class StatusServiceProvider extends LinkedList<StatusMessage> implements StatusS
 		super.add(0, message);
 		
 		// inform all registered StatusListeners about the new status message
-		for(StatusChangeListener listener: this.statusListeners)
+		for (StatusChangeListener listener: this.statusListeners)
 			listener.newStatusMessage(message);
 	}
 

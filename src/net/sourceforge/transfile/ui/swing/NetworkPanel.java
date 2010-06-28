@@ -19,9 +19,9 @@
 
 package net.sourceforge.transfile.ui.swing;
 
-import static net.sourceforge.transfile.i18n.Translator.Helpers.translate;
+import static net.sourceforge.jenerics.i18n.Translator.Helpers.translate;
 import static net.sourceforge.transfile.ui.swing.StatusService.StatusMessage;
-import static net.sourceforge.transfile.tools.Tools.getLoggerForThisMethod;
+import static net.sourceforge.jenerics.Tools.getLoggerForThisMethod;
 
 import java.awt.Component;
 import java.awt.GridBagConstraints;
@@ -73,7 +73,7 @@ import net.sourceforge.transfile.operations.Connection;
 import net.sourceforge.transfile.operations.Connection.State;
 import net.sourceforge.transfile.settings.Settings;
 import net.sourceforge.transfile.settings.exceptions.IllegalConfigValueException;
-import net.sourceforge.transfile.tools.Tools;
+import net.sourceforge.jenerics.Tools;
 
 /**
  * The area where the user enters the remote PeerURL, selects their local port and ip address
@@ -291,7 +291,7 @@ public class NetworkPanel extends TopLevelPanel {
 			getLoggerForThisMethod().log(Level.FINER, "attempting to save PeerURLBar state");
 			this.remoteURLBar.saveModel();
 			getLoggerForThisMethod().log(Level.FINE, "successfully saved PeerURLBar state");
-		} catch(final SerializationException e) {
+		} catch (final SerializationException e) {
 			getLoggerForThisMethod().log(Level.WARNING, "failed to save PeerURLBar state", e);
 		}
 		
@@ -299,7 +299,7 @@ public class NetworkPanel extends TopLevelPanel {
 		Settings.getPreferences().put("local_port", this.getLocalPort().getValue().toString());
 		
 		// save selected local IP address
-		if(this.selectedLocalAddress != null && !("".equals(this.selectedLocalAddress))) {
+		if (this.selectedLocalAddress != null && !("".equals(this.selectedLocalAddress))) {
 			Settings.getPreferences().put("selected_local_ip", this.selectedLocalAddress);
 		}
 	}
@@ -435,11 +435,11 @@ public class NetworkPanel extends TopLevelPanel {
 	void updateLocalIPAddrBox() {
 		this.localIPAddressBox.removeAllItems();
 		
-		if(this.localInternetIPAddress != null && !("".equals(this.localInternetIPAddress)))
-			if(!(this.localLANAddresses.contains(this.localInternetIPAddress)))
+		if (this.localInternetIPAddress != null && !("".equals(this.localInternetIPAddress)))
+			if (!(this.localLANAddresses.contains(this.localInternetIPAddress)))
 				this.localIPAddressBox.addItem(this.localInternetIPAddress);
 		
-		for(String address: this.localLANAddresses)
+		for (String address: this.localLANAddresses)
 			this.localIPAddressBox.addItem(address);
 		
 		onLocalIPAddrBoxUpdated();
@@ -486,8 +486,8 @@ public class NetworkPanel extends TopLevelPanel {
 		
 		updateLocalURL();
 		
-		if(!this.disregardNextLocalIPChange)
-			if(!this.userHasSelectedALocalIP)
+		if (!this.disregardNextLocalIPChange)
+			if (!this.userHasSelectedALocalIP)
 				this.userHasSelectedALocalIP = true;
 	}
 
@@ -506,7 +506,7 @@ public class NetworkPanel extends TopLevelPanel {
 	final void onUserActionConnect() {
 		final String remoteURL = (String) this.remoteURLBar.getSelectedItem();
 		
-		if(remoteURL == null || "".equals(remoteURL)) {
+		if (remoteURL == null || "".equals(remoteURL)) {
 			this.getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_invalid_peerurl")));
 			
 			return;
@@ -913,22 +913,22 @@ public class NetworkPanel extends TopLevelPanel {
 					NetworkPanel.this.getLocalInternetAddrField().setText(NetworkPanel.this.getLocalInternetIPAddress());
 					NetworkPanel.this.setDisregardNextLocalIPChange(true);
 					updateLocalIPAddrBox();
-				} catch(InterruptedException e) {
+				} catch (InterruptedException e) {
 					//TODO when exactly does this happen. should be while the third thread
 					// involved with this SwingWorker gets interrupted while waiting for get to
 					// stop blocking - handle? if yes, how?
-				} catch(ExecutionException e) {
+				} catch (ExecutionException e) {
 					Throwable cause = e.getCause();
 					
 					getLoggerForThisMethod().log(Level.WARNING, "failed to discover external IP address", cause);
 					
-					if(cause instanceof UnknownHostException) {
+					if (cause instanceof UnknownHostException) {
 						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_internet_unknown_host")));
 						NetworkPanel.this.getLocalInternetAddrField().setText(translate("not_available"));
-					} else if(cause instanceof MalformedURLException) {
+					} else if (cause instanceof MalformedURLException) {
 						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_internet_malformed_url"), cause));
 						NetworkPanel.this.getLocalInternetAddrField().setText(translate("not_available"));
-					} else if(cause instanceof IOException) {
+					} else if (cause instanceof IOException) {
 						getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_internet_io_error")));
 						NetworkPanel.this.getLocalInternetAddrField().setText(translate("not_available"));
 					} else {
@@ -960,16 +960,16 @@ public class NetworkPanel extends TopLevelPanel {
 					NetworkPanel.this.setLocalLANAddresses(get());
 					NetworkPanel.this.setDisregardNextLocalIPChange(true);
 					updateLocalIPAddrBox();
-				} catch(InterruptedException e) {
+				} catch (InterruptedException e) {
 					//TODO when exactly does this happen. should be while the third thread
 					// involved with this SwingWorker gets interrupted while waiting for get to
 					// stop blocking - handle? if yes, how?
-				} catch(ExecutionException e) {
+				} catch (ExecutionException e) {
 					Throwable cause = e.getCause();
 					
 					getLoggerForThisMethod().log(Level.WARNING, "failed to discover local LAN addresses", cause);
 
-					if(cause instanceof SocketException)
+					if (cause instanceof SocketException)
 						NetworkPanel.this.getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_lan_sockets")));
 					else
 						NetworkPanel.this.getWindow().getStatusService().postStatusMessage(translate(new StatusMessage("error_discover_lan_unknown")));
@@ -984,7 +984,7 @@ public class NetworkPanel extends TopLevelPanel {
 	 * 
 	 */
 	private void updateLocalURL() {
-		if(this.selectedLocalAddress == null || "".equals(this.selectedLocalAddress)) {
+		if (this.selectedLocalAddress == null || "".equals(this.selectedLocalAddress)) {
 			this.localURLField.setText("N/A");
 			return;
 		}
@@ -1004,17 +1004,17 @@ public class NetworkPanel extends TopLevelPanel {
 							this.lastSelectedLocalAddress :
 							Settings.getPreferences().get("selected_local_ip", "");
 
-		if(ipToSelect == null || "".equals(ipToSelect))
+		if (ipToSelect == null || "".equals(ipToSelect))
 			return;
 
-		if(this.localLANAddresses.contains(ipToSelect))
+		if (this.localLANAddresses.contains(ipToSelect))
 			this.localIPAddressBox.setSelectedItem(ipToSelect);
 		else
-			if(ipToSelect.equals(this.localInternetIPAddress))
+			if (ipToSelect.equals(this.localInternetIPAddress))
 				this.localIPAddressBox.setSelectedItem(ipToSelect);	
 		
 		// selection events not to be processed by the 
-		if(this.disregardNextLocalIPChange)
+		if (this.disregardNextLocalIPChange)
 			this.disregardNextLocalIPChange = false;
 	}
 	

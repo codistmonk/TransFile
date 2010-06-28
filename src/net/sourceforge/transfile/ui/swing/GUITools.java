@@ -47,7 +47,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 
-import net.sourceforge.transfile.tools.Tools;
+import net.sourceforge.jenerics.Tools;
 
 /**
  * TODO doc

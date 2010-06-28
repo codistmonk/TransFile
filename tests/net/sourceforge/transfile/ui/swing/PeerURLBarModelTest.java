@@ -124,7 +124,7 @@ public class PeerURLBarModelTest {
 		final List<Integer> elements = new LinkedList<Integer>(); 
 		
 		int i = 0;
-		for(; i < maxRetainedItems; i++) {
+		for (; i < maxRetainedItems; i++) {
 			this.model.addElement(i);
 			elements.add(i);
 		}
@@ -155,15 +155,15 @@ public class PeerURLBarModelTest {
 		final Random randomElements = new Random();
 		final List<Integer> elements = new ArrayList<Integer>(maxRetainedItems + 1);
 		
-		for(int i = 0; i < new Random().nextInt(maxRetainedItems) + maxRetainedItems; i++) {
+		for (int i = 0; i < new Random().nextInt(maxRetainedItems) + maxRetainedItems; i++) {
 			Integer e = randomElements.nextInt(1000);
 			
-			if(!elements.contains(e))
+			if (!elements.contains(e))
 				elements.add(e);
 			
 			this.model.addElement(e);
 			
-			while(elements.size() > maxRetainedItems)
+			while (elements.size() > maxRetainedItems)
 				elements.remove(0);
 		}
 			
@@ -180,7 +180,7 @@ public class PeerURLBarModelTest {
 			this.model.addElement(3);
 			this.model.insertElementAt(0, 2);
 			this.model.addElement(4);
-		} catch(final UnsupportedOperationException exception) {
+		} catch (final UnsupportedOperationException exception) {
 			assertEquals(2, this.model.getSize());
 			assertArrayEquals(new Integer[] { 3, 1 }, modelToArray(this.model));
 			return;
@@ -213,7 +213,7 @@ public class PeerURLBarModelTest {
 		
 		try {
 			this.model.removeElement(e);
-		} catch(final UnsupportedOperationException exception) {
+		} catch (final UnsupportedOperationException exception) {
 			assertEquals(2, this.model.getSize());
 			assertSame(e, this.model.getElementAt(1));
 			assertArrayEquals(new Integer[] { 24, 42 }, modelToArray(this.model));
@@ -232,7 +232,7 @@ public class PeerURLBarModelTest {
 		try {
 			this.model.removeElementAt(0);
 			this.model.addElement("another test");
-		} catch(final UnsupportedOperationException exception) {
+		} catch (final UnsupportedOperationException exception) {
 			assertEquals(1, this.model.getSize());
 			assertSame(e, this.model.getElementAt(0));
 			assertArrayEquals(new String[] { e }, modelToArray(this.model));

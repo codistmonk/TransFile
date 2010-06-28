@@ -19,7 +19,7 @@
 
 package net.sourceforge.transfile.ui.swing;
 
-import static net.sourceforge.transfile.tools.Tools.array;
+import static net.sourceforge.jenerics.collections.CollectionsTools.array;
 import static net.sourceforge.transfile.ui.swing.GUITools.horizontalFlow;
 
 import java.awt.BorderLayout;
@@ -47,7 +47,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableModel;
 
 import net.sourceforge.transfile.TransFile;
-import net.sourceforge.transfile.i18n.Translator;
+import net.sourceforge.jenerics.i18n.Translator;
 import net.sourceforge.transfile.settings.Settings;
 
 /**

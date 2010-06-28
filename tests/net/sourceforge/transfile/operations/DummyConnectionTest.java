@@ -20,7 +20,7 @@
 package net.sourceforge.transfile.operations;
 
 import static org.junit.Assert.assertTrue;
-import static net.sourceforge.transfile.tools.Tools.array;
+import static net.sourceforge.jenerics.collections.CollectionsTools.array;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Semaphore;

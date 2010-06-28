@@ -77,7 +77,7 @@ public class Peer {
 		Pattern p = Pattern.compile("^" + PROTOCOL_PREFIX + "(.+):([0-9]+)$");
 		Matcher m = p.matcher(peerURL);
 		
-		if(!m.find())
+		if (!m.find())
 			throw new PeerURLFormatException("Malformatted PeerURL: " + peerURL);
 		
 		setup(m.group(1), Integer.parseInt(m.group(2)));	
@@ -169,7 +169,7 @@ public class Peer {
 			this.inetAddrString = inetAddrString;
 			this.inetAddr = InetAddress.getByName(this.inetAddrString);
 			this.port = port;		
-		} catch(final NumberFormatException e) {
+		} catch (final NumberFormatException e) {
 			throw new PeerURLFormatException(e);
 		}
 	}

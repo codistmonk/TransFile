@@ -19,10 +19,10 @@
 
 package net.sourceforge.transfile.ui.swing;
 
-import static net.sourceforge.transfile.i18n.Translator.createLocale;
-import static net.sourceforge.transfile.i18n.Translator.getDefaultTranslator;
-import static net.sourceforge.transfile.i18n.Translator.Helpers.translate;
-import static net.sourceforge.transfile.tools.Tools.getLoggerForThisMethod;
+import static net.sourceforge.jenerics.i18n.Translator.createLocale;
+import static net.sourceforge.jenerics.i18n.Translator.getDefaultTranslator;
+import static net.sourceforge.jenerics.i18n.Translator.Helpers.translate;
+import static net.sourceforge.jenerics.Tools.getLoggerForThisMethod;
 
 import java.awt.Container;
 import java.awt.Dimension;
@@ -57,7 +57,7 @@ import net.sourceforge.jmacadapter.eawtwrappers.ApplicationAdapter;
 import net.sourceforge.jmacadapter.eawtwrappers.ApplicationEvent;
 import net.sourceforge.transfile.backend.BackendEventHandler;
 import net.sourceforge.transfile.backend.ControllableBackend;
-import net.sourceforge.transfile.i18n.Translator;
+import net.sourceforge.jenerics.i18n.Translator;
 import net.sourceforge.transfile.operations.ReceiveOperation;
 import net.sourceforge.transfile.operations.Session;
 import net.sourceforge.transfile.operations.SimpleSocketConnection;
@@ -213,7 +213,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 	 */
 	final void quit() {
 		// inform all TopLevelPanels about the impending shutdown
-		for(TopLevelPanel panel: this.panels) {
+		for (TopLevelPanel panel: this.panels) {
 			panel.informQuit();
 		}
 		
@@ -267,9 +267,9 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 			locale = loadLocale();
 			// if not present, use the host's default locale (and implicitly fall back to en_US if the host's
 			// default locale is unsupported
-			if(locale == null)
+			if (locale == null)
 				locale = getLocale();
-		} catch(final IllegalConfigValueException e) {
+		} catch (final IllegalConfigValueException e) {
 			//TODO this code is never reached as IllegalConfigValueException is never thrown
 			// user set an invalid locale, fall back to host's default locale
 			locale = getLocale();
@@ -292,7 +292,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		//TODO userLocaleSetting can never be null. Hence, the host default locale is never used.
 		final String userLocaleSetting = Settings.getPreferences().get("locale", Settings.LOCALE.toString());
 		
-		if(userLocaleSetting == null || "".equals(userLocaleSetting)) {
+		if (userLocaleSetting == null || "".equals(userLocaleSetting)) {
 			return null;
 		}
 		
@@ -383,7 +383,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		
 		// add the "Exit" item to the "File" menu, unless running on Mac OS (X) in which
 		// case there is already a "Quit" item in the application menu
-		if(!MacAdapterTools.isMacOSX()) {
+		if (!MacAdapterTools.isMacOSX()) {
 			final JMenuItem exitItem = translate(new JMenuItem("menu_item_exit"));
 			
 			exitItem.addActionListener(new ActionListener() {
@@ -402,7 +402,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 		
 		// add the "Preferences..." item to the "Settings" menu, unless running on Mac OS (X) in which
 		// case there is already a "Preferences..." item in the application menu
-		if(!MacAdapterTools.isMacOSX()) {
+		if (!MacAdapterTools.isMacOSX()) {
 			final JMenuItem preferencesItem = translate(new JMenuItem("menu_item_preferences"));
 			
 			preferencesItem.addActionListener(new ActionListener() {
@@ -469,7 +469,7 @@ public class SwingGUI extends JFrame implements UserInterface, BackendEventHandl
 				}
 				
 				// enforce maximum width
-				if(SwingGUI.this.getSize().width > SwingGUI.this.getMaximumSize().width) {
+				if (SwingGUI.this.getSize().width > SwingGUI.this.getMaximumSize().width) {
 					SwingGUI.this.setSize(SwingGUI.this.getMaximumSize().width, SwingGUI.this.getSize().height);
 				}
 			}

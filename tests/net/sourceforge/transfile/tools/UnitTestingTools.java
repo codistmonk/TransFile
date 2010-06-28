@@ -38,7 +38,7 @@ public final class UnitTestingTools {
 	
 	
 	public static final <T> void addArrayElementsToModel(final MutableModelAdapter model, final T[] elements) {
-		for(final T e: elements)
+		for (final T e: elements)
 			model.addElement(e);
 	}
 	
@@ -46,7 +46,7 @@ public final class UnitTestingTools {
 	public static final <T> T[] modelToArray(final ListModel model) {
 		final List<T> elements = new ArrayList<T>(model.getSize());
 		
-		for(int i = 0; i < model.getSize(); i++)
+		for (int i = 0; i < model.getSize(); i++)
 			elements.add((T) model.getElementAt(i));
 		
 		return (T[]) elements.toArray();

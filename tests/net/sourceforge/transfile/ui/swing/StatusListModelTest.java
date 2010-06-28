@@ -20,8 +20,8 @@
 package net.sourceforge.transfile.ui.swing;
 
 import static org.junit.Assert.*;
-import static net.sourceforge.transfile.tools.Tools.*;
 import static net.sourceforge.transfile.tools.UnitTestingTools.*;
+import static net.sourceforge.jenerics.collections.CollectionsTools.arrayConcat;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -52,7 +52,7 @@ public class StatusListModelTest {
 		
 		@Override
 		public <T> void addElement(T newElement) {
-			if(!(newElement instanceof StatusMessage))
+			if (!(newElement instanceof StatusMessage))
 				throw new Error("StatusListModel exclusively stores StatusMessages");
 			
 			StatusListModelTest.this.getModel().addMessage((StatusMessage) newElement);
@@ -125,7 +125,7 @@ public class StatusListModelTest {
 		final List<StatusMessage> elements = new LinkedList<StatusMessage>();
 		final Random randomElements = new Random();
 		
-		for(int i = 0; i <= minRows; i++) {
+		for (int i = 0; i <= minRows; i++) {
 			final StatusMessage e = new StatusMessage(Integer.toString(randomElements.nextInt())); 
 			elements.add(e);
 			this.model.addMessage(e);
@@ -154,12 +154,12 @@ public class StatusListModelTest {
 	 * 
 	 */
 	private static StatusList.StatusDummy[] makeDummyArray(final int numDummies) {
-		if(numDummies < 1)
+		if (numDummies < 1)
 			return new StatusList.StatusDummy[] { };
 		
 		StatusList.StatusDummy[] dummies = new StatusList.StatusDummy[numDummies];
 		
-		for(int i = 0; i < dummies.length; i++)
+		for (int i = 0; i < dummies.length; i++)
 			dummies[i] = new StatusList.StatusDummy();
 		
 		return dummies;

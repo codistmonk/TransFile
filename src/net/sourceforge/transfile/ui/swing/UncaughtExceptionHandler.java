@@ -19,8 +19,8 @@
 
 package net.sourceforge.transfile.ui.swing;
 
-import static net.sourceforge.transfile.tools.Tools.getLoggerForThisMethod;
-import static net.sourceforge.transfile.i18n.Translator.Helpers.translate;
+import static net.sourceforge.jenerics.Tools.getLoggerForThisMethod;
+import static net.sourceforge.jenerics.i18n.Translator.Helpers.translate;
 
 import java.util.logging.Level;
 
@@ -58,7 +58,7 @@ class UncaughtExceptionHandler implements java.lang.Thread.UncaughtExceptionHand
 	 */
 	@Override
 	public void uncaughtException(final Thread thread, final Throwable exception) {
-		if(SwingUtilities.isEventDispatchThread()) {
+		if (SwingUtilities.isEventDispatchThread()) {
 			handleUncaughtException(exception);
 		} else {
 			SwingUtilities.invokeLater(new Runnable() {

@@ -19,7 +19,7 @@
 
 package net.sourceforge.transfile.ui.swing;
 
-import static net.sourceforge.transfile.tools.Tools.getLoggerForThisMethod;
+import static net.sourceforge.jenerics.Tools.getLoggerForThisMethod;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -32,10 +32,11 @@ import javax.swing.AbstractListModel;
 import javax.swing.JComboBox;
 import javax.swing.MutableComboBoxModel;
 
+import net.sourceforge.transfile.TransFile;
 import net.sourceforge.transfile.exceptions.SerializationException;
 import net.sourceforge.transfile.exceptions.SerializationFileInUseException;
 import net.sourceforge.transfile.network.Peer;
-import net.sourceforge.transfile.tools.Tools;
+import net.sourceforge.jenerics.filesystem.FileSystemTools;
 
 
 /**
@@ -100,9 +101,9 @@ class PeerURLBar extends JComboBox {
 	 * 
 	 */
 	public PeerURLBar(final String stateFileName, final int maxRetainedItems) throws SerializationFileInUseException {
-		this.stateFile = new File(Tools.getUserApplicationDirectory(), stateFileName);
+		this.stateFile = new File(FileSystemTools.getUserApplicationDirectory(TransFile.USER_APPLICATION_DIRECTORY_NAME), stateFileName);
 		
-		if(usedStateFiles.contains(this.stateFile))
+		if (usedStateFiles.contains(this.stateFile))
 			throw new SerializationFileInUseException(this.stateFile);
 		
 		this.persistent = true;
@@ -139,7 +140,7 @@ class PeerURLBar extends JComboBox {
 	 * @throws SerializationException if serializing or saving the serialized data to disk failed
 	 */
 	public void saveModel() throws SerializationException {
-		if(this.persistent)
+		if (this.persistent)
 			this.model.saveHolder();
 	}
 	
@@ -190,7 +191,7 @@ class PeerURLBar extends JComboBox {
 		 * {@inheritDoc}
 		 */
 		public void actionPerformed(ActionEvent e) {			
-			if(e.getActionCommand().equals("comboBoxEdited"))
+			if (e.getActionCommand().equals("comboBoxEdited"))
 				addItem(getSelectedItem());
 		}
 		
@@ -221,7 +222,7 @@ class PeerURLBar extends JComboBox {
 		 * 
 		 */
 		public PeerURLBarModel() {
-			if(PeerURLBar.this.isPersistent()) {
+			if (PeerURLBar.this.isPersistent()) {
 				try {
 					getLoggerForThisMethod().log(Level.FINER, "attempting to load PeerURLBar state from file: " + PeerURLBar.this.getStateFile().getAbsolutePath());
 					this.holder = ComboBoxItemsHolder.load(PeerURLBar.this.getStateFile());
@@ -256,7 +257,7 @@ class PeerURLBar extends JComboBox {
 		 */
 		@Override
 		public void addElement(final Object e) {
-			if(this.holder.items.contains(e))
+			if (this.holder.items.contains(e))
 				return;
 			
 			this.holder.items.add(0, e);
@@ -309,16 +310,16 @@ class PeerURLBar extends JComboBox {
 			this.holder.selectedItem = itemToSelect;
 			int i = this.holder.items.indexOf(itemToSelect);
 			// if the selected item already exists (user picked it from the drop-down list or re-entered it)
-			if(i >= 0) {
+			if (i >= 0) {
 				// make the selected item the "youngest" item (move it to the first position in the list)
 				this.holder.items.remove(i);
 				this.holder.items.add(0, itemToSelect);
 			// if it's a new item
 			} else {
-				if(this.holder.selectedItem instanceof String) {
+				if (this.holder.selectedItem instanceof String) {
 					String selectedString = (String) this.holder.selectedItem;
 					// if the selected item is a string and doesn't start with the correct protocol prefix
-					if(!selectedString.startsWith(Peer.PROTOCOL_PREFIX)) {
+					if (!selectedString.startsWith(Peer.PROTOCOL_PREFIX)) {
 						// prepend the protocol prefix
 						//TODO be smarter, recognize at least incomplete or maybe even mistyped prefixes and correct them
 						selectedString = Peer.PROTOCOL_PREFIX + selectedString;
@@ -350,7 +351,7 @@ class PeerURLBar extends JComboBox {
 		 * 
 		 */
 		private void removeExcessiveItems() {
-			while(this.holder.items.size() > PeerURLBar.this.maxRetainedItems)
+			while (this.holder.items.size() > PeerURLBar.this.maxRetainedItems)
 				this.holder.items.remove(this.holder.items.size() - 1);			
 		}
 		

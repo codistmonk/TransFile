@@ -91,7 +91,7 @@ class Connection {
 	 */
 	@Override
 	public final void finalize() {
-		if(!this.socket.isClosed()) {
+		if (!this.socket.isClosed()) {
 			try {
 				close();
 			} catch (ConnectionFailedToCloseException e) {

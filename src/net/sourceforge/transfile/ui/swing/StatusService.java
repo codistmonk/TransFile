@@ -19,7 +19,7 @@
 
 package net.sourceforge.transfile.ui.swing;
 
-import net.sourceforge.transfile.i18n.Translator;
+import net.sourceforge.jenerics.i18n.Translator;
 
 /**
  * Receives new status messages and stores them in a last-in first-out fashion

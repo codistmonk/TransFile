@@ -19,7 +19,7 @@
 
 package net.sourceforge.transfile.ui.swing;
 
-import static net.sourceforge.transfile.i18n.Translator.Helpers.translate;
+import static net.sourceforge.jenerics.i18n.Translator.Helpers.translate;
 import static net.sourceforge.transfile.ui.swing.GUITools.scrollable;
 import static net.sourceforge.transfile.ui.swing.GUITools.titleBorder;
 

@@ -85,16 +85,16 @@ public class BilateralConnectorTest {
 			assertTrue(c1.isConnected());		
 			assertTrue(c2.isConnected());
 			
-		} catch(final BilateralConnectException e) {
+		} catch (final BilateralConnectException e) {
 			
 			fail("c1 failed:\n    outbound: " + e.getOutboundCause() + 
 						   "\n    inbound: " + e.getInboundCause());
 			
-		} catch(final ExecutionException e) {
+		} catch (final ExecutionException e) {
 			
 			final Throwable cause = e.getCause();
 			
-			if(cause instanceof BilateralConnectException)
+			if (cause instanceof BilateralConnectException)
 				fail("c2 failed:\n    outbound: " + ((BilateralConnectException) cause).getOutboundCause() + 
 						   	   "\n    inbound: " + ((BilateralConnectException) cause).getInboundCause());				
 			else

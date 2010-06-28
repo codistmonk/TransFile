@@ -64,42 +64,42 @@ public class PointToPointConnector extends AbstractConnector {
 			// bind to the local IP address and port
 			try {
 				socket.bind(getLocalPeer().toInetSocketAddress());
-			} catch(final IOException e) {
+			} catch (final IOException e) {
 				throw new ConnectBindException(e);
 			}
 			
 			try {
 				socket.setReuseAddress(true);
-			} catch(final SocketException e) {
+			} catch (final SocketException e) {
 				throw new ConnectSocketConfigException(e);
 			}
 						
 			// attempt to connect until timed out
-			while(true) {
+			while (true) {
 				try {
 					// attempt to connect, timing out after connectIntervalTimeout milliseconds to check for thread interruption
 					socket.connect(getRemotePeer().toInetSocketAddress(), CONNECT_INTERVAL_TIMEOUT);
-				} catch(final SocketTimeoutException e) {
+				} catch (final SocketTimeoutException e) {
 					// check if this thread has been interrupted
-					if(Thread.interrupted())
+					if (Thread.interrupted())
 						throw new InterruptedException();
-				} catch(final IOException e) {
+				} catch (final IOException e) {
 					//TODO ?
 					// ignore / retry until timeout
 					//TODO log
-				} catch(final IllegalBlockingModeException e) {
+				} catch (final IllegalBlockingModeException e) {
 					//TODO throw a runtime exception instead
 					throw new LogicError(e);
-				} catch(final IllegalArgumentException e) {
+				} catch (final IllegalArgumentException e) {
 					//TODO throw a runtime exception instead
 					throw new LogicError(e);
 				} 
 				
 				// check if a connection has been established
-				if(socket.isConnected())
+				if (socket.isConnected())
 					break;
 
-				if(System.currentTimeMillis() - startTime >= CONNECT_TIMEOUT)
+				if (System.currentTimeMillis() - startTime >= CONNECT_TIMEOUT)
 					throw new ConnectTimeoutException();
 			}
 			
@@ -108,10 +108,10 @@ public class PointToPointConnector extends AbstractConnector {
 		} finally {
 			
 			// unless the connection was successfully established, close the socket if it exists
-			if(!socket.isConnected()) {
+			if (!socket.isConnected()) {
 				try {
 					socket.close();
-				} catch(IOException e) {
+				} catch (IOException e) {
 					throw new ConnectSocketFailedToCloseException(e);
 				}
 			}

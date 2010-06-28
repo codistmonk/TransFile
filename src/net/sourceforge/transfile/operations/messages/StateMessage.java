@@ -22,7 +22,7 @@ package net.sourceforge.transfile.operations.messages;
 import java.io.File;
 
 import net.sourceforge.transfile.operations.Operation.State;
-import net.sourceforge.transfile.tools.Tools;
+import net.sourceforge.jenerics.Tools;
 
 /**
  * TODO doc

@@ -216,7 +216,7 @@ public class StatusPanel extends TopLevelPanel {
 	 * @see #unexpand()
 	 */
 	protected final void expand() {
-		if(this.isExpanded)
+		if (this.isExpanded)
 			throw new IllegalStateException("already expanded");
 		
 		this.statusList.setVisibleRowCount(maxMessages);
@@ -241,7 +241,7 @@ public class StatusPanel extends TopLevelPanel {
 	 * @see #expand()
 	 */
 	protected final void unexpand() {
-		if(!this.isExpanded)
+		if (!this.isExpanded)
 			throw new IllegalStateException("not expanded");
 		
 		this.statusList.setVisibleRowCount(1);

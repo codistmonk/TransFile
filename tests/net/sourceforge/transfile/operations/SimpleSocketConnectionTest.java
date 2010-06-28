@@ -21,7 +21,7 @@ package net.sourceforge.transfile.operations;
 
 import static net.sourceforge.transfile.operations.AbstractConnection.DEFAULT_LOCAL_PEER;
 import static net.sourceforge.transfile.operations.AbstractConnection.DEFAULT_REMOTE_PEER;
-import static net.sourceforge.transfile.tools.Tools.array;
+import static net.sourceforge.jenerics.collections.CollectionsTools.array;
 
 /**
  * TODO doc

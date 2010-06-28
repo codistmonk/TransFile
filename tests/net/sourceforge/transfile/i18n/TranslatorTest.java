@@ -23,6 +23,8 @@ import static org.junit.Assert.*;
 
 import java.util.Locale;
 
+import net.sourceforge.jenerics.i18n.Translator;
+
 import org.junit.Test;
 
 /**

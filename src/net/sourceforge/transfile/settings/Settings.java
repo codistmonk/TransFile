@@ -28,8 +28,9 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.prefs.Preferences;
 
+import net.sourceforge.transfile.TransFile;
 import net.sourceforge.transfile.settings.exceptions.ConstantReflectionException;
-import net.sourceforge.transfile.tools.Tools;
+import net.sourceforge.jenerics.filesystem.FileSystemTools;
 
 /**
  * <p>Provides simple key-value pair persistence through the Java Preferences mechanism ({@link #getPreferences}). 
@@ -108,7 +109,7 @@ public final class Settings {
 	/*
 	 * The default log directory and file
 	 */
-	public static final File LOG_PATH = new File(Tools.getUserApplicationDirectory(), "log.txt");
+	public static final File LOG_PATH = new File(FileSystemTools.getUserApplicationDirectory(TransFile.USER_APPLICATION_DIRECTORY_NAME), "log.txt");
 	
 	/*
 	 * The defauls locale. Should only be used if there is neither a user preference nor a usable host default
@@ -154,13 +155,13 @@ public final class Settings {
 
 			final Object value = valueField.get(null);
 
-			if(valueField.getType().isAssignableFrom(String.class))
+			if (valueField.getType().isAssignableFrom(String.class))
 				return (String) value;
 
 			return value.toString();
-		} catch(IllegalAccessException e) {
+		} catch (IllegalAccessException e) {
 			throw new ConstantReflectionException(fieldName, e);
-		} catch(NoSuchFieldException e) {
+		} catch (NoSuchFieldException e) {
 			throw new ConstantReflectionException(fieldName, e);
 		}
 	}
@@ -187,9 +188,9 @@ public final class Settings {
 		modifiers |= Modifier.STATIC;
 		modifiers |= Modifier.FINAL;
 
-		for(Field field: settingsClass.getDeclaredFields()) {
+		for (Field field: settingsClass.getDeclaredFields()) {
 			String fieldName = field.getName();
-			if(!fieldName.equals("serialVersionUID") && field.getModifiers() == modifiers)
+			if (!fieldName.equals("serialVersionUID") && field.getModifiers() == modifiers)
 				fieldNames.add(fieldName);
 		}
 

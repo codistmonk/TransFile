@@ -64,15 +64,15 @@ public final class NetworkTools {
 		Set<String> localAddresses = new HashSet<String>();
 		
 		// iterate through all local network interfaces
-		for(Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces(); ifaces.hasMoreElements();) {
+		for (Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces(); ifaces.hasMoreElements();) {
 			NetworkInterface iface = ifaces.nextElement();
 			// iterate through all IP addresses of the current local network interface
-			for(Enumeration<InetAddress> addresses = iface.getInetAddresses(); addresses.hasMoreElements(); ) {
+			for (Enumeration<InetAddress> addresses = iface.getInetAddresses(); addresses.hasMoreElements(); ) {
 				InetAddress address = addresses.nextElement();
 				
-				if(ipv4Only) {
+				if (ipv4Only) {
 					// InetAddress is implemented by either Inet4Adress or Inet6Address
-					if(address instanceof Inet4Address)
+					if (address instanceof Inet4Address)
 						localAddresses.add(address.getHostAddress());
 				} else {
 					localAddresses.add(address.getHostAddress());

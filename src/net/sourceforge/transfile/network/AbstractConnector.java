@@ -82,7 +82,7 @@ public abstract class AbstractConnector implements Connector {
 	 */
 	@Override
 	public final synchronized Connection connect() throws IllegalStateException, ConnectException, InterruptedException {
-		if(this.executed)
+		if (this.executed)
 			throw new IllegalStateException();
 		
 		final Connection c = _connect();

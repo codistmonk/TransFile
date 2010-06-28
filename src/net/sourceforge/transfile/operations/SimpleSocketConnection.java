@@ -29,7 +29,7 @@ import java.util.concurrent.Executors;
 
 import net.sourceforge.transfile.operations.messages.DisconnectMessage;
 import net.sourceforge.transfile.operations.messages.Message;
-import net.sourceforge.transfile.tools.Tools;
+import net.sourceforge.jenerics.Tools;
 
 /**
  * TODO doc

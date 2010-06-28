@@ -19,7 +19,7 @@
 
 package net.sourceforge.transfile.network;
 
-import static net.sourceforge.transfile.tools.Tools.getLoggerForThisMethod;
+import static net.sourceforge.jenerics.Tools.getLoggerForThisMethod;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -87,27 +87,27 @@ public class BilateralConnector extends AbstractConnector {
 		
 		try {
 			outboundConnection = establishOutboundConnection();
-		} catch(final InterruptedException e) {
+		} catch (final InterruptedException e) {
 			// if establishing a Link to the peer has been interrupted, make sure to interrupt
 			// both connection attempts (both outgoing and incoming) by interrupting connectionFromPeer
 			this.inboundConnectionAcceptor.cancel(true);
 			throw e;
-		} catch(final ConnectException e) {
+		} catch (final ConnectException e) {
 			this.outboundConnectionError = e;
 		}
 		
 		try {
 			inboundConnection = this.inboundConnectionAcceptor.get();
-		} catch(final CancellationException e) {
+		} catch (final CancellationException e) {
 			throw new InterruptedException();
-		} catch(final ExecutionException e) {
+		} catch (final ExecutionException e) {
 			// listening for an incoming connection from the peer failed
 			final Throwable cause = e.getCause();
-			if(cause instanceof ConnectException) {
+			if (cause instanceof ConnectException) {
 				this.inboundConnectionError = (Exception) cause;
-			} else if(cause instanceof ServerException) {
+			} else if (cause instanceof ServerException) {
 				this.inboundConnectionError = (Exception) cause;
-			} else if(cause instanceof InterruptedException) {
+			} else if (cause instanceof InterruptedException) {
 				// ignore
 				//TODO safe?
 			} else {
@@ -142,31 +142,31 @@ public class BilateralConnector extends AbstractConnector {
 			
 			try {
 				socket.setReuseAddress(true);
-			} catch(final SocketException e) {
+			} catch (final SocketException e) {
 				throw new ConnectSocketConfigException(e);
 			}
 			
 			// attempt to connect for a maximum of connectMaxIntervals times
-			while(true) {
+			while (true) {
 				try {
 					// attempt to connect, timing out after connectIntervalTimeout milliseconds to check for thread interruption
 					socket.connect(peerAddr, CONNECT_INTERVAL_TIMEOUT);
-				} catch(SocketTimeoutException e) {
-					if(Thread.interrupted())
+				} catch (SocketTimeoutException e) {
+					if (Thread.interrupted())
 						throw new InterruptedException();
-				} catch(IOException e) {
+				} catch (IOException e) {
 					throw new ConnectIOException(e);	
-				} catch(IllegalBlockingModeException e) {
+				} catch (IllegalBlockingModeException e) {
 					throw new LogicError(e);
-				} catch(IllegalArgumentException e) {
+				} catch (IllegalArgumentException e) {
 					throw new LogicError(e);
 				} 
 				
 				// check if a connection has been established
-				if(socket.isConnected())
+				if (socket.isConnected())
 					break;
 
-				if(System.currentTimeMillis() - startTime >= CONNECT_TIMEOUT)
+				if (System.currentTimeMillis() - startTime >= CONNECT_TIMEOUT)
 					throw new ConnectTimeoutException();
 			}
 			
@@ -175,10 +175,10 @@ public class BilateralConnector extends AbstractConnector {
 		} finally {
 			
 			// unless the connection was successfully established, close the socket if it exists
-			if(!socket.isConnected()) {
+			if (!socket.isConnected()) {
 				try {
 					socket.close();
-				} catch(IOException e) {
+				} catch (IOException e) {
 					throw new ConnectSocketFailedToCloseException(e);
 				}
 			}
@@ -194,15 +194,15 @@ public class BilateralConnector extends AbstractConnector {
 	private Connection selectConnection(final Connection c1, final Connection c2) 
 			throws BilateralConnectException {
 		// if both connections have failed...
-		if(!isEstablished(c1) && !isEstablished(c2))
+		if (!isEstablished(c1) && !isEstablished(c2))
 			throw new BilateralConnectException(this.outboundConnectionError, this.inboundConnectionError);
 		
 		// if c1 has been established but c2 has failed...
-		if(isEstablished(c1) && !isEstablished(c2))
+		if (isEstablished(c1) && !isEstablished(c2))
 			return c1;
 		
 		// if c2 has been established but c1 has failed...
-		if(!isEstablished(c1) && isEstablished(c2))
+		if (!isEstablished(c1) && isEstablished(c2))
 			return c2;
 		
 		// both connections have been established, negotiate the selection with the remote peer
@@ -292,26 +292,26 @@ public class BilateralConnector extends AbstractConnector {
 				this.serverSocket.setReuseAddress(true);
 				
 				// attempt to receive a connection for a maximum of connectMaxIntervals times
-				while(true) {
+				while (true) {
 
 					try {
 						this.clientSocket = this.serverSocket.accept();
-					} catch(final SocketTimeoutException e) {
+					} catch (final SocketTimeoutException e) {
 						// accept timed out as requested - check for thread interruption and abort if present, otherwise retry
-						if(Thread.interrupted())
+						if (Thread.interrupted())
 							throw new InterruptedException();
-					} catch(final IOException e) {
+					} catch (final IOException e) {
 						throw new ConnectIOException(e);
-					} catch(final SecurityException e) {
+					} catch (final SecurityException e) {
 						throw new ConnectSecurityException(e);
-					} catch(final IllegalBlockingModeException e) {
+					} catch (final IllegalBlockingModeException e) {
 						throw new LogicError(e);
 					}
 
 					// check if a connection has been established
-					if(this.clientSocket != null && this.clientSocket.isConnected()) {
+					if (this.clientSocket != null && this.clientSocket.isConnected()) {
 						// check if the connection originates from the expected peer
-						if(this.clientSocket.getInetAddress().equals(this.remotePeer.getInetAddress()))
+						if (this.clientSocket.getInetAddress().equals(this.remotePeer.getInetAddress()))
 							// if so, break the loop -> connection established
 							break;
 						// if not, discard the connection and keep going
@@ -319,32 +319,32 @@ public class BilateralConnector extends AbstractConnector {
 						this.clientSocket = null;
 					}
 
-					if(System.currentTimeMillis() - startTime >= CONNECT_TIMEOUT)
+					if (System.currentTimeMillis() - startTime >= CONNECT_TIMEOUT)
 						throw new ConnectTimeoutException();
 				}
 				
 				// if the flow reaches this point, a connection from the correct peer has been accepted
 				return new Connection(this.clientSocket, this.localPeer, this.remotePeer);
-			} catch(SocketException e) {
+			} catch (SocketException e) {
 				throw new ConnectSocketConfigException(e);
-			} catch(IOException e) {
+			} catch (IOException e) {
 				throw new ServerFailedToBindException(this.localPeer.getPort(), e);
-			} catch(SecurityException e) {
+			} catch (SecurityException e) {
 				throw new ServerFailedToBindException(this.localPeer.getPort(), e);
 			} finally {
 				// whatever happened, close the server socket if it exists
-				if(this.serverSocket != null) {
+				if (this.serverSocket != null) {
 					try {
 						this.serverSocket.close();
-					} catch(IOException e) {
+					} catch (IOException e) {
 						throw new ServerFailedToCloseException(e);
 					}
 				}
 				// unless the connection has been established successfully, close the client socket if it exists
-				if(this.clientSocket != null && !this.clientSocket.isConnected()) {
+				if (this.clientSocket != null && !this.clientSocket.isConnected()) {
 					try {
 						this.clientSocket.close();
-					} catch(IOException e) {
+					} catch (IOException e) {
 						throw new ConnectSocketFailedToCloseException(e);
 					}
 				}

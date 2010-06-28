@@ -44,7 +44,12 @@ public class TransFile implements Runnable {
 	/*
 	 * The application title to be used throughout the program
 	 */
-	public static final String applicationTitle = "TransFile";
+	public static final String APPLICATION_TITLE = "TransFile";
+	
+	/*
+	 * The name of the user-specific application (configuration) directory
+	 */
+	public static final String USER_APPLICATION_DIRECTORY_NAME = ".transfile";
 	
 	/*
 	 * Reference to the UserInterface used to asynchronously inform the user / user interface about state changes in the backend
@@ -58,7 +63,7 @@ public class TransFile implements Runnable {
 	 * This has to be done early, hence this static initializer
 	 */
 	static {
-		MacAdapterTools.setApplicationName(TransFile.applicationTitle);
+		MacAdapterTools.setApplicationName(TransFile.APPLICATION_TITLE);
 	}
 	
 	
@@ -129,7 +134,7 @@ public class TransFile implements Runnable {
 		// - what log level to use for console logging
 		
 		// remove all default handlers
-		for(Handler handler: Logger.getLogger("").getHandlers())
+		for (Handler handler: Logger.getLogger("").getHandlers())
 			Logger.getLogger("").removeHandler(handler);
 		
 		final Level logLevel = Level.parse(Settings.getPreferences().get("log_level", Settings.LOG_LEVEL.getName()));

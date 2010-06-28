@@ -25,7 +25,7 @@ import org.junit.Before;
 
 import net.sourceforge.transfile.operations.AbstractConnectionTestBase.ConnectionRecorder;
 import net.sourceforge.transfile.operations.Connection.State;
-import net.sourceforge.transfile.tools.Tools;
+import net.sourceforge.jenerics.Tools;
 
 /**
  * TODO doc

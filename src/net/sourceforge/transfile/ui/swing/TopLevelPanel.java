@@ -79,7 +79,7 @@ abstract class TopLevelPanel extends JPanel {
 	 * 
 	 */
 	final void initPanel() {
-		if(this.isInit)
+		if (this.isInit)
 			throw new DoubleInitializationException("TopLevelPanel was asked to initialize a second time: " + getClass().getSimpleName());
 		
 		onInit();

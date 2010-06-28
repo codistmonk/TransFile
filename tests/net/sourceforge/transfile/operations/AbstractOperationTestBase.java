@@ -29,7 +29,7 @@ import java.util.List;
 import net.sourceforge.transfile.operations.Operation.State;
 import net.sourceforge.transfile.operations.messages.DisconnectMessage;
 import net.sourceforge.transfile.operations.messages.StateMessage;
-import net.sourceforge.transfile.tools.Tools;
+import net.sourceforge.jenerics.Tools;
 
 import org.junit.Test;
 

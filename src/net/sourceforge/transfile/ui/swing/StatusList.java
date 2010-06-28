@@ -19,7 +19,7 @@
 
 package net.sourceforge.transfile.ui.swing;
 
-import static net.sourceforge.transfile.i18n.Translator.getDefaultTranslator;
+import static net.sourceforge.jenerics.i18n.Translator.getDefaultTranslator;
 import static net.sourceforge.transfile.ui.swing.StatusService.StatusMessage;
 
 import java.util.LinkedList;
@@ -33,7 +33,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 
 import net.sourceforge.transfile.exceptions.LogicError;
-import net.sourceforge.transfile.i18n.Translator;
+import net.sourceforge.jenerics.i18n.Translator;
 
 /**
  * <p>Custom JList displaying {@link StatusService.StatusMessage}s, from most recent (first position) to oldest (last position).</p>
@@ -63,7 +63,7 @@ public class StatusList extends JList {
 	 * <br />Should not be < 1
 	 */
 	public StatusList(final int minRows) {
-		if(minRows <1)
+		if (minRows <1)
 			throw new LogicError("can't initialise with a minimum of less than 1 rows");
 		
 		this.model = new StatusListModel(minRows);
@@ -123,7 +123,7 @@ public class StatusList extends JList {
 			// fireContentsChanged when StatusMessages are autotranslated
 			getDefaultTranslator().addTranslatorListener(new TranslatorListener());
 			
-			for(int i = 0; i < minRows; i++)
+			for (int i = 0; i < minRows; i++)
 				this.messages.add(new StatusDummy());
 		}
 		
@@ -140,8 +140,8 @@ public class StatusList extends JList {
 			
 			// if the list is holding more than the specified minimum number of messages/rows,
 			// remove the oldest (rightmost) object if it is a StatusDummy
-			if(this.messages.size() > this.minRows)
-				if(this.messages.get(this.messages.size() - 1) instanceof StatusDummy)
+			if (this.messages.size() > this.minRows)
+				if (this.messages.get(this.messages.size() - 1) instanceof StatusDummy)
 					this.messages.remove(this.messages.size() - 1);
 	
 			// list has changed, fire event

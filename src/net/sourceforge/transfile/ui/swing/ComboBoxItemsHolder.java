@@ -104,17 +104,17 @@ class ComboBoxItemsHolder implements Serializable {
 		} catch (ClassNotFoundException e) {
 			throw new SerializationException(e);
 		} finally {
-			if(ois != null) {
+			if (ois != null) {
 				try {
 					ois.close();
-				} catch(IOException e) {
+				} catch (IOException e) {
 					throw new SerializationException(e);
 				}
 			}
-			if(fis != null) {
+			if (fis != null) {
 				try {
 					fis.close();
-				} catch(IOException e) {
+				} catch (IOException e) {
 					throw new SerializationException(e);
 				}
 			}
@@ -139,14 +139,14 @@ class ComboBoxItemsHolder implements Serializable {
 		} catch (IOException e) {
 			throw new SerializationException(e);
 		} finally {
-			if(oos != null) {
+			if (oos != null) {
 				try {
 					oos.close();
 				} catch (IOException e) {
 					throw new SerializationException(e);
 				}
 			}
-			if(fos != null) {
+			if (fos != null) {
 				try {
 					fos.close();
 				} catch (IOException e) {

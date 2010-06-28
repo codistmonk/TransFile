@@ -84,15 +84,15 @@ public class PointToPointConnectorTest {
 			assertTrue(c1.isConnected());		
 			assertTrue(c2.isConnected());
 			
-		} catch(final ConnectException e) {
+		} catch (final ConnectException e) {
 			
 			fail("c1 failed: " + e);
 			
-		} catch(final ExecutionException e) {
+		} catch (final ExecutionException e) {
 			
 			final Throwable cause = e.getCause();
 			
-			if(cause instanceof ConnectException)
+			if (cause instanceof ConnectException)
 				fail("c2 failed: " + cause);
 			else
 				throw e;

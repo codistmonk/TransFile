@@ -103,7 +103,7 @@ class PortSpinner extends JSpinner {
 				 					 maxPort,
 				 					 1));
 				
-		if(!(getEditor() instanceof NumberEditor))
+		if (!(getEditor() instanceof NumberEditor))
 			throw new LogicError("PortSpinner Editor is not a NumberEditor");
 		
 		this.editor = new PortSpinnerEditor(); 
@@ -155,7 +155,7 @@ class PortSpinner extends JSpinner {
 					
 			this.textField = getTextField();
 			
-			if(!(this.textField.getDocument() instanceof AbstractDocument))
+			if (!(this.textField.getDocument() instanceof AbstractDocument))
 				throw new LogicError("PortSpinner JFormattedTextField Document is not an AbstractDocument");
 			
 			this.document = (AbstractDocument) this.textField.getDocument();
@@ -210,8 +210,8 @@ class PortSpinner extends JSpinner {
 			// get invoked) and for another, similarly mystical and undocumented reason, a NumberEditor formatted with a
 			// DecimalFormat doesn't raise a ParseException when it encounters letters instead of digits, this seems like the 
 			// easiest solution.
-			for(char c: this.textField.getText().toCharArray()) {
-				if(!(Character.isDigit(c))) {
+			for (char c: this.textField.getText().toCharArray()) {
+				if (!(Character.isDigit(c))) {
 					onInvalidEdit();
 					return;
 				}
