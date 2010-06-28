@@ -24,6 +24,7 @@ import static org.junit.Assert.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import org.junit.Test;
 
 import net.sourceforge.transfile.operations.Operation.State;
 import net.sourceforge.transfile.operations.messages.DataOfferMessage;
@@ -32,9 +33,8 @@ import net.sourceforge.transfile.operations.messages.DisconnectMessage;
 import net.sourceforge.transfile.operations.messages.FileOfferMessage;
 import net.sourceforge.transfile.operations.messages.Message;
 import net.sourceforge.transfile.operations.messages.StateMessage;
-import net.sourceforge.transfile.tools.Tools;
+import net.sourceforge.jenerics.Tools;
 
-import org.junit.Test;
 
 /**
  * TODO doc
